@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="2">
+  <name>oomact</name>
+  <version>0.0.1</version>
+  <description>oomact</description>
+  <maintainer email="sommerh@ethz.ch">Hannes Sommer</maintainer>
+  
+  <author>Hannes Sommer, Ignazio Indovina, Jerome Maye</author>
+  <license>BSD-3-Clause</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>.
+  
+  <depend>asl_cmake_modules</depend>
+  <depend>TBB</depend>
+  <depend>aslam_backend</depend>
+  <depend>aslam_backend_expressions</depend>
+  <depend>aslam_splines</depend>
+  <depend>sm_matrix_archive</depend>
+  <depend>incremental_calibration</depend>
+  <depend>sm_value_store</depend>
+  <depend>glog_catkin</depend>
+</package>

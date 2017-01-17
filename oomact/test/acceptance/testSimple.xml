@@ -1,0 +1,748 @@
+<test>
+  <version>TestConfig</version>
+  <calibrator>
+    <windowDuration>10</windowDuration>
+    <shortWindowDuration>5</shortWindowDuration>
+    
+    <timeBaseSensor>imu</timeBaseSensor>
+
+    <cloudPolicies>
+      <BumbleBee>
+        <maximalDuration>0.1</maximalDuration>
+        <minimalDuration>0</minimalDuration>
+        <minimalGap>1.8</minimalGap>
+      </BumbleBee>
+      <UTM_FRONT>
+        <maximalDuration>1.5</maximalDuration>
+        <minimalDuration></minimalDuration>
+        <minimalGap>0.5</minimalGap>
+      </UTM_FRONT>
+      <LMS_DOWN>
+        <maximalDuration>1.5</maximalDuration>
+        <minimalDuration></minimalDuration>
+        <minimalGap>0.5</minimalGap>
+      </LMS_DOWN>
+      <default>
+        <maximalDuration>0.2</maximalDuration>
+        <minimalDuration></minimalDuration>
+        <minimalGap>1.8</minimalGap>
+      </default>
+    </cloudPolicies>
+
+    <useCollectingSet>false</useCollectingSet>
+
+    <startRelPos>0.0</startRelPos>
+    <endRelPos>1</endRelPos>
+    <useStartPosePrior>false</useStartPosePrior>
+    <loopOptimization>true</loopOptimization>
+    <skipFirstCloudComputation>true</skipFirstCloudComputation>
+    <verbose>false</verbose>
+    <preOptimize>false</preOptimize>
+    <useFastTermination>false</useFastTermination>
+    <acceptAll>false</acceptAll>
+    <dontTouchTrajectoryInFirstLidarRounds>true</dontTouchTrajectoryInFirstLidarRounds>
+    <writeLogFile>false</writeLogFile>
+    <writeData>false</writeData>
+    <writeDebugData>false</writeDebugData>
+    <writeMeasurements>true</writeMeasurements>
+    <printRegessionErrorStatistics></printRegessionErrorStatistics>
+    
+    <cloudMatchers>
+      <Any2GroundPlane>
+readingDataPointsFilters:
+  - IdentityDataPointsFilter
+
+referenceDataPointsFilters:
+  - IdentityDataPointsFilter
+
+matcher:
+  KDTreeMatcher:
+    knn: 2
+    epsilon: 0.1
+    maxDist: 0.5
+
+outlierFilters:
+ - VarTrimmedDistOutlierFilter:
+     minRatio: 0.1
+     maxRatio: 0.3
+
+errorMinimizer:
+  PointToPlaneErrorMinimizer
+
+transformationCheckers:
+  - CounterTransformationChecker:
+      maxIterationCount: 40
+  - DifferentialTransformationChecker:
+      minDiffRotErr: 0.001
+      minDiffTransErr: 0.01
+      smoothLength: 4   
+
+inspector:
+  NullInspector
+logger:
+  NullLogger
+      </Any2GroundPlane>
+      <BumbleBee2Any>
+readingDataPointsFilters:
+  - IdentityDataPointsFilter
+
+referenceDataPointsFilters:
+  - IdentityDataPointsFilter
+
+matcher:
+  KDTreeMatcher:
+    knn: 2
+    epsilon: 5
+    maxDist: 0.8
+
+# it should be better a medianFilter
+outlierFilters:
+# - SurfaceNormalOutlierFilter:
+#    maxAngle: 1
+# - MaxDistOutlierFilter:
+#    maxDist: 0.2
+# - TrimmedDistOutlierFilter: # With 0.5 acts as a median filter
+#    ratio: 0.5
+ - VarTrimmedDistOutlierFilter:
+     minRatio: 0.1
+     maxRatio: 0.3
+
+errorMinimizer:
+  PointToPlaneErrorMinimizer
+
+transformationCheckers:
+  - CounterTransformationChecker:
+      maxIterationCount: 40
+  - DifferentialTransformationChecker:
+      minDiffRotErr: 0.001
+      minDiffTransErr: 0.01
+      smoothLength: 4   
+
+inspector:
+  NullInspector
+
+logger:
+  NullLogger
+      </BumbleBee2Any>
+      <default>
+readingDataPointsFilters:
+  - IdentityDataPointsFilter
+
+referenceDataPointsFilters:
+  - IdentityDataPointsFilter
+
+matcher:
+  KDTreeMatcher:
+    knn: 2
+    epsilon: 5
+
+# it should be better a medianFilter
+outlierFilters:
+# - SurfaceNormalOutlierFilter:
+#    maxAngle: 1
+# - MaxDistOutlierFilter:
+#    maxDist: 0.2
+# - TrimmedDistOutlierFilter: # With 0.5 acts as a median filter
+#    ratio: 0.5
+ - VarTrimmedDistOutlierFilter:
+     minRatio: 0.1
+     maxRatio: 0.6
+
+errorMinimizer:
+  PointToPlaneErrorMinimizer
+
+transformationCheckers:
+  - CounterTransformationChecker:
+      maxIterationCount: 40
+  - DifferentialTransformationChecker:
+      minDiffRotErr: 0.001
+      minDiffTransErr: 0.01
+      smoothLength: 4   
+
+inspector:
+  NullInspector
+
+logger:
+  NullLogger
+      </default>
+    </cloudMatchers>
+
+    <usePose>false</usePose>
+    <useVelocities>true</useVelocities>
+    <useCalibrationPriors>false</useCalibrationPriors>
+        
+    <initWithPoseMeasurements>false</initWithPoseMeasurements>
+
+    <estimateWithCurrentCalibrationFirst>true</estimateWithCurrentCalibrationFirst>
+    <estimateFirstStateWithVelodyne>false</estimateFirstStateWithVelodyne>
+    <twoStageCalibration>false</twoStageCalibration>
+    
+    <estimateOnly>false</estimateOnly>
+    <maxNumCloudAssociations>15000</maxNumCloudAssociations>
+    <predictResults>true</predictResults>
+    <num3dLidarAssociationRounds>2</num3dLidarAssociationRounds>
+    <num2dLidarAssociationRounds>2</num2dLidarAssociationRounds>
+    <useSymmetricLidar3dAssociations>true</useSymmetricLidar3dAssociations>
+    <estimate>
+        <timeDelays>true</timeDelays>
+        <spatialExtrinsics>true</spatialExtrinsics>
+        <pureObservers>false</pureObservers>
+        <mcStateBeforeImu>false</mcStateBeforeImu>
+    </estimate>
+    <nThreads>4</nThreads>
+    <estimator>
+      <infoGainDelta>0.2</infoGainDelta>
+      <groupId>1</groupId>
+      <verbose>true</verbose>
+      <checkValidity>true</checkValidity>
+      <maxIterationHitIsStillValid>true</maxIterationHitIsStillValid>
+      <reOptMaxIterations>10</reOptMaxIterations>
+      <optimizer>
+        <method>ObservabilityAware</method>
+        <convergenceDeltaJ>1e-2</convergenceDeltaJ>
+        <convergenceDeltaX>1e-3</convergenceDeltaX>
+        <maxIterations>30</maxIterations>
+        <linearSolverMaximumFails>0</linearSolverMaximumFails>
+        <nThreads>4</nThreads>
+        <verbose>true</verbose>
+        <linearSolver>
+          <columnScaling>true</columnScaling>
+          <epsNorm>1e-8</epsNorm>
+          <epsSVD>1e-2</epsSVD>
+          <epsQR>1e-8</epsQR>
+          <svdTol>-1</svdTol>
+          <qrTol>-1</qrTol>
+          <verbose>true</verbose>
+        </linearSolver>
+      </optimizer>
+    </estimator>
+  </calibrator>
+  <model>
+    <splines>
+      <splineKnotsPerSecond>5</splineKnotsPerSecond>
+    </splines>
+    <BaseTrajectory>
+      <used>true</used>
+      <tangentialConstraint>
+        <used>true</used>
+        <variance>1e-8</variance>
+      </tangentialConstraint>
+      <estimate>true</estimate>
+      <assumeStatic>false</assumeStatic>
+      <splines>
+        <rotSplineOrder>4</rotSplineOrder>
+        <rotFittingLambda>0.00001</rotFittingLambda>
+        <transSplineOrder>4</transSplineOrder>
+        <transFittingLambda>0.00001</transFittingLambda>
+        <knotsPerSecond>5</knotsPerSecond>
+      </splines>
+      <McSensor>ViconBase</McSensor>
+      <frame>LowerBody</frame>
+      <referenceFrame>Global</referenceFrame>
+    </BaseTrajectory>
+    <UpperBodyTrajectory>
+      <used>false</used>
+      <tangentialConstraint>
+        <used>false</used>
+      </tangentialConstraint>
+      <estimate>true</estimate>
+      <splines>
+        <rotSplineOrder>4</rotSplineOrder>
+        <rotFittingLambda>0.00001</rotFittingLambda>
+        <transSplineOrder>4</transSplineOrder>
+        <transFittingLambda>0.00001</transFittingLambda>
+        <knotsPerSecond>5</knotsPerSecond>
+      </splines>
+      <McSensor>ViconBody</McSensor>
+      <frame>UpperBody</frame>
+      <referenceFrame>Global</referenceFrame>
+    </UpperBodyTrajectory>
+      <sensors>
+        <imu>
+          <frame>UpperBody</frame>
+          <estimate>true</estimate>
+          <observeOnly>false</observeOnly>
+          <used>true</used>
+          <frequency>200.0</frequency>
+          <maximalExpectedGap>0.05</maximalExpectedGap>
+          <acc>
+            <estimate>true</estimate>
+            <noise>
+              <accXVariance>0.00032</accXVariance>
+              <accYVariance>0.00032</accYVariance>
+              <accZVariance>0.01</accZVariance>
+              <accRandomWalk>0.002</accRandomWalk>
+            </noise>
+            <biasVector>
+              <used>false</used>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.0</z>
+            </biasVector>
+            <biasSpline>
+              <fittingLambda>0.1</fittingLambda>
+              <knotsPerSecond>1</knotsPerSecond>
+              <splineOrder>3</splineOrder>
+            </biasSpline>
+          </acc>
+          <gyro>
+            <estimate>true</estimate>
+            <noise>
+              <gyroXVariance>0.15e-3</gyroXVariance>
+              <gyroYVariance>0.15e-3</gyroYVariance>
+              <gyroZVariance>2.4e-5</gyroZVariance>
+              <gyroRandomWalk>4e-3</gyroRandomWalk>
+            </noise>
+            <biasVector>
+              <used>false</used>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.0</z>
+            </biasVector>
+            <biasSpline>
+              <fittingLambda>0.1</fittingLambda>
+              <knotsPerSecond>1</knotsPerSecond>
+              <splineOrder>3</splineOrder>
+            </biasSpline>
+          </gyro>
+          <translation>
+            <x>-0.10</x>
+            <y>-0.16</y>
+            <z>1.11</z>
+            <sigma>0.00001</sigma>
+            <estimate>true</estimate>
+          </translation>
+          <rotation>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.01</sigma>
+            <estimate>true</estimate>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.05</upperBound>
+            <lowerBound>-0.05</lowerBound>
+            <used>false</used>
+          </delay>
+          <inertiaFrame>Global</inertiaFrame></imu>
+        <Velodyne>
+          <frame>UpperBody</frame>
+          <estimate>true</estimate>
+          <observeOnly>false</observeOnly>
+          <used>true</used>
+          <translation>
+            <sigma>0.01,0.01,0.00001</sigma>
+            <estimate>true</estimate>
+          </translation>
+          <rotation>
+            <sigma>0.01</sigma>
+            <estimate>true</estimate>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+            <estimate>true</estimate>
+          </delay>
+          <minimalDistance>0.5</minimalDistance>
+          <maximalDistance>100</maximalDistance>
+          <noise>
+            <mestimator>
+              <name></name>
+              <cauchySigma2>10</cauchySigma2>
+            </mestimator>
+            <normalsVarianceX>4e-4</normalsVarianceX>
+            <normalsVarianceY>4e-4</normalsVarianceY>
+            <normalsVarianceZ>4e-4</normalsVarianceZ>
+            <!-- Specifications given by the constructor using resolutions and noise model for discretization, also for the range case (all angles in deg)-->
+            <vertAngleVariance>1e-12</vertAngleVariance>
+<!--            <vertAngleVariance>4.5e-5</vertAngleVariance>-->
+            <horizAngleVariance>1e-11</horizAngleVariance>
+<!--            <horizAngleVariance>6.5e-7</horizAngleVariance>-->
+            <rangeVariance>4e-4</rangeVariance>
+<!--            Beam divergence angle in radians-->
+            <beamDiverAngle>2e-3</beamDiverAngle>
+<!--            Gains arbitrarily set up to limit the effect of the coVariance-->
+            <noiseGainX>0.2</noiseGainX>
+            <noiseGainY>0.3</noiseGainY>
+            <noiseGainZ>0.3</noiseGainZ>
+          </noise>
+          <pcFilterConfig>icp/VelodyneFilter.yaml</pcFilterConfig>
+        </Velodyne>
+        <Sick>
+          <minimalAngle>-2.3561944</minimalAngle>
+          <maximalAngle>2.3561944</maximalAngle>
+          <minimalDistance>0.5</minimalDistance>
+          <maximalDistance>20</maximalDistance>
+          <noise>
+            <!-- Specifications given by the constructor using resolutions and noise model for discretization, also for the range case (all angles in deg)-->
+            <vertAngleVariance>1e-9</vertAngleVariance>
+            <horizAngleVariance>1e-11</horizAngleVariance>
+            <rangeVariance>4e-4</rangeVariance>
+<!--            Beam divergence angle in radians-->
+            <beamDiverAngle>0.015</beamDiverAngle>
+<!--            Gains arbitrarily set up to limit the effect of the covariance-->
+            <noiseGainX>0.02</noiseGainX>
+            <noiseGainY>0.2</noiseGainY>
+            <noiseGainZ>0.1</noiseGainZ>
+            <mestimator>
+              <name>cauchy</name>
+              <cauchySigma2>10</cauchySigma2>
+            </mestimator>
+          </noise>
+        </Sick>
+        <Hokuyo>
+          <minimalAngle>-2.3561944</minimalAngle>
+          <maximalAngle>2.3561944</maximalAngle>
+          <minimalDistance>0.5</minimalDistance>
+          <maximalDistance>20</maximalDistance>
+          <noise>
+            <!-- Specifications given by the constructor using resolutions and noise model for discretization, also for the range case (all angles in deg)-->
+            <vertAngleVariance>1e-9</vertAngleVariance>
+            <horizAngleVariance>1e-11</horizAngleVariance>
+            <rangeVariance>4e-4</rangeVariance>
+<!--            Beam divergence angle in radians-->
+            <beamDiverAngle>0.015</beamDiverAngle>
+<!--            Gains arbitrarily set up to limit the effect of the covariance-->
+            <noiseGainX>0.02</noiseGainX>
+            <noiseGainY>0.2</noiseGainY>
+            <noiseGainZ>0.1</noiseGainZ>
+            <mestimator>
+              <name>cauchy</name>
+              <cauchySigma2>10</cauchySigma2>
+            </mestimator>
+          </noise>
+        </Hokuyo>
+        <GroundPlane>
+          <frame>Map</frame>
+          <estimate>false</estimate>
+          <observeOnly>true</observeOnly>
+          <used>false</used>
+          <cutOffDistance>0.2</cutOffDistance>
+          <minimalDistance>0</minimalDistance>
+          <maximalDistance>100</maximalDistance>
+          <attitudeSigma>1e-3</attitudeSigma>
+          <hightSigma>1e-3</hightSigma>
+          <noise>
+            <vertAngleVariance>1e-9</vertAngleVariance>
+            <horizAngleVariance>1e-11</horizAngleVariance>
+            <rangeVariance>4e-4</rangeVariance>
+            <beamDiverAngle>0.015</beamDiverAngle>
+            <noiseGainX>0.00001</noiseGainX>
+            <noiseGainY>0.00001</noiseGainY>
+            <noiseGainZ>0.00001</noiseGainZ>
+          </noise>
+          <translation>
+            <used>false</used>
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <used>false</used>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.001,0.1,0.1</sigma>
+          </rotation>
+          <delay><used>false</used></delay>
+          <pcFilterConfig>icp/GroundPlaneFilter.yaml</pcFilterConfig>
+        </GroundPlane>
+        <ViconSystem>
+          <frame>Global</frame>
+          <used>false</used>
+          <estimate>true</estimate>
+          <translation>
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.1</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.001</sigma>
+            <upperBound>0.001</upperBound>
+            <lowerBound>-0.001</lowerBound>
+            <used>true</used>
+          </delay>
+        </ViconSystem>
+        <ViconBody>
+          <frame>UpperBody</frame>
+          <used>false</used>
+          <observeOnly>true</observeOnly>
+          <estimate>true</estimate>
+          <translation>
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.1</sigma>
+          </rotation>
+          <covPosition><sigma>0.002</sigma></covPosition>
+          <covOrientation><sigma>0.001</sigma></covOrientation>
+          <delay><used>false</used></delay>
+        </ViconBody>
+        <ViconBase>
+          <frame>LowerBody</frame>
+          <used>true</used>
+          <observeOnly>true</observeOnly>
+          <estimate>true</estimate>
+          <translation>
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.1</sigma>
+          </rotation>
+          <covPosition><sigma>0.002</sigma></covPosition>
+          <covOrientation><sigma>0.001</sigma></covOrientation>
+          <delay><used>false</used></delay>
+        </ViconBase>
+        <ViconBase2ViconBody>
+          <used>true</used>
+          <translation>
+            <x>0</x>
+            <y>0</y>
+            <z>0</z>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <yaw>0.0</yaw>
+            <pitch>0.0</pitch>
+            <roll>0.0</roll>
+            <sigma>0.1</sigma>
+          </rotation>
+        </ViconBase2ViconBody>
+        <ControlInput>
+          <frame>LowerBody</frame>
+          <groundFrame>Global</groundFrame>
+          <mWheelOdometry>WheelOdometry</mWheelOdometry>
+          <type>WheelCenterVelocities</type>
+          <used>true</used>
+          <observeOnly>true</observeOnly>
+          <estimate>false</estimate>
+          <sigmaTv>0.05</sigmaTv>
+          <sigmaRv>0.05</sigmaRv>
+          <accTLimit>0.75</accTLimit>
+          <decTLimit>1.5</decTLimit>
+          <decTBreakLimit>2</decTBreakLimit>
+          <accRLimit>1.5</accRLimit>
+          <delay>-0.3<sigma>0.2</sigma>
+            <upperBound>0</upperBound>
+            <lowerBound>-0.5</lowerBound>
+          </delay>
+          <tK>5<sigma>1</sigma>
+            <lowerBound>1</lowerBound>
+            <upperBound>10</upperBound>
+          </tK>
+          <rK>5<sigma>1</sigma>
+            <lowerBound>1</lowerBound>
+            <upperBound>10</upperBound>
+          </rK>
+        </ControlInput>
+        <VelocityObserver>
+          <frame>LowerBody</frame>
+          <groundFrame>Global</groundFrame>
+          <type>Velocities</type>
+          <mWheelOdometry>WheelOdometry</mWheelOdometry>
+          <used>true</used>
+          <accTLimit>0.75</accTLimit>
+          <decTLimit>1.5</decTLimit>
+          <decTBreakLimit>2</decTBreakLimit>
+          <accRLimit>1.5</accRLimit>
+          <delay>-0.3<sigma>0.2</sigma>
+            <upperBound>0</upperBound>
+            <lowerBound>-0.5</lowerBound>
+          </delay>
+          <observeOnly>true</observeOnly>
+          <estimate>false</estimate>
+        </VelocityObserver>
+        <LMS_FRONT>
+          <frame>UpperBody</frame>
+          <model>Sick</model>
+          <minimalAngle>-1.54226</minimalAngle>
+          <maximalAngle>1.54226</maximalAngle>
+          <translation>
+            <sigma>0.05,0.05,0.01</sigma>
+          </translation>
+          <rotation>
+            <sigma>0.0001,0.0001,0.05</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
+        </LMS_FRONT>
+        <LMS_REAR>
+          <frame>UpperBody</frame>
+          <model>Sick</model>
+          <translation>
+            <sigma>0.05,0.05,0.01</sigma>
+          </translation>
+          <rotation>
+            <sigma>0.0001,0.0001,0.05</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
+        </LMS_REAR>
+        <LMS_DOWN>
+          <frame>UpperBody</frame>
+          <model>Sick</model>
+          <translation>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <sigma>0.05</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
+        </LMS_DOWN>
+        <UTM_FRONT>
+          <frame>Nose</frame>
+          <model>Hokuyo</model>
+          <translation>
+            <sigma>0.01</sigma>
+          </translation>
+          <rotation>
+            <sigma>0.05</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
+        </UTM_FRONT>
+        <dynamixel>
+          <frame>UpperBody</frame>
+          <used>true</used>
+          <estimate>true</estimate>
+          <angleSigma>0.01</angleSigma>
+          <translation>
+            <sigma>0.1</sigma>
+          </translation>
+          <rotation>
+            <sigma>0.05</sigma>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <splines>
+            <fittingLambda>10</fittingLambda>
+            <knotsPerSecond>15</knotsPerSecond>
+            <splineOrder>4</splineOrder>
+          </splines>
+        </dynamixel>
+        <BumbleBee>
+          <frame>UpperBody</frame>
+          <used>true</used>
+          <observeOnly>false</observeOnly>
+          <translation>
+            <sigma>0.1</sigma>
+            <estimate>true</estimate>
+          </translation>
+          <rotation>
+            <sigma>0.05</sigma>
+            <estimate>true</estimate>
+          </rotation>
+          <delay>0.00<sigma>0.1</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+          </delay>
+          <minimalX>1.5</minimalX>
+          <maximalX>6</maximalX>
+          <numDisparities>256</numDisparities>
+          <useSemiGlobalMatcher>false</useSemiGlobalMatcher>
+          <pcFilterConfig>icp/BumbleBeeFilter.yaml</pcFilterConfig>
+          <focalLength></focalLength>
+          <baseLine></baseLine>
+          <preScaleFactor>1</preScaleFactor>
+          <xyVarianceFactor>2</xyVarianceFactor>
+          <zVarianceFactor>2</zVarianceFactor>
+        </BumbleBee>
+        <WheelOdometry>
+          <frame>LowerBody</frame>
+          <groundFrame>Global</groundFrame>
+          <observeOnly>false</observeOnly>
+          <estimate>true</estimate>
+          <used>true</used>
+          <delay>0.0<sigma>0.05</sigma>
+            <upperBound>0.1</upperBound>
+            <lowerBound>-0.1</lowerBound>
+            <estimate>true</estimate>
+          </delay>
+          <wheelBase>0.7<sigma>0.01</sigma><estimate>true</estimate></wheelBase>
+          <wheelRadiusLeft>0.15<sigma>0.01</sigma></wheelRadiusLeft>
+          <wheelRadiusRight>0.15<sigma>0.01</sigma></wheelRadiusRight>
+          <assumedWheelBase>0.7</assumedWheelBase>
+          <assumedWheelRadiusLeft>0.15</assumedWheelRadiusLeft>
+          <assumedWheelRadiusRight>0.15</assumedWheelRadiusRight>
+                    <translation>
+            <used>false</used>
+          </translation>
+          <rotation>
+            <used>false</used>
+          </rotation>
+          <noise>
+            <lwVariance>0.01</lwVariance>
+            <rwVariance>0.02</rwVariance>
+          </noise>
+        </WheelOdometry>
+      </sensors>
+      <constraints>
+        <active>true</active>
+          <noise>
+            <vyVariance>0.0005</vyVariance>
+            <vzVariance>0.06</vzVariance>
+          </noise>
+      </constraints>
+      <Gravity>
+        <estimate>true</estimate>
+        <magnitude>9.81<sigma>0.1</sigma></magnitude>
+      </Gravity>
+      <intrinsics>
+        <use3dLidar>true</use3dLidar>
+        <lidar2dNameList>LMS_FRONT,LMS_REAR,LMS_DOWN,UTM_FRONT</lidar2dNameList>
+        <useImuFrame>false</useImuFrame>
+        <yhorizConstraint>false</yhorizConstraint>
+      </intrinsics>
+      <BaseJoint>
+        <used>true</used>
+        <observeOnly>false</observeOnly>
+        <estimate>true</estimate>
+        <x>0.14<sigma>0.0001</sigma></x>
+        <z>0.09<sigma>0.0001</sigma></z>
+        <omega0Squared>5</omega0Squared>
+        <lambda>0.36</lambda>
+        <randomWalk>0.1</randomWalk>
+        <couplingFactor>1</couplingFactor>
+        <splines>
+          <fittingLambda>10</fittingLambda>
+          <knotsPerSecond>15</knotsPerSecond>
+          <splineOrder>4</splineOrder>
+        </splines>
+      </BaseJoint>
+      <useKinematicChain>true</useKinematicChain>
+  </model>
+</test>

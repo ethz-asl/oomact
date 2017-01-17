@@ -1,0 +1,21 @@
+#include "aslam/calibration/algo/splinesToFile.h"
+#include <glog/logging.h>
+#include <string>
+#include <vector>
+#include <aslam/calibration/CalibratorI.hpp>
+
+using namespace sm::timing;
+using namespace sm::kinematics;
+
+namespace aslam {
+  namespace calibration {
+    template <typename Spline>
+    void writeSplines(const std::vector<Spline> & splines, double dt, std::ofstream & stream) {
+      if(stream.is_open()){
+        for (auto & spl : splines) {
+          writeSpline(spl, dt, stream);
+        }
+      }
+    }
+  }
+}
