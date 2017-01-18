@@ -7,6 +7,7 @@
 #include <sm/BoostPropertyTree.hpp>
 
 #include "aslam/backend/Optimizer2.hpp"
+#include "aslam/backend/SparseCholeskyLinearSystemSolver.hpp"
 
 #include "aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp"
 namespace aslam {
@@ -147,7 +148,9 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     BatchCalibrationProblem problem;
 
     estimate(estConf, problem, problem, [&](){
-      aslam::backend::Optimizer2 opt(sm::BoostPropertyTree(), nullptr, boost::make_shared<backend::LevenbergMarquardtTrustRegionPolicy>(100));
+      boost::shared_ptr<backend::LinearSystemSolver> linearSystemSolver(new aslam::backend::SparseCholeskyLinearSystemSolver());
+      linearSystemSolver->setAcceptConstantErrorTerms(options_.getAcceptConstantErrorTerms());
+      aslam::backend::Optimizer2 opt(sm::BoostPropertyTree(), linearSystemSolver, boost::make_shared<backend::LevenbergMarquardtTrustRegionPolicy>(100));
       updateOptimizerInspector(problem, false, [](std::ostream &){}, opt.callback());
       opt.setProblem(problem.getProblemSp());
       opt.options().verbose = false;

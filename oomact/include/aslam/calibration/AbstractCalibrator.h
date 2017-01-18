@@ -28,8 +28,16 @@ class AbstractCalibratorOptions : public CalibratorOptionsI {
   bool getPredictResults() const override {
     return predictResults;
   }
+
+  bool getAcceptConstantErrorTerms() const override {
+    return acceptConstantErrorTerms;
+  }
+  void setAcceptConstantErrorTerms(bool acceptConstantErrorTerms) {
+    this->acceptConstantErrorTerms = acceptConstantErrorTerms;
+  }
  private:
   bool predictResults;
+  bool acceptConstantErrorTerms;
   double splineOutputSamplePeriod;
 };
 

@@ -33,6 +33,7 @@ class CalibratorOptionsI {
   virtual ~CalibratorOptionsI(){}
   virtual double getSplineOutputSamplePeriod() const = 0;
   virtual bool getPredictResults() const = 0;
+  virtual bool getAcceptConstantErrorTerms() const = 0;
 };
 
 class CalibratorI {

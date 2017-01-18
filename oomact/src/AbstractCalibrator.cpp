@@ -29,6 +29,7 @@ aslam::calibration::ModelAtTime CalibratorI::getModelAt(const Sensor& sensor, Ti
 
 AbstractCalibratorOptions::AbstractCalibratorOptions(const sm::value_store::ValueStoreRef& config) :
     predictResults(config.getBool("predictResults", true)),
+    acceptConstantErrorTerms(config.getBool("acceptConstantErrorTerms", false)),
     splineOutputSamplePeriod(config.getDouble("splineOutputSamplePeriod", 0.01))
 {
 }
