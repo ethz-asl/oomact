@@ -13,7 +13,7 @@
 - git:
    local-name: aslam_incremental_calibration
    uri: git@github.com:ethz-asl/aslam_incremental_calibration.git
-   version: feature/useGaussNewtonWithLine
+   version: feature/useGaussNewtonWithLineSearch
 - git:
     local-name: aslam_optimizer
     uri: git@github.com:ethz-asl/aslam_optimizer.git
