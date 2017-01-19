@@ -2,9 +2,8 @@
 
 #include <gtest/gtest.h>
 
-
-#include "SimpleModel.hpp"
-#include "Tools.hpp"
+#include "../test_tools/SimpleModel.hpp"
+#include "../test_tools/Tools.hpp"
 
 namespace aslam {
 namespace calibration {

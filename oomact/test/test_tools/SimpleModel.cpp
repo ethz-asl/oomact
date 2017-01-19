@@ -1,3 +1,5 @@
+#include "../test_tools/SimpleModel.hpp"
+
 #include <cmath>
 
 #include <gtest/gtest.h>
@@ -6,7 +8,6 @@
 #include <sm/BoostPropertyTree.hpp>
 #include <sm/value_store/ValueStore.hpp>
 
-#include "SimpleModel.hpp"
 namespace aslam {
 namespace calibration {
 namespace {

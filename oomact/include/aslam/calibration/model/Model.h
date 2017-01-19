@@ -137,14 +137,8 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
   virtual ModelAtTime getAtTime(sm::timing::NsecTime timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const;
   virtual ModelAtTime getAtTime(const BoundedTimeExpression & boundedTimeExpresion, int maximalDerivativeOrder, const ModelSimplification & simplification) const;
 
-  const Gravity& getGravity() const {
-    assert(gravity);
-    return *gravity;
-  }
-  Gravity& getGravity() {
-    assert(gravity);
-    return *gravity;
-  }
+  const Gravity& getGravity() const;
+  Gravity& getGravity();
 
   std::ostream & printCalibrationVariables(std::ostream& out) const;
 

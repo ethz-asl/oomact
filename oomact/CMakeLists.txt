@@ -72,6 +72,8 @@ target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
+  test/test_tools/Tools.cpp
+  test/test_tools/SimpleModel.cpp
   test/error-terms/ErrorTermAccelerometerTest.cpp
   test/error-terms/ErrorTermGyroscopeTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
@@ -80,9 +82,8 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
   test/data/MeasurementsContainerTest.cpp
-  test/acceptance/Tools.cpp
-  test/acceptance/SimpleModel.cpp
   test/acceptance/SimpleModelTest.cpp
+  test/model/ModelTest.cpp
   
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test
 )
