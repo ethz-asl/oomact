@@ -7,7 +7,15 @@ bool aslam::calibration::Interval::contains(Timestamp t, const TimeDesignVariabl
   return contains(t - delay.getUpperBound()) && contains(t - delay.getLowerBound());
 }
 
-bool aslam::calibration::Interval::contains(Timestamp t, const Sensor& sensor) const {
+bool aslam::calibration::Interval::containsModule(Timestamp t, const Module& module) const {
+  if(auto sPtr = module.ptrAs<DelayCv>()){
+    return contains(t, *sPtr);
+  } else {
+    return contains(t);
+  }
+}
+
+bool aslam::calibration::Interval::contains(Timestamp t, const DelayCv& sensor) const {
   if(sensor.hasDelay()){
     return contains(t, sensor.getDelayVariable());
   } else {

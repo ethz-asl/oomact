@@ -18,6 +18,9 @@ std::ostream& aslam::calibration::ErrorTermStatistics::printInto(std::ostream& o
   out << "Total initial "<< name << " cost : " << cost << " in " << counter << " error terms.";
   if(counter) out << " Avg=" << (cost / counter) << ".";
   if(inactiveCounter) out << " Inactive=" << inactiveCounter << ".";
+  if(skipCounter) {
+    out << " Skipped=" << skipCounter << ".";
+  }
   return out;
 }
 
@@ -36,6 +39,9 @@ std::ostream& aslam::calibration::ErrorTermStatistics::printShortInto(std::ostre
     out << ", " << inactiveCounter;
   }
 
+  if(skipCounter) {
+    out << ", S=" << skipCounter;
+  }
   out << ")";
   return out;
 }

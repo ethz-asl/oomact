@@ -3,6 +3,7 @@
 
 #include "MeasurementErrorTerm.h"
 #include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/calibration/error-terms/ErrorTermGroup.h>
 
 namespace aslam {
   namespace calibration {
@@ -31,7 +32,8 @@ namespace aslam {
        */
       ErrorTermGyroscope(const aslam::backend::EuclideanExpression& _w_i_mi,
                          const aslam::backend::EuclideanExpression& _bias,
-                         const Input& wm, const Covariance& sigma2);
+                         const Input& wm, const Covariance& sigma2,
+                         const ErrorTermGroupReference & etgr = ErrorTermGroupReference());
 
       /// Copy constructor
       ErrorTermGyroscope(const ErrorTermGyroscope& other) = default;

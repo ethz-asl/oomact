@@ -22,6 +22,7 @@
 #include "aslam/calibration/data/AccelerometerMeasurement.h"
 #include "aslam/calibration/data/GyroscopeMeasurement.h"
 
+
 #include "aslam/calibration/error-terms/ErrorTermAccelerometer.h"
 #include "aslam/calibration/error-terms/ErrorTermGyroscope.h"
 
@@ -34,6 +35,8 @@ namespace calibration {
 Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef config) :
     Sensor(model, name, config),
     measurements_(std::make_shared<Measurements>()),
+    useAcc_(myConfig.getBool("acc/used", true)),
+    useGyro_(myConfig.getBool("gyro/used", true)),
     accBias(*this, "accBias", myConfig.getChild("acc")),
     gyroBias(*this, "gyroBias", myConfig.getChild("gyro")),
     minimalMeasurementsPerBatch(myConfig.getInt("minimalMeasurementsPerBatch", 100)),
@@ -42,20 +45,32 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
   if(isUsed()){
     SM_ASSERT_GE(std::runtime_error, minimalMeasurementsPerBatch, 0, "");
 
-    accXVariance = myConfig.getDouble("acc/noise/accXVariance");
-    accYVariance = myConfig.getDouble("acc/noise/accYVariance");
-    accZVariance = myConfig.getDouble("acc/noise/accZVariance");
-    accRandomWalk = myConfig.getDouble("acc/noise/accRandomWalk");
+    if(useAcc_){
+      accXVariance = myConfig.getDouble("acc/noise/accXVariance");
+      accYVariance = myConfig.getDouble("acc/noise/accYVariance");
+      accZVariance = myConfig.getDouble("acc/noise/accZVariance");
+      accRandomWalk = myConfig.getDouble("acc/noise/accRandomWalk");
+    }
 
-    gyroXVariance = myConfig.getDouble("gyro/noise/gyroXVariance");
-
-    gyroYVariance = myConfig.getDouble("gyro/noise/gyroYVariance");
-
-    gyroZVariance = myConfig.getDouble("gyro/noise/gyroZVariance");
-    gyroRandomWalk = myConfig.getDouble("gyro/noise/gyroRandomWalk");
+    if(useGyro_){
+      gyroXVariance = myConfig.getDouble("gyro/noise/gyroXVariance");
+      gyroYVariance = myConfig.getDouble("gyro/noise/gyroYVariance");
+      gyroZVariance = myConfig.getDouble("gyro/noise/gyroZVariance");
+      gyroRandomWalk = myConfig.getDouble("gyro/noise/gyroRandomWalk");
+    }
   }
 
 //TODO C support MESTIMATORS:  setMEstimator(boost::shared_ptr<aslam::backend::MEstimator>(new aslam::backend::CauchyMEstimator(10)));
+}
+
+void Imu::registerWithModel() {
+  if(isUsed()){
+    if(useAcc_)
+      accBias.registerCalibrationVariables(getModel());
+    if(useGyro_)
+      gyroBias.registerCalibrationVariables(getModel());
+  }
+  Sensor::registerWithModel();
 }
 
 Imu::~Imu() {
@@ -88,6 +103,12 @@ Bias::Bias(Module & m, const std::string & name, sm::value_store::ValueStoreRef 
   }
 }
 
+void Bias::registerCalibrationVariables(Model& model) {
+  if(biasVector){
+    model.addCalibrationVariables({biasVector});
+  }
+}
+
 void Bias::initState(CalibratorI & calib){
   if(isUsingSpline()){
     state_ = std::make_shared<BiasBatchState>(*biasSplineCarrier, getName());
@@ -110,7 +131,7 @@ void Bias::addToBatch(bool stateActive, BatchStateReceiver & batchStateReceiver,
 }
 
 bool Imu::initState(CalibratorI& calib) {
-  if(isUsed()){ //TODO C move bias vector model here!
+  if(isUsed()){
     accBias.initState(calib);
     gyroBias.initState(calib);
   }
@@ -118,15 +139,18 @@ bool Imu::initState(CalibratorI& calib) {
 }
 void Imu::addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) {
   const bool stateActive = stateActivator.isActive(*this);
-  accBias.addToBatch(stateActive, batchStateReceiver, problem);
-  gyroBias.addToBatch(stateActive, batchStateReceiver, problem);
+  if(useAcc_){
+    accBias.setActive(stateActive);
+    accBias.addToBatch(stateActive, batchStateReceiver, problem);
+  }
+  if(useGyro_){
+    gyroBias.setActive(stateActive);
+    gyroBias.addToBatch(stateActive, batchStateReceiver, problem);
+  }
 }
 
 void Imu::setActive(bool spatial, bool temporal) {
   Sensor::setActive(spatial, temporal);
-
-  accBias.setActive(spatial);
-  gyroBias.setActive(spatial);
 }
 
 BiasBatchState::BiasBatchState(const TrajectoryCarrier & carrier, const std::string & name)
@@ -220,33 +244,40 @@ void addImuErrorTerms(CalibratorI & calib, const Imu & imu, std::string name, co
 }
 
 void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & errorTermReceiver, bool observeOnly) const {
-  const std::string accelerometerName = getName() + "Accelerometer";
-  const std::string gyroscopeName = getName() + "Gyroscope";
+  if(useAcc_){
+    const std::string accelerometerName = getName() + "Accelerometer";
+    if(accBias.isUsingSpline()){
+      addBiasModelErrorTerms(calib, accelerometerName, errorTermReceiver, accBias.state_->biasSpline, Eigen::Matrix3d::Identity() / accRandomWalk, observeOnly);
+    }
 
-
-  if(accBias.isUsingSpline()){
-    addBiasModelErrorTerms(calib, accelerometerName, errorTermReceiver, accBias.state_->biasSpline, Eigen::Matrix3d::Identity() / accRandomWalk, observeOnly);
-  }
-  if(gyroBias.isUsingSpline()){
-    addBiasModelErrorTerms(calib, gyroscopeName, errorTermReceiver, gyroBias.state_->biasSpline, Eigen::Matrix3d::Identity() / gyroRandomWalk, observeOnly);
-  }
-
-  {
     //TODO C solve gravity vector problem. Each model has a gravity vector?
     auto g_m = calib.getModel().getGravity().getVectorExpression();
     Eigen::Matrix3d covarianceMatrix = Eigen::Vector3d(accXVariance, accYVariance, accZVariance).asDiagonal();
+    ErrorTermGroupReference etgr(getName() + "Acc");
     addImuErrorTerms(
         calib, *this, accelerometerName, measurements_->accelerometer,
         [&, this](const Timestamp timestamp, const AccelerometerMeasurement & m){
           auto robot = calib.getModelAt(*this, timestamp, 2, {false});
-          return boost::make_shared<ErrorTermAccelerometer>(robot.getAcceleration(inertiaFrame, getParentFrame()), getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse(), g_m, accBias.getBiasExpression(timestamp), m.a_i_mi, covarianceMatrix);
+          return boost::make_shared<ErrorTermAccelerometer>(
+              robot.getAcceleration(inertiaFrame, getParentFrame()),
+              getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse(),
+              g_m,
+              accBias.getBiasExpression(timestamp),
+              m.a_i_mi,
+              covarianceMatrix,
+              etgr);
         },
         errorTermReceiver,
         observeOnly
       );
   }
-  {
+  if(useGyro_){
+    const std::string gyroscopeName = getName() + "Gyroscope";
+    if(gyroBias.isUsingSpline()){
+      addBiasModelErrorTerms(calib, gyroscopeName, errorTermReceiver, gyroBias.state_->biasSpline, Eigen::Matrix3d::Identity() / gyroRandomWalk, observeOnly);
+    }
     Eigen::Matrix3d covarianceMatrix = Eigen::Vector3d(gyroXVariance, gyroYVariance, gyroZVariance).asDiagonal();
+    ErrorTermGroupReference etgr(getName() + "Gyro");
     addImuErrorTerms(
         calib, *this, gyroscopeName, measurements_->gyroscope,
         [&, this](const Timestamp timestamp, const GyroscopeMeasurement & m){
@@ -254,7 +285,8 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
           return boost::make_shared<ErrorTermGyroscope>(
               getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse() * robot.getAngularVelocity(inertiaFrame, getParentFrame()),
               gyroBias.getBiasExpression(timestamp),
-              m.w_i_mi, covarianceMatrix
+              m.w_i_mi, covarianceMatrix,
+              etgr
             );
         },
         errorTermReceiver,
@@ -295,4 +327,3 @@ void Imu::addPriorFactors(CalibratorI & calib, ErrorTermReceiver & errorTermRece
 
 } /* namespace calibration */
 } /* namespace aslam */
-

@@ -105,9 +105,6 @@ void So3R3Trajectory::fitSplines(const Interval& effectiveBatchInterval, const s
   bsplines::BSplineFitter<RotationSpline>::initUniformSpline(getRotationSpline(), effectiveBatchInterval.start, effectiveBatchInterval.end, timestamps, rotPoses, numSegments, rotSplineLambda);
 }
 
-
-
-
 void So3R3Trajectory::initSplinesConstant(const Interval& effectiveBatchInterval, const size_t numMeasurements, const Eigen::Vector3d & transPose, const Eigen::Vector4d & rotPose) {
   const double elapsedTime = effectiveBatchInterval.getElapsedTime();
   const int measPerSec = std::round(numMeasurements / elapsedTime);

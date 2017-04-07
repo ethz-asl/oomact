@@ -4,7 +4,6 @@
 
 #include <aslam/calibration/model/Model.h>
 #include <sm/BoostPropertyTree.hpp>
-#include <sm/PropertyTree.hpp>
 #include <sm/value_store/ValueStore.hpp>
 
 #include "SimpleModel.hpp"

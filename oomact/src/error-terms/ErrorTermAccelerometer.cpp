@@ -27,8 +27,9 @@ using namespace aslam::backend;
 
 namespace aslam {
   namespace calibration {
-    ErrorTermAccelerometer::ErrorTermAccelerometer(const EuclideanExpression& a_m_mi, const RotationExpression& R_i_m, const EuclideanExpression& g_m, const EuclideanExpression& bias, const Input& am, const Covariance& sigma2) :
-        Parent(RotationExpression(R_i_m) * (a_m_mi + g_m) + bias, am, sigma2)
+    ErrorTermAccelerometer::ErrorTermAccelerometer(const EuclideanExpression& a_m_mi, const RotationExpression& R_i_m, const EuclideanExpression& g_m, const EuclideanExpression& bias, const Input& am, const Covariance& sigma2,
+                                                   const ErrorTermGroupReference & etgr) :
+        Parent(RotationExpression(R_i_m) * (a_m_mi + g_m) + bias, am, sigma2, etgr)
     {}
   }
 }

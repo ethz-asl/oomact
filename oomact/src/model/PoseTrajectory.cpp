@@ -59,7 +59,7 @@ PoseTrajectory::PoseTrajectory(Model& model, const std::string& name, sm::value_
   estimate(getMyConfig().getBool("estimate", true)),
   useTanConstraint(getMyConfig().getBool("tangentialConstraint/used", false)),
   tanConstraintVariance(getMyConfig().getDouble("tangentialConstraint/variance", TAN_CONSTRAINT_VARIANCE_DEFAULT)),
-  initWithPoseMeasurements(getMyConfig().getBool("initWithPoseMeasurements", poseSensor.isResolved())),
+  initWithPoseMeasurements(getMyConfig().getBool("initWithPoseMeasurements", false)),
   poseSensor(*this, "McSensor", initWithPoseMeasurements),
   odometrySensor(*this, "OdomSensor"),
   assumeStatic(getMyConfig().getBool("assumeStatic", false)),
@@ -303,7 +303,7 @@ bool PoseTrajectory::initState(CalibratorI& calib) {
         throw std::runtime_error(getName() + ".initWithPoseMeasurements is true but " + poseSensor.toString() + " is not resolved!");
       }
     }
-    CHECK(odometrySensor.isResolved()) << "CalibratorOptions.initWithPoseMeasurements is false but " << odometrySensor.toString() << " is not resolved!";
+    CHECK(odometrySensor.isResolved()) << getName() << ".initWithPoseMeasurements is false but " << odometrySensor.toString() << " is not resolved!";
     return initSplines(calib, getCurrentTrajectory(), odometrySensor, poseSensor);
   }
 }

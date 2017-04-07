@@ -83,6 +83,7 @@ int main(int, char **) {
     });
 */
   auto vsCalib = ValueStoreRef::fromString(
+      "acceptConstantErrorTerms=true\n"
       "timeBaseSensor=rovio\n"
     );
 

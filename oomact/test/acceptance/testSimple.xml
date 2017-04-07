@@ -237,6 +237,7 @@ logger:
         <knotsPerSecond>5</knotsPerSecond>
       </splines>
       <McSensor>ViconBase</McSensor>
+      <OdomSensor>WheelOdometry</OdomSensor>
       <frame>LowerBody</frame>
       <referenceFrame>Global</referenceFrame>
     </BaseTrajectory>
@@ -373,6 +374,9 @@ logger:
           <maximalAngle>2.3561944</maximalAngle>
           <minimalDistance>0.5</minimalDistance>
           <maximalDistance>20</maximalDistance>
+          <angularResolution>0.5</angularResolution><!-- 0.5 deg -->
+          <measurementTimeIncrement>.00002777777777777777</measurementTimeIncrement><!-- 720 steps each 1/50 secs -->
+          <nansAreFine>false</nansAreFine>
           <noise>
             <!-- Specifications given by the constructor using resolutions and noise model for discretization, also for the range case (all angles in deg)-->
             <vertAngleVariance>1e-9</vertAngleVariance>
@@ -391,10 +395,14 @@ logger:
           </noise>
         </Sick>
         <Hokuyo>
+        <!-- TODO find correct specs!  -->
           <minimalAngle>-2.3561944</minimalAngle>
           <maximalAngle>2.3561944</maximalAngle>
           <minimalDistance>0.5</minimalDistance>
           <maximalDistance>20</maximalDistance>
+          <angularResolution>0.25</angularResolution><!-- 0.25 deg -->
+          <measurementTimeIncrement>0.00001736111111111111</measurementTimeIncrement><!-- 1440 steps each 1/40 secs -->
+          <nansAreFine>true</nansAreFine>
           <noise>
             <!-- Specifications given by the constructor using resolutions and noise model for discretization, also for the range case (all angles in deg)-->
             <vertAngleVariance>1e-9</vertAngleVariance>
@@ -530,8 +538,8 @@ logger:
         <ControlInput>
           <frame>LowerBody</frame>
           <groundFrame>Global</groundFrame>
-          <mWheelOdometry>WheelOdometry</mWheelOdometry>
           <type>WheelCenterVelocities</type>
+          <mWheelOdometry>WheelOdometry</mWheelOdometry>
           <used>true</used>
           <observeOnly>true</observeOnly>
           <estimate>false</estimate>
@@ -628,6 +636,7 @@ logger:
             <sigma>0.05</sigma>
           </rotation>
           <delay>0.00<sigma>0.1</sigma>
+            <used>true</used>
             <upperBound>0.1</upperBound>
             <lowerBound>-0.1</lowerBound>
           </delay>

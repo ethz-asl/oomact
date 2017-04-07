@@ -33,6 +33,8 @@ class CalibratorOptionsI {
   virtual ~CalibratorOptionsI(){}
   virtual double getSplineOutputSamplePeriod() const = 0;
   virtual bool getPredictResults() const = 0;
+  virtual bool getVerbose() const = 0;
+  virtual void setVerbose(bool verbose) = 0;
   virtual bool getAcceptConstantErrorTerms() const = 0;
 };
 
@@ -96,8 +98,8 @@ class IncrementalCalibratorI : public virtual CalibratorI {
   /// invoke window-full handler if window is full. Returns true iff it it was full.
   virtual bool invokeWindowFullHanlderIfNecessary(bool acceptShortWindow = false) = 0;
 
-  virtual void startCollectingDataFrom(const ModuleList & moduleList) = 0;
-  virtual void stopCollectingDataFrom(const ModuleList & moduleList) = 0;
+  virtual void startCollectingDataFrom(const ModuleList & moduleList, Timestamp startTime) = 0;
+  virtual void stopCollectingDataFrom(const ModuleList & moduleList, Timestamp endTime) = 0;
   virtual size_t getNumModulesDataCollecting() const = 0;
 
   virtual void enableIcpInspection(bool active, const std::string & inspectionOutputFolder) = 0; //TODO Move to ICP related Module!

@@ -40,9 +40,18 @@ class ErrorTermStatistics {
     return name;
   }
 
+  void skip() {
+    skipCounter ++;
+  }
+
+  size_t getSkipCount() const {
+    return skipCounter;
+  }
+
  private:
   std::string name;
   size_t counter = 0;
+  size_t skipCounter = 0;
   size_t inactiveCounter = 0;
   double cost = 0;
   bool evaluateError;

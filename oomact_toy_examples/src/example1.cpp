@@ -85,6 +85,7 @@ int main(int, char **) {
   mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcs, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
+      "acceptConstantErrorTerms=true\n"
       "timeBaseSensor=a\n"
     );
 

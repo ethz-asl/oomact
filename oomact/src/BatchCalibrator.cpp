@@ -54,6 +54,7 @@ class BatchEstConf : public EstConf {
   void print(std::ostream & o) const override {
     o << "BatchEstimationConfig()";
   }
+
  private:
   bool useCalibPriors_ = false;
 };

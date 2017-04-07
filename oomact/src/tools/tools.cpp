@@ -9,6 +9,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 #include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
@@ -28,12 +29,14 @@ void writeStringToFile(const std::string & fileName, const std::string & content
   writeToFile(fileName, [&](std::ostream & o){ o << content; });
 }
 
-void createDirs(const std::string & path){
+void createDirs(const std::string & path, bool ignoreErrors){
   try{
     boost::filesystem::create_directories(boost::filesystem::path(path).parent_path());
   }catch(boost::filesystem::filesystem_error & e){
-    LOG(ERROR) << "error when creating all directories for path='" << path << "' :" << e.what();
-    throw e;
+    if(!ignoreErrors){
+      LOG(ERROR) << "error when creating all directories for path='" << path << "' :" << e.what();
+      throw e;
+    }
   }
 }
 
@@ -49,9 +52,9 @@ void openStream(std::ofstream & outputFile, std::string path) {
 
 
 
-backend::MEstimator::Ptr getMestimator(const std::string & name, const sm::value_store::ValueStoreRef config) {
-  std::string mEstimatorName = config.getString("name");
-  if (mEstimatorName.empty() || mEstimatorName == "None"){
+backend::MEstimator::Ptr getMestimator(const std::string & name, const sm::value_store::ValueStoreRef config, int dim) {
+  std::string mEstimatorName = boost::algorithm::to_lower_copy(config.getString("name", std::string("none")).get());
+  if (mEstimatorName.empty() || mEstimatorName == "none"){
     LOG(INFO) << "Using no M-estimator for " << name << ".";
     return boost::make_shared<backend::NoMEstimator>();
   }
@@ -59,6 +62,12 @@ backend::MEstimator::Ptr getMestimator(const std::string & name, const sm::value
     double cauchySigma2 = config.getDouble("cauchySigma2", 10);
     LOG(INFO) << "Using Cauchy M-estimator(sigma^2 = " << cauchySigma2 << ") for " << name << ".";
     return boost::make_shared<backend::CauchyMEstimator>(cauchySigma2);
+  }
+  else if (mEstimatorName == "blakezisserman"){
+    double pCut = config.getDouble("bzPCut", 0.99);
+    CHECK(dim > 0);
+    LOG(INFO) << "Using Blake Zisserman M-estimator(cut = " << pCut << ", dim = " << dim << " ) for " << name << ".";
+    return boost::make_shared<backend::BlakeZissermanMEstimator>(dim, pCut);
   }
   else
     throw std::runtime_error("unknown M-estimator " + mEstimatorName);

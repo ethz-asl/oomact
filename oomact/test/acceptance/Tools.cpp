@@ -2,7 +2,6 @@
 
 #include <glog/logging.h>
 #include <sm/BoostPropertyTreeLoader.hpp>
-#include <sm/PropertyTree.hpp>
 
 namespace aslam {
 namespace calibration {

@@ -10,11 +10,9 @@ std::vector<std::reference_wrapper<Module>> ModuleList::resolveModuleList(Model&
 {
   std::vector<std::reference_wrapper<Module> > modules;
   for (std::string moduleName: getModuleIds()) {
-    try {
-      Module& m = model.getModule(moduleName);
-      modules.push_back(m);
-    }
-    catch (std::out_of_range& e) {
+    if(Module* mp = model.getModulePtr(moduleName)){
+      modules.push_back(*mp);
+    } else {
       LOG(WARNING) << "Could not find module named '" << moduleName << "'. Going to ignore it!";
     }
   }

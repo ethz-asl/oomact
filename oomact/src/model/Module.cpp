@@ -129,22 +129,24 @@ void ModuleLinkBase::checkAndAnnounceResolvedLink(const Module * to, bool conver
     LOG(INFO) << *this << " successfully resolved to " << *to;
   } else {
     const char * problem = to ? (to->isUsed()? " resolves to unused module!" : " resolves to used module but of wrong type!" ) : " could not be resolved!";
-    LOG(WARNING) << *this << problem;
     if(required){
+      LOG(ERROR) << *this << problem;
       throw std::runtime_error(toString() + problem);
+    } else {
+      LOG(INFO) << *this << problem;
     }
   }
 }
-ModuleLinkBase::ModuleLinkBase(const std::string& name, const std::string targetUid, bool required) :
-  NamedMinimal(name), targetUid(targetUid), required(required)
+ModuleLinkBase::ModuleLinkBase(const std::string& ownerName, const std::string & linkName, const std::string targetUid, bool required) :
+  NamedMinimal(ownerName + "." + linkName), targetUid(targetUid), required(required)
 {
   if(required && targetUid.empty()){
     throw std::runtime_error("Empty required Link : " + toString());
   }
 }
 
-ModuleLinkBase::ModuleLinkBase(Module & owner, const std::string& name, bool required) :
-  ModuleLinkBase(owner.getName() + "." + name, required ? owner.getMyConfig().getString(name) : owner.getMyConfig().getString(name, std::string()), required)
+ModuleLinkBase::ModuleLinkBase(Module & owner, const std::string& linkName, bool required) :
+  ModuleLinkBase(owner.getName(), linkName, required ? owner.getMyConfig().getString(linkName) : owner.getMyConfig().getString(linkName, std::string()), required)
 {
   owner.moduleLinks_.push_back(*this);
 }
@@ -161,6 +163,9 @@ void Module::resolveLinks(ModuleRegistry & reg) {
 
 bool Module::hasTooFewMeasurements() const {
   return false;
+}
+
+void Module::estimatesUpdated(CalibratorI& /*calib*/) const {
 }
 
 } /* namespace calibration */

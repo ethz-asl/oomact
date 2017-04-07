@@ -21,6 +21,7 @@ SimpleModelFrame body("body");
 class MockMotionCaptureSource : public MotionCaptureSource {
  public:
   MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
+  virtual ~MockMotionCaptureSource() = default;
  private:
   virtual std::vector<PoseStamped> getPoses(sm::timing::NsecTime from, sm::timing::NsecTime till) const override {
     sm::timing::NsecTime inc = 1e7;

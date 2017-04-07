@@ -257,10 +257,10 @@ struct PlanFragmentWithHome : public PlanFragment{
 struct HomingDriver : public SmartDriver {
   HomingDriver(const HomingDriver&) = delete;
 
-  HomingDriver (const PlanFragmentWithHome & planFrag, Driver & d) : HomingDriver(planFrag, nullptr, d, nullptr) {}
-  HomingDriver (const PlanFragmentWithHome & planFrag, CalibrationServer &cs, Driver & d, Logger & l) : HomingDriver(planFrag, &cs, d, &l) {}
-  HomingDriver (const PlanFragmentWithHome & planFrag, CalibrationServer * cs, Driver & d, Logger * l = nullptr) : SmartDriver(d), l(l), cs(cs) {
-    if(planFrag.hasHome()){
+  explicit HomingDriver(const PlanFragmentWithHome & planFrag, Driver & d, bool useHome = true) : HomingDriver(planFrag, nullptr, d, nullptr, useHome) {}
+  explicit HomingDriver(const PlanFragmentWithHome & planFrag, CalibrationServer &cs, Driver & d, Logger & l, bool useHome = true) : HomingDriver(planFrag, &cs, d, &l, useHome) {}
+  explicit HomingDriver(const PlanFragmentWithHome & planFrag, CalibrationServer * cs, Driver & d, Logger * l = nullptr, bool useHome = true) : SmartDriver(d), l(l), cs(cs), useHome(useHome) {
+    if(useHome && planFrag.hasHome()){
       d.setHome(planFrag.getHome());
       goHome();
     } else {
@@ -272,14 +272,19 @@ struct HomingDriver : public SmartDriver {
     stop();
     if(cs) cs->startCalibration();
     sleep(0.1);
-    LOG(INFO) << "Going home";
-    if(l) goHomeAndStopLogging(*l);
-    else goHome();
+    if(useHome){
+      LOG(INFO) << "Going home";
+      if(l) goHomeAndStopLogging(*l);
+      else goHome();
+    } else {
+      if(l) l->stop();
+    }
     if(cs) cs->waitForCalibration();
   }
  private:
   Logger * l;
   CalibrationServer * cs;
+  bool useHome = true;
 };
 
 ModuleList velodyneSensors ({"Velodyne"});
@@ -499,39 +504,83 @@ struct Straight : public PlanFragmentWithHome {
   }
 };
 
-struct Nose : public PlanFragmentWithHome {
-  int repetitions = 2;
-  double duration = 0.9;
+struct TurningStatic : public PlanFragmentWithHome {
+  double yawInc = 0;
+  double duration = 0.1;
+  int rep;
 
-  Nose(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, "Nose") {
-    repetitions = vs.getInt("rep", repetitions);
+  TurningStatic(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, "TurningStatic") {
+    yawInc = vs.getDouble("yawInc", yawInc);
     duration = vs.getDouble("dur", duration);
+    rep = vs.getInt("rep", rep);
   }
 
   void execute(CalibrationServer &cs, Driver &du, Logger & l) const override {
-    HomingDriver d(*this, cs, du, l);
+    HomingDriver d(*this, cs, du, l, false);
 
-    cs.startDataCollection(motionSensors);
-    takeStaticPointClouds(cs, d);
+    double yawBase = 0;
+    if(hasHome()){
+      du.setHome(getHome());
+    }
+    if(du.hasHome()){
+      yawBase = du.getHomeYaw();
+    }
+    LOG(INFO) << "Using " << yawBase << " as 0 yaw reference.";
 
-    for(int i = 0; i < repetitions; i ++){
-      d.forward(0.2, 0.3);
-//      d.turn(0.05, 0.3);
-      takeStaticPointClouds(cs, d);
-      sleep(0.9);
+    for(int i = 0; i < rep; i ++){
+      if(i > 0 || hasHome()){
+        d.turnTo(yawInc * i * 2 * M_PI + yawBase);
+      }
+      d.setVelocity(0, 0);
+      sleep(2);
+      cs.startDataCollection(staticPointSensors);
       cs.startDataCollection(dynamicPointSensors);
       sleep(duration);
       cs.endDataCollection(dynamicPointSensors);
+      cs.endDataCollection(staticPointSensors);
     }
-    d.setVelocity(0, 0);
-
-    cs.endDataCollection(velodyneSensors);
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(duration=" << duration << ", rep=" << repetitions << ")";
+    into << getName() << "(yawInc=" << yawInc << ", duration=" << duration << ", rep=" << rep << ")";
   }
 };
+
+
+
+struct ForwardStatic : public PlanFragmentWithHome {
+  double dist = 0;
+  double duration = 0.1;
+  int rep;
+
+  ForwardStatic(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, "ForwardStatic") {
+    dist = vs.getDouble("dist", dist);
+    duration = vs.getDouble("dur", duration);
+    rep = vs.getInt("rep", rep);
+  }
+
+  void execute(CalibrationServer &cs, Driver &du, Logger & l) const override {
+    HomingDriver d(*this, cs, du, l, false);
+
+    for(int i = 0; i < rep; i ++){
+      if(i > 0){
+        d.forward(dist);
+      }
+      d.setVelocity(0, 0);
+      sleep(2);
+      cs.startDataCollection(staticPointSensors);
+      cs.startDataCollection(dynamicPointSensors);
+      sleep(duration);
+      cs.endDataCollection(dynamicPointSensors);
+      cs.endDataCollection(staticPointSensors);
+    }
+  }
+
+  void print(std::ostream & into) const override {
+    into << getName() << "(dist=" << dist << ", duration=" << duration << ", rep=" << rep << ")";
+  }
+};
+
 
 struct Imu : public PlanFragmentWithHome {
   int repetitions = 2;
@@ -666,8 +715,9 @@ struct Registry {
     AddFragment(GoHome);
     AddFragment(Imu);
     AddFragment(ImuManual);
-    AddFragment(Nose);
     AddFragment(Odom);
+    AddFragment(TurningStatic);
+    AddFragment(ForwardStatic);
   }
 
   std::shared_ptr<FragmentT> createFragment(const std::string key, const sm::value_store::ValueStoreRef & vs){

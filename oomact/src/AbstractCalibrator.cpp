@@ -1,27 +1,29 @@
 #include <aslam/calibration/AbstractCalibrator.h>
 
+#include <chrono>
+#include <functional>
+#include <map>
+
 #include <glog/logging.h>
 #include <sm/MatrixArchive.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
 
+#include <aslam/calibration/CalibrationProblem.hpp>
+#include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include <aslam/calibration/CalibrationProblem.hpp>
-#include <aslam/calibration/DesignVariableReceiver.hpp>
-
 #include "aslam/calibration/algo/OptimizationProblemSpline.h"
-#include "aslam/calibration/DesignVariableReceiver.hpp"
-#include <chrono>
-#include <functional>
-#include <map>
 
 using std::chrono::_V2::system_clock;
 
 namespace aslam {
 namespace calibration {
+
+template class ModuleLink<Sensor>;
+
 // TODO C move CalibratorI::getModelAt to a more suitable place
 aslam::calibration::ModelAtTime CalibratorI::getModelAt(const Sensor& sensor, Timestamp time, int maximalDerivativeOrder, const ModelSimplification& simplification) const {
   return sensor.hasDelay() ? getModelAt(sensor.getBoundedTimestampExpression(*this, time), maximalDerivativeOrder, simplification) : getModelAt(time, maximalDerivativeOrder, simplification);
@@ -29,13 +31,20 @@ aslam::calibration::ModelAtTime CalibratorI::getModelAt(const Sensor& sensor, Ti
 
 AbstractCalibratorOptions::AbstractCalibratorOptions(const sm::value_store::ValueStoreRef& config) :
     predictResults(config.getBool("predictResults", true)),
+    verbose(config.getBool("verbose", false)),
     acceptConstantErrorTerms(config.getBool("acceptConstantErrorTerms", false)),
     splineOutputSamplePeriod(config.getDouble("splineOutputSamplePeriod", 0.01))
 {
+  if(acceptConstantErrorTerms){
+    LOG(INFO)<< "Using acceptConstantErrorTerms = true";
+  }
+}
+
+AbstractCalibratorOptions::~AbstractCalibratorOptions(){
 }
 
 AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model) :
-  _timeBaseSensor("Calibrator", config.getString("timeBaseSensor"), true),
+  _timeBaseSensor("Calibrator", "timeBaseSensor", config.getString("timeBaseSensor"), true), //TODO C support LinkBase with config and owner name
   _modelSP(model),
   _model(*model)
 {
@@ -45,6 +54,7 @@ AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Mod
 
 bool AbstractCalibrator::initStates(){
   for(Module & m : getModel().getModules()){
+    LOG(INFO) << "Initializing module " << m.getName() << "'s state.";
     if(!m.initState(*this)){
       LOG(ERROR) << "Module " << m.getName() << " failed to initialize its state. Going to abort this window.";
       return false;
@@ -62,7 +72,9 @@ void AbstractCalibrator::setUpdateHandler(StatusUpdateHandler statusUpdateHandle
 }
 
 void AbstractCalibrator::setLowestTimestamp(Timestamp lowestTimestamp) {
-  CHECK(_lowesTimestampProvided) << "Lowest timestamp provided twice!";
+  if(!(!_lowesTimestampProvided || lowestTimestamp == _lowestTimestamp)){
+    LOG(WARNING) << "Lowest timestamp provided twice!";
+  }
   _lowestTimestamp = lowestTimestamp;
   _lowesTimestampProvided = true;
 }
@@ -155,7 +167,7 @@ void AbstractCalibrator::addMeasurementTimestamp(const Timestamp lowerBound, Tim
   if (_lowestTimestamp == Timestamp(-1L) || _lowestTimestamp > lowerBound){
     _lowestTimestamp = lowerBound;
     {
-      SM_ASSERT_FALSE(std::runtime_error, _lowesTimestampProvided, "Found even lower timestmap!");
+      SM_ASSERT_FALSE(std::runtime_error, _lowesTimestampProvided, "Found even lower timestamp!");
       std::time_t now;
       now = std::chrono::system_clock::to_time_t(sm::timing::nsecToChrono(lowerBound));
       LOG(INFO) << "Start collecting measurements from " << std::ctime(&now) << " (" << std::fixed << static_cast<double>(lowerBound) << ") on.";
@@ -228,7 +240,9 @@ void AbstractCalibrator::printBatchErrorTermStatistics(const CalibrationProblem&
 void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  currentBatch, bool printRegessionErrorStatistics, std::function<void(std::ostream & o)> printOptimizationState, backend::callback::Registry & callbackRegistry) {
   callbackRegistry.clear();
   callbackRegistry.add<aslam::backend::callback::event::LINEAR_SYSTEM_SOLVED>([this, printOptimizationState]() {
-      printOptimizationState(LOG(INFO) << "Optimizer: Linear system solved:\n");
+      if(getOptions().getVerbose()){
+        printOptimizationState(LOG(INFO) << "Optimizer: Linear system solved:\n");
+      }
     });
   callbackRegistry.add<aslam::backend::callback::event::COST_UPDATED>([this, &currentBatch, printRegessionErrorStatistics](const aslam::backend::callback::event::COST_UPDATED & a)
     {
@@ -236,12 +250,14 @@ void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  cu
       if(wasRegression) {
         LOG(WARNING) << "Last update was a regression: " <<  a.previousLowestCost << " -> " << a.currentCost;
       }
-      if(printRegessionErrorStatistics || !wasRegression){
+      if(getOptions().getVerbose() && (printRegessionErrorStatistics || !wasRegression)){
         printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated " << a.previousLowestCost << " -> " << a.currentCost << (wasRegression ? " (REGRESSION)" : "") << ":\n");
       }
     });
   callbackRegistry.add<aslam::backend::callback::event::DESIGN_VARIABLES_UPDATED>([this]() {
-      _model.printCalibrationVariables(LOG(INFO) << "Optimizer: Variables updated:" << std::endl);
+      if(getOptions().getVerbose()){
+        _model.printCalibrationVariables(LOG(INFO) << "Optimizer: Variables updated:" << std::endl);
+      }
       if(_calibrationUpdateHandler){
         _calibrationUpdateHandler();
       }
@@ -265,17 +281,17 @@ void AbstractCalibrator::estimate(const EstConf & estimationConfig, CalibrationP
 
   setCalibrationVariablesActivity(estimationConfig);
 
-  ValueObserver dimGroup0Observer, dimGroup1Observer, numErrorTermsObserver;
+  ValueObserver dimCalibObserver, dimStateObserver, numErrorTermsObserver;
 
   auto logGroupDimsAndErrorNum = [&](){
-    dimGroup0Observer.update(problem.getDimCalibrationVariables());
-    dimGroup1Observer.update(problem.getDimStateVariables());
+    dimCalibObserver.update(problem.getDimCalibrationVariables());
+    dimStateObserver.update(problem.getDimStateVariables());
     numErrorTermsObserver.update(problem.getNumErrorTerms());
 
-    if(dimGroup0Observer.getDiff() || dimGroup1Observer.getDiff() || numErrorTermsObserver.getDiff()){
+    if(dimCalibObserver.getDiff() || dimStateObserver.getDiff() || numErrorTermsObserver.getDiff()){
       LOG(INFO)
-          << "\ndim(Group_0)="<< dimGroup0Observer
-          << "\ndim(Group_1)="<< dimGroup1Observer
+          << "\ndim(Calib)="<< dimCalibObserver
+          << "\ndim(State)="<< dimStateObserver
           << "\n#errorTerms="<< numErrorTermsObserver;
     }
   };
@@ -287,6 +303,7 @@ void AbstractCalibrator::estimate(const EstConf & estimationConfig, CalibrationP
 
     LOG(INFO) << "adding new batch.";
     getModel().addToBatch([&](CalibrationVariable * c){
+      LOG(INFO) << "Adding calibration variable " << c->getName() << " (dim=" << c->getDimension() << ", active="<< c->isActivated() << ")";
       problem.addCalibrationVariable(c);
     });
 
@@ -308,6 +325,8 @@ void AbstractCalibrator::estimate(const EstConf & estimationConfig, CalibrationP
         logGroupDimsAndErrorNum();
       }
     }
+
+    getModel().updateCVIndices();
   }
 
   {
@@ -315,7 +334,7 @@ void AbstractCalibrator::estimate(const EstConf & estimationConfig, CalibrationP
     addFactors(estimationConfig, problem, logGroupDimsAndErrorNum);
   }
 
-  if(dimGroup0Observer.getCurrentValue() + dimGroup1Observer.getCurrentValue() == 0){
+  if(dimCalibObserver.getCurrentValue() + dimStateObserver.getCurrentValue() == 0){
     LOG(WARNING) << "Not estimating because there are no variables to optimize!";
   } else if (numErrorTermsObserver.getCurrentValue() == 0){
     LOG(WARNING) << "Not estimating because there are no error terms!";

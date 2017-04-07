@@ -38,7 +38,8 @@ namespace aslam {
                              const aslam::backend::RotationExpression& R_i_m,
                              const aslam::backend::EuclideanExpression& g_m,
                              const aslam::backend::EuclideanExpression& bias,
-                             const Input& am, const Covariance& sigma2);
+                             const Input& am, const Covariance& sigma2,
+                             const ErrorTermGroupReference & etgr = ErrorTermGroupReference());
 
       /// Copy constructor
       ErrorTermAccelerometer(const ErrorTermAccelerometer& other) = default;
