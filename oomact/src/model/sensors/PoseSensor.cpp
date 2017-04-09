@@ -18,6 +18,16 @@
 namespace aslam {
 namespace calibration {
 
+
+void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t) {
+  PoseMeasurement p;
+  p.t_m_mf = trans;
+  p.q_m_f = quat;
+  p.sigma2_t_m_mf = getCovPosition().getValue();
+  p.sigma2_q_m_f = getCovOrientation().getValue();
+  addMeasurement(p, t);
+}
+
 void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t)
 {
   measurements->push_back({t, pose});

@@ -18,6 +18,7 @@ class PoseSensor : public AbstractPoseSensor {
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
   void addMeasurement(const PoseMeasurement& pose, const Timestamp t);
+  void addMeasurement(const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, const Timestamp t);
 
   virtual bool hasMeasurements() const override;
   virtual const PoseMeasurements & getMeasurements() const override;
