@@ -37,8 +37,8 @@ class MockMotionCaptureSource : public MotionCaptureSource {
  public:
   MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
  private:
-  virtual std::vector<PoseStamped> getPoses(sm::timing::NsecTime from, sm::timing::NsecTime till) const override {
-    sm::timing::NsecTime inc = 1e7;
+  virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override {
+    Timestamp inc(1e-2);
     std::vector<PoseStamped> poses;
     for(auto t = from; t <= till + inc; t += inc){
       poses.resize(poses.size() + 1);
