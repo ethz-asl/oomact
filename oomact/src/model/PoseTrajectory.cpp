@@ -33,7 +33,7 @@ namespace aslam {
 namespace calibration {
 
 
-Eigen::Vector4d bestQuat(const Eigen::Vector4d& pquat, const
+Eigen::Vector4d negateQuatIfThatBringsItCloser(const Eigen::Vector4d& pquat, const
     Eigen::Vector4d& cquat) {
   if ((pquat + cquat).norm() < (pquat - cquat).norm())
     return -cquat;
@@ -89,7 +89,7 @@ void PoseTrajectory::writeConfig(std::ostream& out) const {
 
 bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSensorI& poseSensor, const Frame & referenceFrame) {
   if(!poseSensor.hasMeasurements()){
-    LOG(WARNING) << "Motion sensor " << poseSensor.getSensor() << " has no measurements! Cannot initialize based on it!";
+    LOG(WARNING) << "Pose sensor " << poseSensor.getSensor() << " has no measurements! Cannot initialize based on it!";
     return false;
   }
 
@@ -111,19 +111,19 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   rotPoses.reserve(numMeasurements);
 
   auto & trajectoryFrame = trajectory.getCarrier().getFrame();
-  auto tApp = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
+  auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
 
   NsecTime currentDelay = poseSensor.getSensor().hasDelay() ? NsecTime(poseSensor.getSensor().getDelay()) : 0L;
 
   for (auto it = measurements.cbegin(); it != measurements.cend(); ++it) {
     NsecTime timestamp = it->first - currentDelay;
     if(effectiveBatchInterval.contains(timestamp)){
-      sm::kinematics::Transformation m_f(it->second.q_m_f, it->second.t_m_mf);
-      m_f = m_f * tApp;
+      sm::kinematics::Transformation T_measured(it->second.q_m_f, it->second.t_m_mf);
+      T_measured = T_measured * T_sens_traj;
 
       timestamps.push_back(timestamp);
-      rotPoses.push_back(rotPoses.empty() ? m_f.q() : bestQuat(rotPoses.back(), m_f.q()));
-      transPoses.push_back(m_f.t());
+      rotPoses.push_back(rotPoses.empty() ? T_measured.q() : negateQuatIfThatBringsItCloser(rotPoses.back(), T_measured.q()));
+      transPoses.push_back(T_measured.t());
     }
   }
 
@@ -258,7 +258,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
     timestampsWheelSpeeds.push_back(timestamp);
 
     // Best quaternion correction
-    auto q_m_r_k = bestQuat(q_m_r_km1, T_m_r_k.q());
+    auto q_m_r_k = negateQuatIfThatBringsItCloser(q_m_r_km1, T_m_r_k.q());
     transPoses.push_back(T_m_r_k.t());
     rotPoses.push_back(q_m_r_k);
   }
@@ -314,10 +314,10 @@ bool PoseTrajectory::initState(CalibratorI& calib) {
 void PoseTrajectory::addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) {
   const bool stateActive = estimate && !assumeStatic && stateActivator.isActive(*this);
   if(!estimate){
-    LOG(WARNING) << "Not going to estimate the base trajectory!";
+    LOG(WARNING) << "Not going to estimate " << getName() << "!";
   }
   if(stateActive){
-    LOG(INFO) << "Activating base trajectory spline.";
+    LOG(INFO) << "Activating " << getName() << "'s splines.";
   }
   CHECK(state_);
   state_->addToProblem(stateActive, problem);
