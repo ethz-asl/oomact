@@ -3,10 +3,15 @@
 namespace aslam {
 namespace calibration {
 
+
+void aslam::calibration::ErrorTermStatistics::add(double squaredError) {
+  cost += squaredError;
+  counter++;
+}
+
 bool ErrorTermStatistics::add(aslam::backend::ErrorTerm& e, bool ignoreInactive) {
   if (ignoreInactive || errorTermIsActive(e)) {
-    cost += evaluateError ? e.evaluateError() : e.getSquaredError();
-    counter++;
+    add(evaluateError ? e.evaluateError() : e.getSquaredError());
     return true;
   } else {
     inactiveCounter++;

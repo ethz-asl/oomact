@@ -20,6 +20,7 @@ class ErrorTermStatistics {
     return add(*e, ignoreInactive);
   }
   bool add(aslam::backend::ErrorTerm& e, bool ignoreInactive = true);
+  void add(double squaredError);
 
   std::ostream& printInto(std::ostream & out) const;
   std::ostream& printShortInto(std::ostream & out) const;
