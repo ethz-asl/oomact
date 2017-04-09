@@ -251,7 +251,7 @@ void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  cu
         LOG(WARNING) << "Last update was a regression: " <<  a.previousLowestCost << " -> " << a.currentCost;
       }
       if(getOptions().getVerbose() && (printRegessionErrorStatistics || !wasRegression)){
-        printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated " << a.previousLowestCost << " -> " << a.currentCost << (wasRegression ? " (REGRESSION)" : "") << ":\n");
+        printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated: previous - current = " << a.previousLowestCost << " - " << a.currentCost << " = " << (a.previousLowestCost - a.currentCost) << (wasRegression ? " (REGRESSION)" : "") << ":\n");
       }
     });
   callbackRegistry.add<aslam::backend::callback::event::DESIGN_VARIABLES_UPDATED>([this]() {
