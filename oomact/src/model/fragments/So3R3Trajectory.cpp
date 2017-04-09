@@ -10,6 +10,7 @@
 #include "aslam/calibration/tools/SplineWriter.h"
 #include "aslam/calibration/algo/OptimizationProblemSpline.h"
 #include <aslam/calibration/DesignVariableReceiver.hpp>
+#include <aslam/calibration/tools/ErrorTermStatistics.h>
 
 using aslam::backend::VectorExpression;
 using aslam::backend::ErrorTermReceiver;
@@ -103,6 +104,17 @@ void So3R3Trajectory::fitSplines(const Interval& effectiveBatchInterval, const s
 
   bsplines::BSplineFitter<TranslationSpline>::initUniformSpline(getTranslationSpline(), effectiveBatchInterval.start, effectiveBatchInterval.end, timestamps, transPoses, numSegments, transSplineLambda);
   bsplines::BSplineFitter<RotationSpline>::initUniformSpline(getRotationSpline(), effectiveBatchInterval.start, effectiveBatchInterval.end, timestamps, rotPoses, numSegments, rotSplineLambda);
+
+  if(VLOG_IS_ON(1)){
+    LOG(INFO) << "Computing initial offset statistics.";
+    ErrorTermStatistics statRot(getCarrier().getName() + "_rot[deg]"), statTrans(getCarrier().getName() + "_trans[1]");
+    for(size_t i = 0; i < timestamps.size(); i++){
+      statTrans.add(pow((getTranslationSpline().getEvaluatorAt<0>(timestamps[i]).eval() - transPoses[i]).norm(), 2));
+      statRot.add(sm::kinematics::rad2deg(pow(sm::kinematics::quat2AxisAngle(sm::kinematics::qplus(getRotationSpline().getEvaluatorAt<0>(timestamps[i]).eval(), sm::kinematics::quatInv(rotPoses[i]))).norm(), 2)));
+    }
+    statTrans.printInto(LOG(INFO));
+    statRot.printInto(LOG(INFO));
+  }
 }
 
 void So3R3Trajectory::initSplinesConstant(const Interval& effectiveBatchInterval, const size_t numMeasurements, const Eigen::Vector3d & transPose, const Eigen::Vector4d & rotPose) {
