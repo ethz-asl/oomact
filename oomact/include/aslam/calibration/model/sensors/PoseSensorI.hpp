@@ -20,6 +20,8 @@ class PoseSensorI {
   virtual const PoseMeasurements & getMeasurements() const = 0;
   virtual PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const = 0;
 
+  virtual const Frame & getTargetFrame() const = 0;
+
   virtual Sensor & getSensor() = 0;
   virtual const Sensor & getSensor() const = 0;
 };

@@ -87,7 +87,7 @@ void PoseTrajectory::writeConfig(std::ostream& out) const {
   }
 }
 
-bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSensorI& poseSensor) {
+bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSensorI& poseSensor, const Frame & referenceFrame) {
   if(!poseSensor.hasMeasurements()){
     LOG(WARNING) << "Motion sensor " << poseSensor.getSensor() << " has no measurements! Cannot initialize based on it!";
     return false;
@@ -99,6 +99,9 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   SM_ASSERT_TRUE(Exception, effectiveBatchInterval, "effectiveBatchInterval must be set");
 
   const size_t numMeasurements = measurements.size();
+
+  CHECK_EQ(poseSensor.getTargetFrame(), referenceFrame); //TODO Support trajectory initializing with more remote pose sensors
+
   LOG(INFO) << "Initializing " << getObjectName(trajectory.getCarrier()) << " with "<< numMeasurements << " poses from " << poseSensor.getSensor().getName();
   std::vector<NsecTime> timestamps;
   timestamps.reserve(numMeasurements);
@@ -298,7 +301,7 @@ bool PoseTrajectory::initState(CalibratorI& calib) {
   } else {
     if(initWithPoseMeasurements){
       if(poseSensor.isResolved()){
-        return initSplines(calib, getCurrentTrajectory(), poseSensor);
+        return initSplines(calib, getCurrentTrajectory(), poseSensor, getReferenceFrame());
       } else {
         throw std::runtime_error(getName() + ".initWithPoseMeasurements is true but " + poseSensor.toString() + " is not resolved!");
       }

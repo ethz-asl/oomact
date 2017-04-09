@@ -55,6 +55,10 @@ class MotionCaptureSensor : public AbstractPoseSensor {
   const PoseMeasurements & getMeasurements() const;
   PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const;
 
+  const Frame& getTargetFrame() const override {
+    return motionCaptureSystem.getParentFrame();
+  }
+
  private:
   MotionCaptureSystem & motionCaptureSystem;
   std::shared_ptr<MotionCaptureSource> motionCaptureSource;

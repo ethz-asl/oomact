@@ -30,6 +30,9 @@ class PoseSensor : public AbstractPoseSensor {
     return covPosition;
   }
 
+  const Frame& getTargetFrame() const override {
+    return targetFrame;
+  }
  private:
   std::shared_ptr<PoseMeasurements> measurements;
 
