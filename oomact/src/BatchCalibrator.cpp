@@ -151,8 +151,11 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     estimate(estConf, problem, problem, [&](){
       boost::shared_ptr<backend::LinearSystemSolver> linearSystemSolver(new aslam::backend::SparseCholeskyLinearSystemSolver());
       linearSystemSolver->setAcceptConstantErrorTerms(options_.getAcceptConstantErrorTerms());
+
       aslam::backend::Optimizer2 opt(sm::BoostPropertyTree(), linearSystemSolver, boost::make_shared<backend::LevenbergMarquardtTrustRegionPolicy>(100));
-      updateOptimizerInspector(problem, false, [](std::ostream &){}, opt.callback());
+      updateOptimizerInspector(problem, false, [&](std::ostream &out){
+          out << "The Jacobian matrix is: " << linearSystemSolver->JRows()<< " x " << linearSystemSolver->JCols();
+      }, opt.callback());
       opt.setProblem(problem.getProblemSp());
       opt.options().verbose = false;
 //      opt.options().maxIterations = _options.maxIterations;
