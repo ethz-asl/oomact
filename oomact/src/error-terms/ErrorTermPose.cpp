@@ -44,12 +44,18 @@ namespace aslam {
       setDesignVariablesIterator(dv.begin(), dv.end());
     }
 
-    ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement& pm, ErrorTermGroupReference etgr) :
-      ErrorTermPose(T, pm.t_m_mf, pm.q_m_f, Covariance::Identity(), etgr) {
+    ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const Eigen::Vector3d & t,
+        const Eigen::Vector4d & q, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_q, ErrorTermGroupReference etgr):
+        ErrorTermPose(T, t, q, Covariance::Identity(), etgr) {
       Covariance Q = Covariance::Zero();
-      Q.topLeftCorner<3, 3>() = pm.sigma2_t_m_mf;
-      Q.bottomRightCorner<3, 3>() = pm.sigma2_q_m_f;
+      Q.topLeftCorner<3, 3>() = cov_t;
+      Q.bottomRightCorner<3, 3>() = cov_q;
       setInvR(Q.inverse());
+    }
+
+
+    ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement& pm, ErrorTermGroupReference etgr) :
+      ErrorTermPose(T, pm.t_m_mf, pm.q_m_f, pm.sigma2_t_m_mf, pm.sigma2_q_m_f, etgr) {
     }
 
     sm::kinematics::RotationVector rotVec;
