@@ -43,9 +43,11 @@ class PoseSensor : public AbstractPoseSensor {
 
   const Frame& targetFrame;
 
+  bool absoluteMeasurements_;
+
   bool isOutlier(const PoseMeasurement & p) const;
  protected:
-   void writeConfig(std::ostream & out) const override;
+  void writeConfig(std::ostream & out) const override;
 };
 
 } /* namespace calibration */

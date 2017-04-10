@@ -41,8 +41,8 @@ PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueSto
   AbstractPoseSensor(model, name, config),
   covPosition(getMyConfig().getChild("covPosition"), 3),
   covOrientation(getMyConfig().getChild("covOrientation"), 3),
-  targetFrame(getModel().getFrame(getMyConfig().getString("targetFrame")))
-
+  targetFrame(getModel().getFrame(getMyConfig().getString("targetFrame"))),
+  absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
 {
   if(isUsed()) {
     measurements = std::make_shared<PoseMeasurements>();
@@ -77,10 +77,38 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     throw std::runtime_error("Delay already out of bounds!");
   }
 
+  const PoseMeasurement * lastPoseMeasurement = nullptr;
+  aslam::backend::TransformationExpression last_T_m_s;
   for (auto & m : *measurements) {
     Timestamp timestamp = m.first;
-
     auto & poseMeasurement = m.second;
+
+    if(!absoluteMeasurements_){
+      if(isOutlier(poseMeasurement)){
+        LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
+        lastPoseMeasurement = nullptr;
+        continue;
+      }
+      if(uLow > timestamp || uUpp < timestamp){
+        LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
+        continue;
+      }
+      aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
+      boost::shared_ptr<ErrorTermPose> e_pose;
+      if(lastPoseMeasurement == nullptr){
+//        e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, etgr)); // TODO maybe support first absolute measurement? HANDLE outlier right then..
+//        es.add(timestamp, e_pose, false);
+      } else {
+        sm::kinematics::Transformation deltaT
+          = sm::kinematics::Transformation(lastPoseMeasurement->q_m_f, lastPoseMeasurement->t_m_mf).inverse()
+          * sm::kinematics::Transformation(poseMeasurement.q_m_f, poseMeasurement.t_m_mf);
+        e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), poseMeasurement.sigma2_t_m_mf, poseMeasurement.sigma2_t_m_mf, etgr));
+        es.add(timestamp, e_pose, false);
+      }
+      lastPoseMeasurement = &poseMeasurement;
+      last_T_m_s = std::move(T_m_s);
+      continue;
+    }
 
     if(isOutlier(poseMeasurement)){
       LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
