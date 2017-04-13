@@ -21,6 +21,15 @@ class PoseSensor : public AbstractPoseSensor {
 
   virtual bool hasMeasurements() const override;
   virtual const PoseMeasurements & getMeasurements() const override;
+
+  const Covariance& getCovOrientation() const {
+    return covOrientation;
+  }
+
+  const Covariance& getCovPosition() const {
+    return covPosition;
+  }
+
  private:
   std::shared_ptr<PoseMeasurements> measurements;
 
