@@ -6,6 +6,14 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 add_definitions(-std=c++11 -Wall -Wextra)
 
+# enable C++11 support
+if(CMAKE_VERSION VERSION_LESS "3.1")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
+else()
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
+
 cs_add_library(${PROJECT_NAME}
   src/error-terms/ErrorTermWheel.cpp
   src/error-terms/ErrorTermWheelsZ.cpp
