@@ -1,4 +1,5 @@
 #include <glog/logging.h>
+#include <gflags/gflags.h>
 
 #include <sm/boost/null_deleter.hpp>
 
@@ -9,22 +10,6 @@
 #include <aslam/calibration/CalibratorI.hpp>
 
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"
-
-void setupGoogleStderrLogging(bool verbose){
-  google::SetStderrLogging(verbose ? google::INFO : google::WARNING);
-}
-
-void initGloogleLogging(unsigned verbosity) {
-  fLB::FLAGS_colorlogtostderr = true;
-  if(verbosity > 0){
-    fLI::FLAGS_v = verbosity - 1;
-  }
-  google::InitGoogleLogging("");
-
-  setupGoogleStderrLogging(verbosity > 0);
-
-  LOG(INFO) << "Set GLOG verbosity to " << fLI::FLAGS_v << ".";
-}
 
 using namespace aslam::calibration;
 class SimpleModelFrame : public Frame, public NamedMinimal {
@@ -53,8 +38,9 @@ class MockMotionCaptureSource : public MotionCaptureSource {
 };
 */
 
-int main(int, char **) {
-  initGloogleLogging(2);
+int main(int argc, char **argv) {
+  google::ParseCommandLineFlags(&argc, &argv, true);
+  google::InitGoogleLogging(argv[0]);
 
   //TODO read from file
   auto vs = ValueStoreRef::fromString(

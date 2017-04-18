@@ -25,6 +25,9 @@
    local-name: truncated_svd_solver
    uri: git@github.com:ethz-asl/truncated_svd_solver.git 
 - git:
+   local-name: gflags_catkin
+   uri: https://github.com/ethz-asl/gflags_catkin
+- git:
    local-name: glog_catkin
    uri: https://github.com/ethz-asl/glog_catkin
 - git:
