@@ -6,11 +6,11 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 add_definitions(-std=c++11 -Wall -Wextra)
 
-cs_add_executable(example1
+cs_add_executable(oomact_example1
   src/example1.cpp
 )
 
-cs_add_executable(example2
+cs_add_executable(oomact_example2
   src/example2.cpp
 )
 

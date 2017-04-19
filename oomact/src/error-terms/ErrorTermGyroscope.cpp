@@ -27,8 +27,9 @@ using namespace aslam::backend;
 
 namespace aslam {
   namespace calibration {
-    ErrorTermGyroscope::ErrorTermGyroscope(const EuclideanExpression& w_i_mi, const EuclideanExpression& bias, const Input& wm, const Covariance& sigma2) :
-        Parent(w_i_mi + bias, wm, sigma2)
+    ErrorTermGyroscope::ErrorTermGyroscope(const EuclideanExpression& w_i_mi, const EuclideanExpression& bias, const Input& wm, const Covariance& sigma2,
+                                           const ErrorTermGroupReference & etgr) :
+        Parent(w_i_mi + bias, wm, sigma2, etgr)
     {}
   }
 }

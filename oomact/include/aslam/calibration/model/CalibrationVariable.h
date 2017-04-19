@@ -50,6 +50,7 @@ class CalibrationVariable {
   virtual const std::string & getName() const = 0;
 
   virtual void updateStore() = 0;
+  virtual void resetToStore() = 0;
   virtual boost::shared_ptr<backend::ErrorTerm> createPriorErrorTerm() = 0;
 
   void printObservabilityBasisInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.obsBasis); }
@@ -69,7 +70,7 @@ class CalibrationVariable {
   int getIndex() const { return _index; }
   Eigen::MatrixXd getParams() const;
   virtual Eigen::VectorXd getMinimalComponents() const = 0;
-  virtual void setMinimalComponents(Eigen::VectorXd v) = 0;
+  virtual void setMinimalComponents(const Eigen::VectorXd & v) = 0;
   virtual Eigen::VectorXd getDisplacementToLastUpdateValue() const = 0;
   virtual double getDistanceToLastUpdateValue() const { return getDisplacementToLastUpdateValue().norm(); }
   virtual bool isUpdateable() const { return false; };
@@ -151,9 +152,10 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
  public:
   CalibrationDesignVariable(const std::string & name, ValueStoreRef valueStore) :
     DVLoadTraits<DesignVariable_>(), DesignVariable_(DVLoadTraits<DesignVariable_>::load(valueStore)),  name_(name), covariance_(valueStore, getDimension()),
-    upstreamValue_(getParams())
+    upstreamValue_(getParams()),
+    upstreamValueStore_(valueStore)
   {
-    estimate = valueStore.getBool("estimate", true);
+    estimateVh_ = valueStore.getBool("estimate", true);
   }
 
   virtual ~CalibrationDesignVariable(){}
@@ -170,7 +172,7 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
     return ParamsPackTraits<DesignVariable_>::pack(getParams());
   }
 
-  void setMinimalComponents(Eigen::VectorXd v) override {
+  void setMinimalComponents(const Eigen::VectorXd & v) override {
     Eigen::MatrixXd val = internal::toMatrixXd(ParamsPackTraits<DesignVariable_>::unpack(v));
     DesignVariable_::setParameters(val);
   }
@@ -179,6 +181,14 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
     auto v = getParams();
     DVLoadTraits<DesignVariable_>::store(v);
     upstreamValue_ = v;
+  }
+
+  virtual void resetToStore() override {
+    Eigen::MatrixXd params;
+    DesignVariable_(DVLoadTraits<DesignVariable_>::load(upstreamValueStore_)).aslam::backend::DesignVariable::getParameters(params);
+    DesignVariable_::setParameters(params);
+    upstreamValue_ = params;
+    covariance_ = Covariance(upstreamValueStore_, getDimension());
   }
 
   Eigen::VectorXd getDisplacementToLastUpdateValue() const override {
@@ -191,7 +201,7 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
     return DVLoadTraits<DesignVariable_>::isUpdateable();
   }
 
-  bool isToBeEstimated() const override { return estimate.get(); }
+  bool isToBeEstimated() const override { return estimateVh_.get(); }
   bool isActivated() const override { return DesignVariable_::isActive(); }
 
   virtual Eigen::MatrixXd getPriorCovarianceSqrt() const {
@@ -204,7 +214,8 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
   std::string name_;
   Covariance covariance_;
   Eigen::MatrixXd upstreamValue_;
-  sm::value_store::ValueHandle<bool> estimate;
+  sm::value_store::ValueHandle<bool> estimateVh_;
+  ValueStoreRef upstreamValueStore_;
 };
 
 

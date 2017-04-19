@@ -30,9 +30,9 @@ void openStream(std::ofstream & outputFile, std::string pathPrefix);
 void writeToFile(const std::string & fileName, std::function<void(std::ostream &o)> writer);
 void writeStringToFile(const std::string & fileName, const std::string & content);
 
-void createDirs(const std::string & path);
+void createDirs(const std::string & path, bool ignoreErrors = false);
 
-boost::shared_ptr<aslam::backend::MEstimator> getMestimator(const std::string & name, const sm::value_store::ValueStoreRef config);
+boost::shared_ptr<aslam::backend::MEstimator> getMestimator(const std::string & name, const sm::value_store::ValueStoreRef config, int dim = -1);
 
 }
 }

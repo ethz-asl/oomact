@@ -17,7 +17,9 @@ typedef aslam::backend::GenericScalar<Timestamp> TimeDesignVariable;
 template <typename DesignVariable_, typename Bound>
 class BoundedCalibrationVariable;
 typedef BoundedCalibrationVariable<TimeDesignVariable, Timestamp> TimeDesignVariableCv;
-class Sensor;
+
+class Module;
+class DelayCv;
 
 struct BoundedTimeExpression {
   backend::GenericScalarExpression<Timestamp> timestampExpresion;
@@ -45,7 +47,8 @@ struct Interval {
 
   bool contains(Timestamp t, const TimeDesignVariableCv & delay) const;
   bool contains(const BoundedTimeExpression & t) const;
-  bool contains(Timestamp t, const Sensor & sensor) const;
+  bool containsModule(Timestamp t, const Module & sensor) const;
+  bool contains(Timestamp t, const DelayCv & sensor) const;
 
   Timestamp getElapsedTime() const {
     return end - start;

@@ -42,8 +42,16 @@ namespace aslam {
           const aslam::backend::TransformationExpression& T,
           const Eigen::Vector3d & t,
           const Eigen::Vector4d & q,
-          const Covariance& sigma2,
-          ErrorTermGroupReference r);
+          const Covariance& cov,
+          ErrorTermGroupReference etgr);
+
+      ErrorTermPose(
+          const aslam::backend::TransformationExpression& T,
+          const Eigen::Vector3d & t,
+          const Eigen::Vector4d & q,
+          const Eigen::Matrix3d & cov_t,
+          const Eigen::Matrix3d & cov_q,
+          ErrorTermGroupReference etgr);
 
       ErrorTermPose(
           const aslam::backend::TransformationExpression& T, const PoseMeasurement & pm, ErrorTermGroupReference etgr

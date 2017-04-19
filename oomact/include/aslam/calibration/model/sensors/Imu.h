@@ -38,6 +38,7 @@ class Bias : public StateCarrier, public NamedMinimal {
 
   void initState(CalibratorI & calib);
   void addToBatch(bool stateActive, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
+  void registerCalibrationVariables(Model & model);
  private:
   EuclideanPointCvSp biasVector;
   aslam::backend::EuclideanExpression biasVectorExpression;
@@ -77,6 +78,8 @@ class Imu : public Sensor, public StateCarrier {
 
   Imu(Model & model, const std::string & name, sm::value_store::ValueStoreRef config);
 
+  void registerWithModel() override;
+
   void clearMeasurements() override;
   void addAccelerometerMeasurement(CalibratorI & calib, const AccelerometerMeasurement& data, Timestamp timestamp) const;
   void addGyroscopeMeasurement(CalibratorI & calib, const GyroscopeMeasurement& data, Timestamp timestamp) const;
@@ -95,6 +98,7 @@ class Imu : public Sensor, public StateCarrier {
  private:
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, backend::ErrorTermReceiver & errorTermReceiver, bool observeOnly) const override;
   std::shared_ptr<Measurements> measurements_;
+  const bool useAcc_, useGyro_;
 
   /// Variance for Accelerometer X measurements
   double accXVariance;

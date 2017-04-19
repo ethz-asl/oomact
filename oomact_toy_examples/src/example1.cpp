@@ -9,23 +9,6 @@
 
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"
 
-
-void setupGoogleStderrLogging(bool verbose){
-  google::SetStderrLogging(verbose ? google::INFO : google::WARNING);
-}
-
-void initGloogleLogging(unsigned verbosity) {
-  fLB::FLAGS_colorlogtostderr = true;
-  if(verbosity > 0){
-    fLI::FLAGS_v = verbosity - 1;
-  }
-  google::InitGoogleLogging("");
-
-  setupGoogleStderrLogging(verbosity > 0);
-
-  LOG(INFO) << "Set GLOG verbosity to " << fLI::FLAGS_v << ".";
-}
-
 using namespace aslam::calibration;
 class SimpleModelFrame : public Frame, public NamedMinimal {
   using NamedMinimal::NamedMinimal;
@@ -37,8 +20,8 @@ class MockMotionCaptureSource : public MotionCaptureSource {
  public:
   MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
  private:
-  virtual std::vector<PoseStamped> getPoses(sm::timing::NsecTime from, sm::timing::NsecTime till) const override {
-    sm::timing::NsecTime inc = 1e7;
+  virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override {
+    Timestamp inc(1e-2);
     std::vector<PoseStamped> poses;
     for(auto t = from; t <= till + inc; t += inc){
       poses.resize(poses.size() + 1);
@@ -51,8 +34,9 @@ class MockMotionCaptureSource : public MotionCaptureSource {
   std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
 };
 
-int main(int, char **) {
-  initGloogleLogging(2);
+int main(int argc, char **argv) {
+  google::ParseCommandLineFlags(&argc, &argv, true);
+  google::InitGoogleLogging(argv[0]);
 
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
@@ -85,6 +69,7 @@ int main(int, char **) {
   mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcs, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
+      "acceptConstantErrorTerms=true\n"
       "timeBaseSensor=a\n"
     );
 

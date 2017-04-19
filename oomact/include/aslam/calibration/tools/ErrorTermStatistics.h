@@ -20,6 +20,7 @@ class ErrorTermStatistics {
     return add(*e, ignoreInactive);
   }
   bool add(aslam::backend::ErrorTerm& e, bool ignoreInactive = true);
+  void add(double squaredError);
 
   std::ostream& printInto(std::ostream & out) const;
   std::ostream& printShortInto(std::ostream & out) const;
@@ -40,9 +41,18 @@ class ErrorTermStatistics {
     return name;
   }
 
+  void skip() {
+    skipCounter ++;
+  }
+
+  size_t getSkipCount() const {
+    return skipCounter;
+  }
+
  private:
   std::string name;
   size_t counter = 0;
+  size_t skipCounter = 0;
   size_t inactiveCounter = 0;
   double cost = 0;
   bool evaluateError;

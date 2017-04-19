@@ -19,10 +19,11 @@ using aslam::calibration::OptimizationProblem;
 namespace aslam {
 namespace calibration {
 
-class SimpleGravity : public Gravity, public Module {
+class SimpleGravity : public Gravity, public Module, public CalibratableMinimal {
  public:
   SimpleGravity(Model & model, ValueStoreRef vs) :
     Module(model, "Gravity", vs),
+    CalibratableMinimal(this),
     g_m(createCVIfUsed<ScalarCv>("magnitude", "m")),
     gravityVectorExpression(isUsed() ? aslam::backend::EuclideanExpression(Eigen::Vector3d::UnitZ().eval()) * g_m->toExpression() : aslam::backend::EuclideanExpression())
   {
@@ -41,9 +42,8 @@ class SimpleGravity : public Gravity, public Module {
   }
  protected:
   void setActive(bool spatial, bool /*temporal*/){
-//  TODO C USE this  const bool active = ec.getCalibrationActivator().isActive(imu) && ec.isSpatialActive() && imu.isToBeCalibrated() && !imu.isObserveOnly(); //TODO B this should be nicer (depend on Imu s)
-
-    g_m->setActive(spatial);
+//  TODO C USE this  const bool active = ec.getCalibrationActivator().isActive(imu); //TODO B this should be nicer (depend on Imu s)
+    g_m->setActive(isToBeCalibrated() && spatial);
   }
   virtual void writeConfig(std::ostream & out) const{
     out << (", " "g_m" "=") << g_m->getValue();

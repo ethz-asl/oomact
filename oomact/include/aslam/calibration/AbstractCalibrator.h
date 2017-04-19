@@ -20,13 +20,20 @@ class CalibrationProblem;
 class AbstractCalibratorOptions : public CalibratorOptionsI {
  public:
   AbstractCalibratorOptions(const sm::value_store::ValueStoreRef& config);
-  virtual ~AbstractCalibratorOptions() {}
+  virtual ~AbstractCalibratorOptions();
 
   double getSplineOutputSamplePeriod() const override {
     return splineOutputSamplePeriod;
   }
   bool getPredictResults() const override {
     return predictResults;
+  }
+
+  bool getVerbose() const override {
+    return verbose;
+  }
+  void setVerbose(bool verbose) override {
+    this->verbose = verbose;
   }
 
   bool getAcceptConstantErrorTerms() const override {
@@ -37,6 +44,7 @@ class AbstractCalibratorOptions : public CalibratorOptionsI {
   }
  private:
   bool predictResults;
+  bool verbose;
   bool acceptConstantErrorTerms;
   double splineOutputSamplePeriod;
 };
@@ -73,6 +81,7 @@ protected:
   void estimate(const EstConf & estimationConfig, CalibrationProblem & calibrationProblem, BatchStateReceiver & batchStateReceiver, std::function<void()> optimize);
   void printBatchErrorTermStatistics(const CalibrationProblem& batch, bool updateError, std::ostream& out);
   void updateOptimizerInspector(const CalibrationProblem &  currentBatch, bool printRegessionErrorStatistics, std::function<void(std::ostream & o)> printOptimizationState, backend::callback::Registry & callbackRegistry);
+  virtual void addFactors(const EstConf& estimationConfig, backend::ErrorTermReceiver & problem, std::function<void()> statusCallback);
 
   Timestamp _lastTimestamp = -1L;
   Timestamp _lowestTimestamp = -1L;
@@ -96,9 +105,10 @@ protected:
   void setCalibrationVariablesActivity(const EstConf& ec);
 
   virtual bool handleNewTimeBaseTimestamp(Timestamp t) = 0;
-  virtual void addFactors(const EstConf& estimationConfig, backend::ErrorTermReceiver & problem, std::function<void()> statusCallback);
   virtual void clearAfterEstimation();
 };
+
+extern template class ModuleLink<Sensor>;
 
 } /* namespace calibration */
 } /* namespace aslam */

@@ -19,7 +19,7 @@ using backend::ErrorTermReceiver;
 class CalibratorI;
 class DesignVariableReceiver;
 class BatchStateReceiver;
-
+class Sensor;
 class Model;
 
 class Named : public Printable {
@@ -153,6 +153,9 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
   virtual void clearMeasurements();
   virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
   virtual void preProcessNewWindow(CalibratorI & calib);
+
+  virtual void estimatesUpdated(CalibratorI & calib) const;
+
   virtual bool hasTooFewMeasurements() const;
 
   void writeInfo(std::ostream & out) const;
@@ -261,8 +264,8 @@ struct ModuleRegistry {
 };
 
 struct ModuleLinkBase : public NamedMinimal {
-  ModuleLinkBase(Module & owner, const std::string & name, bool required = false);
-  ModuleLinkBase(const std::string & name, const std::string targetUid, bool required = false);
+  ModuleLinkBase(Module & owner, const std::string & linkName, bool required = false);
+  ModuleLinkBase(const std::string & ownerName, const std::string & linkName, const std::string targetUid, bool required = false);
   ModuleLinkBase(const ModuleLinkBase &) = delete;
 
   virtual void resolve(const ModuleRegistry & reg) = 0;
@@ -315,14 +318,14 @@ struct ModuleLink : public ModuleLinkBase {
 } /* namespace aslam */
 
 namespace std {
-  template <typename> class hash;
-  template <>
-  struct hash<std::reference_wrapper<aslam::calibration::Activatable> > {
-   public :
-       size_t operator()(const std::reference_wrapper<aslam::calibration::Activatable> & ref) const {
-         return hash<size_t>()(reinterpret_cast<size_t>(&ref));
-       }
-  };
+template <typename> class hash;
+template <>
+struct hash<std::reference_wrapper<aslam::calibration::Activatable> > {
+ public :
+  size_t operator()(const std::reference_wrapper<aslam::calibration::Activatable> & ref) const {
+    return hash<size_t>()(reinterpret_cast<size_t>(&ref));
+  }
+};
 };
 
 #endif /* INCLUDE_ASLAM_CALIBRATION_MODULE_H_ */
