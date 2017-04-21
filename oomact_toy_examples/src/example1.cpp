@@ -47,18 +47,11 @@ int main(int argc, char **argv) {
     );
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   MotionCaptureSystem observer(m, "o", vs);
-  observer.registerWithModel();
   MotionCaptureSensor mcSensorA(observer, "a", vs);
-  mcSensorA.registerWithModel();
   MotionCaptureSensor mcSensorB(observer, "b", vs);
-  mcSensorB.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks();
+  m.addModulesAndInit(observer,mcSensorA, mcSensorB, traj);
 
   MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
     p.q = sm::kinematics::quatIdentity();

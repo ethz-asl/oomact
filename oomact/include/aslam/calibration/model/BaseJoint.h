@@ -46,7 +46,6 @@ class BaseJoint : public Module, public StateCarrier, public ObserverMinimal, pu
 
   aslam::backend::EuclideanExpression getTranslationExpression() const;
 
-  void registerWithModel() override;
   bool initState(CalibratorI & calib) override;
   void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) override;
 
@@ -59,6 +58,7 @@ class BaseJoint : public Module, public StateCarrier, public ObserverMinimal, pu
  protected:
   void writeConfig(std::ostream& out) const override;
   void setActive(bool spatial, bool temporal) override;
+  void registerWithModel() override;
 
  private:
   const bool estimatePosition = false;

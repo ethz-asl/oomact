@@ -107,22 +107,19 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
     return it == id2moduleMap.end() ? nullptr : &it->second.get();
   }
 
-  virtual void resolveAllLinks();
+  virtual void init();
 
   const std::string& getSensorName(SensorId id) const;
 
-  void registerSensor(Sensor& s);
-
-  void registerJoint(Joint & s){
-    joints.emplace_back(s);
-  }
-  virtual void registerModule(Module & m){
-    modules.emplace_back(m);
-    m.setUid(m.getName()); //TODO A ensure uniqueness for modules uids!!
-    id2moduleMap.emplace(m.getUid(), m);
+  void add(Module & module);
+  template <typename Module_, typename ... Modules_>
+  void addModulesAndInit(Module_ & module, Modules_ & ... modules){
+    add(static_cast<Module&>(module));
+    addModulesAndInit(modules...);
   }
 
   void addCalibrationVariables(std::initializer_list<boost::shared_ptr<CalibrationVariable>> cvs);
+
   void updateCVIndices();
 
   const std::string resolveConfigPath(const std::string & path) const;
@@ -152,7 +149,13 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 
  protected:
   std::vector<boost::shared_ptr<CalibrationVariable>> calibrationVariables;
+  virtual void registerModule(Module & m);
  private:
+  void registerSensor(Sensor& s);
+  void registerJoint(Joint & j);
+
+  void addModulesAndInit();
+
   std::vector<std::unique_ptr<Named>> ownedNOs;
 
   const std::shared_ptr<ConfigPathResolver> configPathResolver;

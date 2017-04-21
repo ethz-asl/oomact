@@ -129,14 +129,14 @@ ModelAtTime FrameGraphModel::getAtTime(const BoundedTimeExpression& boundedTimeE
 
 void FrameGraphModel::registerModule(Module& m) {
   Model::registerModule(m);
-  if(auto trayPtr = m.ptrAs<PoseTrajectory>()){
-    frameGraph_->add(&trayPtr->getFrame(), &trayPtr->getReferenceFrame(), trayPtr);
+  if(auto trajPtr = m.ptrAs<PoseTrajectory>()){
+    frameGraph_->add(&trajPtr->getFrame(), &trajPtr->getReferenceFrame(), trajPtr);
   }
 }
 
-void FrameGraphModel::resolveAllLinks() {
+void FrameGraphModel::init() {
   frameGraph_->init();
-  Model::resolveAllLinks();
+  Model::init();
 }
 
 } /* namespace calibration */

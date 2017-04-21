@@ -43,12 +43,9 @@ void MotionCaptureSystem::writeConfig(std::ostream& out) const {
 }
 
 void MotionCaptureSystem::registerWithModel() {
-  if(isUsed()){
-    getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
-  }
   Module::registerWithModel();
+  getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
 }
-
 
 void MotionCaptureSystem::setActive(bool spatial, bool temporal) {
   if(isUsed()){

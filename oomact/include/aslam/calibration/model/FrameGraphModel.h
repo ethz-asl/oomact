@@ -16,9 +16,10 @@ class FrameGraphModel : public Model {
   ModelAtTime getAtTime(sm::timing::NsecTime timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;
   ModelAtTime getAtTime(const BoundedTimeExpression & boundedTimeExpresion, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;
 
-  void registerModule(Module & m) override;
-  void resolveAllLinks() override;
+  void init() override;
 
+ protected:
+  void registerModule(Module & m) override;
  private:
   template <typename Time> friend class FrameGraphModelAtTimeImpl;
   std::unique_ptr<FrameGraph> frameGraph_;

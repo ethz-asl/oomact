@@ -42,12 +42,10 @@ bool Module::initState(CalibratorI& /*calib*/) {
 void Module::addToBatch(const Activator & /*stateActivator*/, BatchStateReceiver & /*batchStateReceiver*/, DesignVariableReceiver & /*problem*/) {
 }
 
-void Module::registerWithModel() { //TODO C add isRegistsered or better deduplicate with sensor!
-  if(isUsed()){
-    SM_ASSERT_TRUE(std::runtime_error, !isRegistered_, "Only register a module once! (name=" + name_ + ")");
-    model_.registerModule(*this);
-    isRegistered_ = true;
-  }
+void Module::registerWithModel() {
+  CHECK(isUsed());
+  SM_ASSERT_TRUE(std::runtime_error, !isRegistered_, "Only register a module once! (name=" + name_ + ")");
+  isRegistered_ = true;
 }
 
 void Module::clearMeasurements() {

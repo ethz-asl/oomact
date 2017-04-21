@@ -51,16 +51,10 @@ int main(int argc, char **argv) {
       );
 
   FrameGraphModel model(vs, nullptr, {&imu, &gps});
-
   PoseSensor rovioSensor(model, "rovio", vs);
-  rovioSensor.registerWithModel();
   PositionSensor gpsSensor(model, "gps", vs);
-  gpsSensor.registerWithModel();
-
   PoseTrajectory traj(model, "traj", vs);
-  traj.registerWithModel();
-
-  model.resolveAllLinks();
+  model.addModulesAndInit(rovioSensor, gpsSensor, traj);
 
 /* TODO: Create mock data for unit tests
     MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){

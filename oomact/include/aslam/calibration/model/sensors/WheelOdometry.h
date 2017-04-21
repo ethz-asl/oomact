@@ -16,7 +16,6 @@ class WheelOdometry : public Sensor {
 
   SensorType getType() const override { return SensorType::ODOMETRY; };
 
-  void registerWithModel() override;
 
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
   void clearMeasurements() override;
@@ -43,8 +42,9 @@ class WheelOdometry : public Sensor {
 
   bool hasTooFewMeasurements() const override;
  protected:
-  void setActive(bool spatial, bool temporal) override;
   void writeConfig(std::ostream& out) const override;
+  void registerWithModel() override;
+  void setActive(bool spatial, bool temporal) override;
 
  public:
   /// Axe length

@@ -145,8 +145,6 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
 
-  virtual void registerWithModel();
-
   virtual bool initState(CalibratorI & calib);
   virtual void setCalibrationActive(const EstConf & ec);
   virtual void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
@@ -201,27 +199,26 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
 
   bool shouldObserveOnly(const EstConf& ec) const;
 
-  void resolveLinks(ModuleRegistry & reg);
-
   bool operator == (const Module & other) const {
     return this == &other;
   }
  protected:
   virtual void writeConfig(std::ostream & out) const;
-
-#define MODULE_WRITE_PARAMETER(param) out << (", " + normalizeName(#param) + "=") << param;
+  virtual void registerWithModel();
 
   virtual void setActive(bool spatial, bool temporal);
   virtual bool isCalibrationIntended(const EstConf & ec) const;
 
+ private:
+  friend class Model;
+
   sm::value_store::ValueStoreRef myConfig;
 
- private:
+  void resolveLinks(ModuleRegistry & reg);
+
   virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
-  friend Model;
-  void setUid(const std::string& uid) {
-    uid_ = uid;
-  }
+  void setUid(const std::string& uid) { uid_ = uid; }
+
   Model & model_;
   const std::string name_;
   const bool used_ = false;

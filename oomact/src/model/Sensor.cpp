@@ -1,14 +1,15 @@
 #include <aslam/calibration/model/Sensor.hpp>
-#include <ostream>
-#include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
-#include <aslam/calibration/model/Model.h>
+#include <ostream>
 
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
+#include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
+#include <aslam/calibration/CommonTypes.hpp>
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/CalibratorI.hpp> //TODO A remove this and use frames instead!
 
 size_t std::hash < aslam::calibration::SensorType >::operator()(aslam::calibration::SensorType sensorType) const
@@ -88,11 +89,8 @@ void Sensor::writeConfig(std::ostream& out) const {
 }
 
 void Sensor::registerWithModel() {
-  if(isUsed()){
-    getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
-    getModel().registerSensor(*this);
-  }
   Module::registerWithModel();
+  getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
 }
 
 void Sensor::setActive(bool spatial, bool temporal){

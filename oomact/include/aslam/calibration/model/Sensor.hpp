@@ -27,7 +27,6 @@ class Sensor : public Module, public PoseCv, public DelayCv, public ObserverMini
   Sensor(Model & model, std::string name, sm::value_store::ValueStoreRef config);
   virtual ~Sensor();
 
-  void registerWithModel() override;
 
   BoundedTimeExpression getBoundedTimestampExpression(const CalibratorI& calib, Timestamp t) const;
   aslam::backend::TransformationExpression getTransformationExpressionToAtMeasurementTimestamp(const CalibratorI & calib, Timestamp t, const Frame & to, bool ignoreBounds = false) const;
@@ -63,7 +62,8 @@ class Sensor : public Module, public PoseCv, public DelayCv, public ObserverMini
  protected:
   const SensorId id;
   void writeConfig(std::ostream & out) const override;
-  virtual void setActive(bool spatial, bool temporal) override;
+  void registerWithModel() override;
+  void setActive(bool spatial, bool temporal) override;
 
   void setMEstimator(const boost::shared_ptr<aslam::backend::MEstimator>& mEstimator) {
     this->mEstimator = mEstimator;

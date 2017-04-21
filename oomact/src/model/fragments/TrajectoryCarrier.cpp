@@ -3,6 +3,7 @@
 #include <ostream>
 
 #include "aslam/calibration/model/Model.h"
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
 
 namespace aslam {

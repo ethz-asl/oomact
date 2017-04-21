@@ -35,28 +35,28 @@ namespace calibration {
 Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef config) :
     Sensor(model, name, config),
     measurements_(std::make_shared<Measurements>()),
-    useAcc_(myConfig.getBool("acc/used", true)),
-    useGyro_(myConfig.getBool("gyro/used", true)),
-    accBias(*this, "accBias", myConfig.getChild("acc")),
-    gyroBias(*this, "gyroBias", myConfig.getChild("gyro")),
-    minimalMeasurementsPerBatch(myConfig.getInt("minimalMeasurementsPerBatch", 100)),
-    inertiaFrame(getModel().getFrame(myConfig.getString("inertiaFrame")))
+    useAcc_(getMyConfig().getBool("acc/used", true)),
+    useGyro_(getMyConfig().getBool("gyro/used", true)),
+    accBias(*this, "accBias", getMyConfig().getChild("acc")),
+    gyroBias(*this, "gyroBias", getMyConfig().getChild("gyro")),
+    minimalMeasurementsPerBatch(getMyConfig().getInt("minimalMeasurementsPerBatch", 100)),
+    inertiaFrame(getModel().getFrame(getMyConfig().getString("inertiaFrame")))
 {
   if(isUsed()){
     SM_ASSERT_GE(std::runtime_error, minimalMeasurementsPerBatch, 0, "");
 
     if(useAcc_){
-      accXVariance = myConfig.getDouble("acc/noise/accXVariance");
-      accYVariance = myConfig.getDouble("acc/noise/accYVariance");
-      accZVariance = myConfig.getDouble("acc/noise/accZVariance");
-      accRandomWalk = myConfig.getDouble("acc/noise/accRandomWalk");
+      accXVariance = getMyConfig().getDouble("acc/noise/accXVariance");
+      accYVariance = getMyConfig().getDouble("acc/noise/accYVariance");
+      accZVariance = getMyConfig().getDouble("acc/noise/accZVariance");
+      accRandomWalk = getMyConfig().getDouble("acc/noise/accRandomWalk");
     }
 
     if(useGyro_){
-      gyroXVariance = myConfig.getDouble("gyro/noise/gyroXVariance");
-      gyroYVariance = myConfig.getDouble("gyro/noise/gyroYVariance");
-      gyroZVariance = myConfig.getDouble("gyro/noise/gyroZVariance");
-      gyroRandomWalk = myConfig.getDouble("gyro/noise/gyroRandomWalk");
+      gyroXVariance = getMyConfig().getDouble("gyro/noise/gyroXVariance");
+      gyroYVariance = getMyConfig().getDouble("gyro/noise/gyroYVariance");
+      gyroZVariance = getMyConfig().getDouble("gyro/noise/gyroZVariance");
+      gyroRandomWalk = getMyConfig().getDouble("gyro/noise/gyroRandomWalk");
     }
   }
 
@@ -64,13 +64,11 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
 }
 
 void Imu::registerWithModel() {
-  if(isUsed()){
-    if(useAcc_)
-      accBias.registerCalibrationVariables(getModel());
-    if(useGyro_)
-      gyroBias.registerCalibrationVariables(getModel());
-  }
   Sensor::registerWithModel();
+  if(useAcc_)
+    accBias.registerCalibrationVariables(getModel());
+  if(useGyro_)
+    gyroBias.registerCalibrationVariables(getModel());
 }
 
 Imu::~Imu() {
