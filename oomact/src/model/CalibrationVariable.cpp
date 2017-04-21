@@ -21,6 +21,21 @@ namespace calibration {
 
 const ErrorTermGroupReference CvPriorGroup = getErrorTermGroup("CvPrior");
 
+namespace internal {
+
+const std::vector<const char *> SingleComponent = {""};
+
+const std::vector<const char *> DVComponentNames<backend::EuclideanPoint>::value = {"x", "y", "z"};
+const std::vector<const char *> DVComponentNames<backend::RotationQuaternion>::value = {"roll", "pitch", "yaw"};
+
+void getPTVector(const std::vector<const char*>& componentNames, std::vector<ValueHandle<double> >& v, ValueStore& pt) {
+  v.resize(componentNames.size());
+  for (size_t i = 0; i < componentNames.size(); i++) {
+    v[i] = pt.getDouble(componentNames[i]);
+  }
+}
+
+}
 
 CalibrationVariable::~CalibrationVariable(){
 }
@@ -76,53 +91,109 @@ Eigen::MatrixXd CalibrationVariable::getParams() const {
   return params;
 }
 
-constexpr const char * DVComponentNames<backend::EuclideanPoint>::value[];
-constexpr const char * DVComponentNames<backend::RotationQuaternion>::value[];
-
-
 namespace internal {
-  Eigen::VectorXd loadPacked(std::vector<ValueHandle<double>> &vhs){
-    Eigen::VectorXd v(vhs.size());
-    int i = 0;
-    for(auto & vh : vhs){
-      v(i++) = vh.get();
-    }
-    return v;
+bool DVLoadTraitsBase::isUpdateable() const {
+  for (auto& v : vhs)
+    if (v.isUpdateable())
+      return true;
+  return false;
+}
+
+Eigen::VectorXd loadPacked(std::vector<ValueHandle<double>> &vhs){
+  Eigen::VectorXd v(vhs.size());
+  int i = 0;
+  for(auto & vh : vhs){
+    v(i++) = vh.get();
   }
-  void storePacked(std::vector<ValueHandle<double>> &vhs, const Eigen::VectorXd & vPacked){
-    int i = 0;
-    for(auto & vh : vhs){
-      if(vh.isUpdateable()){
-        vh.update(vPacked[i]);
-      }else{
-        LOG(WARNING) << "Trying to update a non updateable value handler." ;
-      }
-      i++;
+  return v;
+}
+void storePacked(std::vector<ValueHandle<double>> &vhs, const Eigen::VectorXd & vPacked){
+  int i = 0;
+  for(auto & vh : vhs){
+    if(vh.isUpdateable()){
+      vh.update(vPacked[i]);
+    }else{
+      LOG(WARNING) << "Trying to update a non updatable value handler." ;
     }
+    i++;
   }
 }
-//TODO B this is wrong: check that it is not used and remove or fix it.
-Eigen::Matrix3d pitchRollYawToMatrix(double roll, double pitch, double yaw){
-  return sm::kinematics::EulerAnglesYawPitchRoll().parametersToRotationMatrix({yaw, pitch, roll});
-}
-
-Eigen::Vector3d matrixToRollPitchYaw(const Eigen::Matrix3d & m){
-  Eigen::Vector3d v = sm::kinematics::EulerAnglesYawPitchRoll().rotationMatrixToParameters(m);
-  return Eigen::Vector3d(v(2), v(1), v(0));
-}
-
-std::function<Eigen::Matrix3d(double roll, double pitch, double yaw)> eulerToMatrix = &pitchRollYawToMatrix;
-std::function<Eigen::Vector3d(const Eigen::Matrix3d & m)> matrixToEuler = &matrixToRollPitchYaw;
-
 
 Eigen::Vector4d ParamsPackTraits<backend::RotationQuaternion>::unpack(const Eigen::VectorXd & v){
-  Eigen::Matrix3d M = eulerToMatrix(v(0), v(1), v(2));
-  return sm::kinematics::r2quat(M);
+  return sm::kinematics::axisAngle2quat(v);
 }
 
 Eigen::VectorXd ParamsPackTraits<backend::RotationQuaternion>::pack(const Eigen::VectorXd & v){
-  return matrixToEuler(sm::kinematics::quat2r(v));
+  return sm::kinematics::quat2AxisAngle(v);
 }
+
+
+class RotationQuaternionLoadImpl {
+ public:
+  virtual ~RotationQuaternionLoadImpl() = default;
+  virtual Eigen::Vector4d load(ValueStoreRef & vs) = 0;
+  virtual void store(const Eigen::Vector4d & v) = 0;
+  virtual bool isUpdateable() = 0;
+};
+
+class RotationQuaternionLoadImplQ : public RotationQuaternionLoadImpl, public internal::DVLoadTraitsBase {
+ public:
+  virtual ~RotationQuaternionLoadImplQ() = default;
+
+  static const ComponentNames quaternionComponents;
+
+  Eigen::Vector4d load(ValueStoreRef & vs) override {
+    getPTVector(quaternionComponents, vhs, vs);
+    return internal::loadPacked(vhs);
+  }
+  void store(const Eigen::Vector4d & v) override {
+    internal::storePacked(vhs, v);
+  }
+  bool isUpdateable() override {
+    return internal::DVLoadTraitsBase::isUpdateable();
+  }
+};
+const ComponentNames RotationQuaternionLoadImplQ::quaternionComponents = {"i", "j", "k", "w"};
+
+class RotationQuaternionLoadImplRPY : public RotationQuaternionLoadImpl, public internal::DVLoadTraitsBase {
+ public:
+  virtual ~RotationQuaternionLoadImplRPY() = default;
+
+  Eigen::Vector4d load(ValueStoreRef & vs) override {
+    getPTVector<backend::RotationQuaternion>(vhs, vs);
+    return ParamsPackTraits<backend::RotationQuaternion>::unpack(internal::loadPacked(vhs));
+  }
+  void store(const Eigen::Vector4d & v) override {
+    internal::storePacked(vhs, ParamsPackTraits<backend::RotationQuaternion>::pack(v));
+  }
+  bool isUpdateable() override {
+    return internal::DVLoadTraitsBase::isUpdateable();
+  }
+};
+
+DVLoadTraits<backend::RotationQuaternion>::DVLoadTraits() {
+}
+DVLoadTraits<backend::RotationQuaternion>::~DVLoadTraits() {
+}
+Eigen::Vector4d DVLoadTraits<backend::RotationQuaternion>::load(ValueStoreRef & vs){
+  if(!impl){
+    if (vs.hasKey("yaw")) {
+      impl.reset(new RotationQuaternionLoadImplRPY);
+    } else {
+      impl.reset(new RotationQuaternionLoadImplQ);
+    }
+  }
+  return impl->load(vs);
+}
+void DVLoadTraits<backend::RotationQuaternion>::store(const Eigen::Vector4d & v) {
+  CHECK(impl) << "Store must not be called before load!";
+  impl->store(v);
+}
+bool DVLoadTraits<backend::RotationQuaternion>::isUpdateable() const {
+  CHECK(impl) << "isUpdateable must not be called before load!";
+  return impl->isUpdateable();
+}
+
 
 boost::shared_ptr<backend::ErrorTerm> PriorErrorTermCreater<backend::Scalar>::createPriorErrorTerm(CalibrationDesignVariable<backend::Scalar> &dv, Eigen::MatrixXd covSqrt){
   return boost::make_shared<MeasurementErrorTerm<1, ScalarExpression>>(dv.toExpression(), dv.getParams()(0, 0), covSqrt, CvPriorGroup, true);
@@ -145,6 +216,7 @@ boost::shared_ptr<backend::ErrorTerm> PriorErrorTermCreater<backend::RotationQua
   auto err = boost::make_shared<QuaternionPriorErrorTerm>(std::vector<backend::DesignVariable*>({&dv}), Eigen::Vector3d::Zero(), Eigen::Matrix3d::Identity(), CvPriorGroup);
   err->vsSetInvR((covSqrt * covSqrt.transpose()).inverse().eval());
   return err;
+}
 }
 
 
@@ -173,6 +245,7 @@ Covariance::Covariance(ValueStoreRef valueStore, int dim) {
     }
   }
 }
+
 
 }
 }

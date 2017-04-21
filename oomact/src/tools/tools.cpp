@@ -10,7 +10,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
 #include "aslam/backend/MEstimatorPolicies.hpp"
@@ -73,10 +72,9 @@ backend::MEstimator::Ptr getMestimator(const std::string & name, const sm::value
     throw std::runtime_error("unknown M-estimator " + mEstimatorName);
 }
 
-extern std::function<Eigen::Vector3d(const Eigen::Matrix3d & m)> matrixToEuler;
-std::string poseToString(const Eigen::Vector3d & trans, const Eigen::Vector4d & rot){
+std::string poseToString(const Eigen::Vector3d & trans, const Eigen::Vector4d & rotQuat){
   std::stringstream ss;
-  ss << "P(t= " << trans.transpose() << " , r=" << matrixToEuler(sm::kinematics::quat2r(rot)).transpose() << ")";
+  ss << "P(t= " << trans.transpose() << " , r=" << rotQuat.transpose() << ")";
   return ss.str();
 }
 
