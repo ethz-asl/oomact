@@ -34,6 +34,8 @@ class PoseSensor : public AbstractPoseSensor {
   const Frame& getTargetFrame() const override {
     return targetFrame;
   }
+
+  const static PoseMeasurement Outlier;
  private:
   std::shared_ptr<PoseMeasurements> measurements;
 
@@ -41,6 +43,7 @@ class PoseSensor : public AbstractPoseSensor {
 
   const Frame& targetFrame;
 
+  bool isOutlier(const PoseMeasurement & p) const;
  protected:
    void writeConfig(std::ostream & out) const override;
 };

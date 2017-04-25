@@ -1,9 +1,11 @@
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
 
+#include <cmath>
+#include <memory>
+
 #include <aslam/backend/TransformationExpression.hpp>
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
-#include <memory>
 
 #include "aslam/calibration/CalibratorI.hpp"
 #include <aslam/calibration/model/Model.h>
@@ -80,7 +82,10 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
 
     auto & poseMeasurement = m.second;
 
-
+    if(isOutlier(poseMeasurement)){
+      LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
+      continue;
+    }
     aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
     boost::shared_ptr<ErrorTermPose> e_pose(new ErrorTermPose(T_m_s.inverse(), poseMeasurement, etgr));
     if(uLow > timestamp || uUpp < timestamp){
@@ -114,6 +119,22 @@ bool PoseSensor::hasMeasurements() const {
 const PoseMeasurements& PoseSensor::getMeasurements() const {
   CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
   return *measurements;
+}
+
+static bool isOutlier_(const PoseMeasurement& p) {
+  return std::isnan(p.t_m_mf[0]);
+}
+static PoseMeasurement createOutlier_() {
+  PoseMeasurement outlier;
+  outlier.t_m_mf[0] = std::numeric_limits<double>::signaling_NaN();
+  CHECK(isOutlier_(outlier));
+  return outlier;
+}
+
+const PoseMeasurement PoseSensor::Outlier = createOutlier_();
+
+bool PoseSensor::isOutlier(const PoseMeasurement& p) const {
+  return isOutlier_(p);
 }
 
 } /* namespace calibration */
