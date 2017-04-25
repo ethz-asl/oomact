@@ -157,10 +157,9 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
       }, opt.callback());
       opt.setProblem(problem.getProblemSp());
       opt.options().verbose = false;
-//      opt.options().maxIterations = _options.maxIterations;
-//      opt.options().convergenceDeltaX = _estimator->getOptimizerOptions().convergenceDeltaX;
-//      opt.options().convergenceDeltaError = _estimator->getOptimizerOptions().convergenceDeltaError;
+      LOG(INFO) << "Optimizer options for batch estimation:" << opt.getOptions();
       opt.optimize();
+      LOG(INFO) << "Final "<< opt.getStatus();
     });
 
     getModel().printCalibrationVariables(LOG(INFO) << "After calibration:" << std::endl) << std::endl;
