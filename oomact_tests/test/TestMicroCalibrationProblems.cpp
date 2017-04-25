@@ -42,6 +42,22 @@ class MockMotionCaptureSource : public MotionCaptureSource {
   std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
 };
 
+MockMotionCaptureSource mmcsStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
+  p.q = sm::kinematics::quatIdentity();
+  p.p = Eigen::Vector3d::UnitX() * (now - start);
+});
+
+MockMotionCaptureSource mmcsRotatingStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
+  p.q = sm::kinematics::axisAngle2quat({double(now - start), 0, 0});
+  p.p = Eigen::Vector3d::UnitX() * (now - start);
+});
+
+MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
+  const auto angleX = double(now - start) * 3;
+  p.q = sm::kinematics::axisAngle2quat({angleX, 0, 0});
+  auto rotRQPlusQuaterRotation = sm::kinematics::axisAngle2R({angleX, 0, 0});
+  p.p = Eigen::Vector3d::UnitX() * (now - start) + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
+});
 
 TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto vs = ValueStoreRef::fromString(
@@ -58,10 +74,7 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   EXPECT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
-  MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-    p.q = sm::kinematics::quatIdentity();
-    p.p = Eigen::Vector3d::UnitX() * (now - start);
-  });
+
 
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
@@ -72,7 +85,7 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto c = createBatchCalibrator(vsCalib, std::shared_ptr<Model>(&m, sm::null_deleter()));
 
   const double startTime = 0, endTime = 1.0;
-  for (auto& p : mmcs.getPoses(startTime, endTime)) {
+  for (auto& p : mmcsStraightLine.getPoses(startTime, endTime)) {
     mcSensorA.addMeasurement(p.q, p.p, p.time);
     c->addMeasurementTimestamp(p.time, mcSensorA);
   }
@@ -104,11 +117,6 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
   EXPECT_DOUBLE_EQ(5.0, mcSensorB.getTranslationToParent()[1]);
   EXPECT_NEAR(0.1, std::abs(sm::kinematics::quat2AxisAngle(mcSensorB.getRotationQuaternionToParent())[2]), 1e-6); // abs for conventional neutrality
 
-  MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-    p.q = sm::kinematics::axisAngle2quat({double(now - start), 0, 0});
-    p.p = Eigen::Vector3d::UnitX() * (now - start);
-  });
-
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
       "acceptConstantErrorTerms=true\n"
@@ -118,7 +126,7 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
 
   const double startTime = 0, endTime = 1.0;
 
-  for (auto& p : mmcs.getPoses(startTime, endTime)) {
+  for (auto& p : mmcsRotatingStraightLine.getPoses(startTime, endTime)) {
     mcSensorA.addMeasurement(p.q, p.p, p.time);
     c->addMeasurementTimestamp(p.time, mcSensorA);
     mcSensorB.addMeasurement(p.q, p.p, p.time);
@@ -128,6 +136,47 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
   EXPECT_NEAR(0, mcSensorB.getTranslationToParent()[1], 0.0001);
   EXPECT_NEAR(0, sm::kinematics::quat2AxisAngle(mcSensorB.getRotationQuaternionToParent())[2], 0.0001);
 }
+
+
+TEST(TestCalibration, testEstimateRelativePoseSensor) {
+  auto vs = ValueStoreRef::fromString(
+      "Gravity{used=false}"
+      "a{frame=body,targetFrame=world,absoluteMeasurements=true,rotation/used=false,translation/used=false,delay/used=false}"
+      "b{frame=body,targetFrame=world,absoluteMeasurements=false,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
+      "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=30,rotSplineOrder=4,rotFittingLambda=0.0000001,transSplineOrder=4,transFittingLambda=0.00000001}}"
+    );
+
+  FrameGraphModel m(vs, nullptr, {&world, &body});
+  PoseSensor mcSensorA(m, "a", vs);
+  PoseSensor mcSensorB(m, "b", vs);
+  PoseTrajectory traj(m, "traj", vs);
+  m.addModulesAndInit(mcSensorA, mcSensorB, traj);
+
+  EXPECT_EQ(2, m.getCalibrationVariables().size());
+  EXPECT_DOUBLE_EQ(5.0, mcSensorB.getTranslationToParent()[1]);
+  EXPECT_NEAR(0.1, std::abs(sm::kinematics::quat2AxisAngle(mcSensorB.getRotationQuaternionToParent())[2]), 1e-6); // abs for conventional neutrality
+
+  auto vsCalib = ValueStoreRef::fromString(
+      "verbose=true\n"
+      "acceptConstantErrorTerms=true\n"
+      "estimator{optimizer{convergenceDeltaX=1e-6,convergenceDeltaError=1e-10,maxIterations=50}}\n"
+      "timeBaseSensor=a\n"
+    );
+  auto c = createBatchCalibrator(vsCalib, std::shared_ptr<Model>(&m, sm::null_deleter()));
+
+  const double startTime = 0, endTime = 1.0;
+
+  for (auto& p : mmcsHelix.getPoses(startTime, endTime)) {
+    mcSensorA.addMeasurement(p.q, p.p, p.time);
+    c->addMeasurementTimestamp(p.time, mcSensorA);
+    mcSensorB.addMeasurement(p.q, p.p, p.time);
+  }
+  c->calibrate();
+
+  EXPECT_NEAR(0, mcSensorB.getTranslationToParent()[1], 0.0001);
+  EXPECT_NEAR(0, sm::kinematics::quat2AxisAngle(mcSensorB.getRotationQuaternionToParent())[2], 0.0001);
+}
+
 
 TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   auto vs = ValueStoreRef::fromString(
@@ -146,12 +195,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
-  MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-    p.q = sm::kinematics::quatIdentity();
-    p.p = Eigen::Vector3d::UnitX() * (now - start);
-  });
-
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcs, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
@@ -193,13 +237,8 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
 
 
-  MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-    p.q = sm::kinematics::quatIdentity();
-    p.p = Eigen::Vector3d::UnitX() * (now - start);
-  });
-
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcs, sm::null_deleter()));
-  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcs, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
+  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "acceptConstantErrorTerms=true\n"
