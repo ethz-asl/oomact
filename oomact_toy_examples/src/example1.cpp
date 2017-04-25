@@ -37,6 +37,7 @@ class MockMotionCaptureSource : public MotionCaptureSource {
 int main(int argc, char **argv) {
   google::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
+  google::SetStderrLogging(FLAGS_v > 0 ? google::INFO : google::WARNING);
 
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
