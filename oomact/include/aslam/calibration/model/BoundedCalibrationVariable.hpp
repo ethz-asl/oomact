@@ -33,6 +33,12 @@ class BoundedCalibrationVariable : public CalibrationDesignVariable<DesignVariab
   {
     assert(DesignVariable_::minimalDimensions() == 1) ; //TODO C support multi dim calibration variables with bounds
     auto v = this->getParams()(0, 0);
+
+    if(valueStore.getBool("relativeBounds", false)){
+      lowerBound_ += v;
+      upperBound_ += v;
+    }
+
     LOG(INFO) << name << "(v=" << v << ", lB=" << double(lowerBound_) << ", uB=" << double(upperBound_) << ")";
     if(!isWithinBounds()){
       throw std::runtime_error("Bounded variable " + name + " is out of bounds!");
