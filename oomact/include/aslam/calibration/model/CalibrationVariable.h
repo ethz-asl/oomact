@@ -280,6 +280,18 @@ boost::shared_ptr<backend::ErrorTerm> CalibrationDesignVariable<DesignVariable_>
   return internal::PriorErrorTermCreater<DesignVariable_>::createPriorErrorTerm(*this, getPriorCovarianceSqrt());
 }
 
+
+/**
+ * Globally enable JPL quaternion convention for value store input/output of the CalibrationDesignVariable<backend::RotationQuaternion>.
+ * (Default is the traditional Hamilton convention.)
+
+ * Technically this conjugates (negates i,j,k components) for all Quaternion-input and -output compared
+ * to when this is not called before. Call it (once) before loading any
+ * CalibrationDesignVariable<backend::RotationQuaternion> as input output will be inconsistent for those
+ * loaded before.
+ */
+void useJPLQuaternionConventionForInputOutput();
+
 }
 }
 
