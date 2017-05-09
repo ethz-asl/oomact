@@ -8,6 +8,7 @@
 #include <sm/MatrixArchive.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
+#include <aslam/backend/OptimizerCallbackManager.hpp>
 
 #include <aslam/calibration/CalibrationProblem.hpp>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
@@ -15,7 +16,6 @@
 #include <aslam/calibration/model/StateCarrier.h>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 
 using std::chrono::_V2::system_clock;
 

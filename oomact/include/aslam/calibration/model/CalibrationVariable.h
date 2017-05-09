@@ -18,7 +18,6 @@
 
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/ExpressionErrorTerm.hpp>
-#include <aslam/calibration/core/IncrementalEstimator.h>
 
 #include <sm/value_store/ValueStore.hpp>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
@@ -53,10 +52,6 @@ class CalibrationVariable {
   virtual void resetToStore() = 0;
   virtual boost::shared_ptr<backend::ErrorTerm> createPriorErrorTerm() = 0;
 
-  void printObservabilityBasisInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.obsBasis); }
-  void printObservabilityBasisScaledInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.obsBasisScaled); }
-  void printNonObservabilityBasisInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.nobsBasis); }
-  void printNonObservabilityBasisScaledInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.nobsBasisScaled); }
   void printFunctorInto(std::ostream& out, std::function<void(int)> f, int limit) const;
 
   virtual void printValuesNiceInto(std::ostream& out) const;

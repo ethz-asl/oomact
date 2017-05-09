@@ -2,6 +2,7 @@
 #define HF3DE647E_64C8_4D32_8DF7_7D746D9ACD23
 
 #include <aslam/backend/DesignVariable.hpp>
+#include <aslam/backend/OptimizationProblemBase.hpp>
 
 namespace aslam {
 namespace calibration {

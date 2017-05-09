@@ -16,7 +16,6 @@
   <depend>aslam_backend_expressions</depend>
   <depend>aslam_splines</depend>
   <depend>sm_matrix_archive</depend>
-  <depend>incremental_calibration</depend>
   <depend>sm_value_store</depend>
   <depend>glog_catkin</depend>
 </package>

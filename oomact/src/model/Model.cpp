@@ -7,8 +7,8 @@
 #include <vector>
 
 #include <aslam/backend/DesignVariable.hpp>
+#include <aslam/backend/OptimizationProblemBase.hpp>
 
-#include <aslam/calibration/core/OptimizationProblem.h>
 #include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/model/fragments/Gravity.h>
 #include <aslam/calibration/model/Module.h>

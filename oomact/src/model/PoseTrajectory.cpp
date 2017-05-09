@@ -11,7 +11,6 @@
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
-#include <aslam/calibration/algo/OptimizationProblemSpline.h>
 #include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/model/Model.h>

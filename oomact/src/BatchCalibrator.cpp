@@ -1,7 +1,6 @@
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/AbstractCalibrator.h>
-#include <aslam/calibration/core/OptimizationProblem.h>
 #include <aslam/calibration/CalibrationProblem.hpp>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <sm/BoostPropertyTree.hpp>
@@ -119,7 +118,7 @@ class BatchCalibrationProblem : public CalibrationProblem, public BatchStateRece
 
  private:
   boost::shared_ptr<backend::OptimizationProblem> problemSp;
-  backend::OptimizationProblem & problem; //TODO C rename OptimizationProblemSpline to something better
+  backend::OptimizationProblem & problem;
 
   size_t dimCalibVariables = 0, dimStateVariables = 0;
 };

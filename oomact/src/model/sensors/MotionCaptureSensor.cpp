@@ -11,7 +11,6 @@
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/model/Model.h>
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 #include "aslam/calibration/data/MeasurementsContainer.h"
 
 namespace aslam {

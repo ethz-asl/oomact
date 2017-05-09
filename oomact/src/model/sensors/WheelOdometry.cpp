@@ -5,6 +5,7 @@
 #include <glog/logging.h>
 
 #include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/calibration/model/Model.h>
@@ -14,7 +15,6 @@
 #include "aslam/calibration/data/WheelSpeedsMeasurement.h"
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
 #include "aslam/calibration/CalibratorI.hpp"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 
 using aslam::backend::EuclideanExpression;
 using aslam::backend::RotationExpression;
