@@ -17,7 +17,6 @@
 - git:
     local-name: aslam_optimizer
     uri: git@github.com:ethz-asl/aslam_optimizer.git
-    version: for/calibration_tools
 - git:
    local-name: Schweizer-Messer
    uri: https://github.com/ethz-asl/Schweizer-Messer
