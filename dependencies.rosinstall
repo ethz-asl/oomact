@@ -10,10 +10,10 @@
 - git:
     local-name: aslam_splines
     uri: git@github.com:ethz-asl/aslam_splines.git
-- git:
-   local-name: aslam_incremental_calibration
-   uri: git@github.com:ethz-asl/aslam_incremental_calibration.git
-   version: for/calibration_tools
+#- git:
+#   local-name: aslam_incremental_calibration
+#   uri: git@github.com:ethz-asl/aslam_incremental_calibration.git
+#   version: for/calibration_tools
 - git:
     local-name: aslam_optimizer
     uri: git@github.com:ethz-asl/aslam_optimizer.git
