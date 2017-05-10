@@ -140,20 +140,47 @@ class RotationQuaternionLoadImplQ : public RotationQuaternionLoadImpl, public in
  public:
   virtual ~RotationQuaternionLoadImplQ() = default;
 
-  static const ComponentNames quaternionComponents;
+  static const ComponentNames QuaternionComponents;
 
   Eigen::Vector4d load(ValueStoreRef & vs) override {
-    getPTVector(quaternionComponents, vhs, vs);
-    return internal::loadPacked(vhs);
+    getPTVector(QuaternionComponents, vhs, vs);
+    return switchQuaternionConvention(internal::loadPacked(vhs));
   }
   void store(const Eigen::Vector4d & v) override {
-    internal::storePacked(vhs, v);
+    internal::storePacked(vhs, switchQuaternionConvention(v));
   }
   bool isUpdateable() override {
     return internal::DVLoadTraitsBase::isUpdateable();
   }
+  static bool switchConvention;
+ private:
+  static Eigen::Vector4d switchQuaternionConvention(const Eigen::Vector4d & q) {
+    if(needsConjugation()){
+      return sm::kinematics::quatInv(q);
+    } else {
+      return q;
+    }
+  }
+
+  static bool needsConjugation() {
+    return switchConvention;
+  }
 };
-const ComponentNames RotationQuaternionLoadImplQ::quaternionComponents = {"i", "j", "k", "w"};
+const ComponentNames RotationQuaternionLoadImplQ::QuaternionComponents = {"i", "j", "k", "w"};
+
+enum class QuaternionConvention{
+  HAMILTON, JPL
+};
+
+const QuaternionConvention InternalConvention = QuaternionConvention::JPL;
+const QuaternionConvention DefaultExternalConvention = QuaternionConvention::HAMILTON;
+bool RotationQuaternionLoadImplQ::switchConvention = DefaultExternalConvention != InternalConvention;
+void setExternalQuaternionConvention(QuaternionConvention convention) {
+  RotationQuaternionLoadImplQ::switchConvention = convention != InternalConvention;
+}
+void useJPLQuaternionConventionForInputOutput() {
+  setExternalQuaternionConvention(QuaternionConvention::JPL);
+}
 
 class RotationQuaternionLoadImplRPY : public RotationQuaternionLoadImpl, public internal::DVLoadTraitsBase {
  public:
@@ -186,7 +213,7 @@ Eigen::Vector4d DVLoadTraits<backend::RotationQuaternion>::load(ValueStoreRef & 
   return impl->load(vs);
 }
 void DVLoadTraits<backend::RotationQuaternion>::store(const Eigen::Vector4d & v) {
-  CHECK(impl) << "Store must not be called before load!";
+  CHECK(impl) << "store must not be called before load!";
   impl->store(v);
 }
 bool DVLoadTraits<backend::RotationQuaternion>::isUpdateable() const {

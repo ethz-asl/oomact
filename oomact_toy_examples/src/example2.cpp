@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   google::SetStderrLogging(FLAGS_v > 0 ? google::INFO : google::WARNING);
 
-  //TODO read from file
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
       "rovio{frame=gps, targetFrame=imu, rotation{used=true,yaw=0,pitch=0,roll=0},translation{used=true,x=0,y=0,z=0},delay/used=false}"
@@ -57,7 +56,7 @@ int main(int argc, char **argv) {
   PoseTrajectory traj(model, "traj", vs);
   model.addModulesAndInit(rovioSensor, gpsSensor, traj);
 
-/* TODO: Create mock data for unit tests
+/* TODO read example data from file
     MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
       p.q = sm::kinematics::quatIdentity();
       p.p = Eigen::Vector3d::UnitX() * (now - start);
