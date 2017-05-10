@@ -117,7 +117,6 @@ Interval MotionCaptureSensor::getSnappedWindow(CalibratorI& calib, const Interva
   return res;
 }
 
-
 void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
   if(!measurements || measurements->poses.empty()){
