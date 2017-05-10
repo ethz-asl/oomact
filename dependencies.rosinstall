@@ -1,46 +1,24 @@
 - git:
-   local-name: catkin_simple
-   uri: https://github.com/catkin/catkin_simple.git
+    local-name: catkin_simple
+    uri: https://github.com/catkin/catkin_simple.git
 - git:
-    local-name: asl_cmake_modules
-    uri: git@github.com:ethz-asl/asl_cmake_modules.git
+    local-name: Schweizer-Messer
+    uri: https://github.com/ethz-asl/Schweizer-Messer.git
 - git:
-   local-name: eigen_catkin
-   uri: https://github.com/ethz-asl/eigen_catkin
-- git:
-    local-name: aslam_splines
-    uri: git@github.com:ethz-asl/aslam_splines.git
-#- git:
-#   local-name: aslam_incremental_calibration
-#   uri: git@github.com:ethz-asl/aslam_incremental_calibration.git
-#   version: for/calibration_tools
+    local-name: eigen_catkin
+    uri: https://github.com/ethz-asl/eigen_catkin.git
 - git:
     local-name: aslam_optimizer
-    uri: git@github.com:ethz-asl/aslam_optimizer.git
+    uri: https://github.com/ethz-asl/aslam_optimizer.git
 - git:
-   local-name: Schweizer-Messer
-   uri: https://github.com/ethz-asl/Schweizer-Messer
+    local-name: aslam_splines
+    uri: https://github.com/ethz-asl/aslam_splines.git
 - git:
-   local-name: truncated_svd_solver
-   uri: git@github.com:ethz-asl/truncated_svd_solver.git 
+    local-name: gflags_catkin
+    uri: https://github.com/ethz-asl/gflags_catkin.git
 - git:
-   local-name: gflags_catkin
-   uri: https://github.com/ethz-asl/gflags_catkin
+    local-name: glog_catkin
+    uri: https://github.com/ethz-asl/glog_catkin.git
 - git:
-   local-name: glog_catkin
-   uri: https://github.com/ethz-asl/glog_catkin
-- git:
-   local-name: eigen_checks
-   uri: https://github.com/ethz-asl/eigen_checks
-- git:
-   local-name: libnabo
-   uri: https://github.com/ethz-asl/libnabo
-- git:
-   local-name: libpointmatcher
-   uri: https://github.com/ethz-asl/libpointmatcher
-- git:
-    local-name: pcl_catkin
-    uri: git@github.com:ethz-asl/pcl_catkin.git
-- git:
-    local-name: suitesparse
-    uri: git@github.com:ethz-asl/suitesparse.git
+    local-name: eigen_checks
+    uri: https://github.com/ethz-asl/eigen_checks.git
