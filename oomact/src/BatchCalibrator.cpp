@@ -1,7 +1,6 @@
 #include <aslam/backend/OptimizationProblem.hpp>
 #include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/AbstractCalibrator.h>
-#include <aslam/calibration/core/OptimizationProblem.h>
 #include <aslam/calibration/CalibrationProblem.hpp>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <sm/BoostPropertyTree.hpp>
@@ -119,7 +118,7 @@ class BatchCalibrationProblem : public CalibrationProblem, public BatchStateRece
 
  private:
   boost::shared_ptr<backend::OptimizationProblem> problemSp;
-  backend::OptimizationProblem & problem; //TODO C rename OptimizationProblemSpline to something better
+  backend::OptimizationProblem & problem;
 
   size_t dimCalibVariables = 0, dimStateVariables = 0;
 };
@@ -158,10 +157,9 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
       }, opt.callback());
       opt.setProblem(problem.getProblemSp());
       opt.options().verbose = false;
-//      opt.options().maxIterations = _options.maxIterations;
-//      opt.options().convergenceDeltaX = _estimator->getOptimizerOptions().convergenceDeltaX;
-//      opt.options().convergenceDeltaError = _estimator->getOptimizerOptions().convergenceDeltaError;
+      LOG(INFO) << "Optimizer options for batch estimation:" << opt.getOptions();
       opt.optimize();
+      LOG(INFO) << "Final "<< opt.getStatus();
     });
 
     getModel().printCalibrationVariables(LOG(INFO) << "After calibration:" << std::endl) << std::endl;

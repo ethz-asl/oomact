@@ -51,14 +51,9 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
     );
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   PoseSensor mcSensorA(m, "a", vs);
-  mcSensorA.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks();
+  m.addModulesAndInit(mcSensorA, traj);
 
   EXPECT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
@@ -100,16 +95,10 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
     );
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   PoseSensor mcSensorA(m, "a", vs);
-  mcSensorA.registerWithModel();
   PoseSensor mcSensorB(m, "b", vs);
-  mcSensorB.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks();
+  m.addModulesAndInit(mcSensorA, mcSensorB, traj);
 
   EXPECT_EQ(2, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorB.getTranslationToParent()[1]);
@@ -149,16 +138,10 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
     );
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   MotionCaptureSystem observer(m, "o", vs);
-  observer.registerWithModel();
   MotionCaptureSensor mcSensorA(observer, "a", vs);
-  mcSensorA.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks();
+  m.addModulesAndInit(observer, mcSensorA, traj);
 
   ASSERT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
@@ -201,18 +184,11 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   //TODO find C++ solution to validation
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   MotionCaptureSystem observer(m, "o", vs);
-  observer.registerWithModel();
   MotionCaptureSensor mcSensorA(observer, "a", vs);
-  mcSensorA.registerWithModel();
   MotionCaptureSensor mcSensorB(observer, "b", vs);
-  mcSensorB.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks(); // TODO B make building a model more simple!
+  m.addModulesAndInit(observer, mcSensorA, mcSensorB, traj);
 
   ASSERT_EQ(1, m.getCalibrationVariables().size());
 

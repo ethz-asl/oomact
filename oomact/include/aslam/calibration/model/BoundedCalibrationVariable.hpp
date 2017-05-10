@@ -25,7 +25,7 @@ template <typename DesignVariable_, typename Bound = double>
 class BoundedCalibrationVariable : public CalibrationDesignVariable<DesignVariable_> {
  public:
   BoundedCalibrationVariable(const std::string & name, ValueStoreRef valueStore, std::function<void(BoundedCalibrationVariable &, BoundsEnforceEvent event)> boundsEventHandler = std::function<void(BoundedCalibrationVariable &, BoundsEnforceEvent event)>()) :
-    DesignVariable_(DVLoadTraits<DesignVariable_>::load(valueStore)),
+    DesignVariable_(internal::DVLoadTraits<DesignVariable_>::load(valueStore)),
     CalibrationDesignVariable<DesignVariable_>(name, valueStore),
     upperBound_(valueStore.getDouble("upperBound")),
     lowerBound_(valueStore.getDouble("lowerBound")),

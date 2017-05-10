@@ -78,8 +78,6 @@ class Imu : public Sensor, public StateCarrier {
 
   Imu(Model & model, const std::string & name, sm::value_store::ValueStoreRef config);
 
-  void registerWithModel() override;
-
   void clearMeasurements() override;
   void addAccelerometerMeasurement(CalibratorI & calib, const AccelerometerMeasurement& data, Timestamp timestamp) const;
   void addGyroscopeMeasurement(CalibratorI & calib, const GyroscopeMeasurement& data, Timestamp timestamp) const;
@@ -93,6 +91,7 @@ class Imu : public Sensor, public StateCarrier {
 
   virtual ~Imu();
  protected:
+  void registerWithModel() override;
   void setActive(bool spatial, bool temporal) override;
 
  private:

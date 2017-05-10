@@ -8,7 +8,6 @@
 
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
 #include "aslam/calibration/tools/SplineWriter.h"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 #include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 

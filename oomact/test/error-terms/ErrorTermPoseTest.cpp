@@ -9,8 +9,6 @@
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/TransformationExpression.hpp>
 
-#include <aslam/calibration/statistics/NormalDistribution.h>
-
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
 
 using namespace aslam::backend;

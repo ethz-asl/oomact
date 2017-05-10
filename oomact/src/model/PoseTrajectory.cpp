@@ -11,10 +11,10 @@
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
-#include <aslam/calibration/algo/OptimizationProblemSpline.h>
 #include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
 #include <aslam/calibration/model/sensors/PoseSensorI.hpp>

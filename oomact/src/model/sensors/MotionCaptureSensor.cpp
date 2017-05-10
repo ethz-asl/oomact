@@ -11,7 +11,6 @@
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/model/Model.h>
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 #include "aslam/calibration/data/MeasurementsContainer.h"
 
 namespace aslam {
@@ -44,12 +43,9 @@ void MotionCaptureSystem::writeConfig(std::ostream& out) const {
 }
 
 void MotionCaptureSystem::registerWithModel() {
-  if(isUsed()){
-    getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
-  }
   Module::registerWithModel();
+  getModel().addCalibrationVariables({rotationVariable, translationVariable, getDelayVariablePtr()});
 }
-
 
 void MotionCaptureSystem::setActive(bool spatial, bool temporal) {
   if(isUsed()){

@@ -7,10 +7,11 @@
 #include <vector>
 
 #include <aslam/backend/DesignVariable.hpp>
+#include <aslam/backend/OptimizationProblemBase.hpp>
 
-#include <aslam/calibration/core/OptimizationProblem.h>
 #include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/model/fragments/Gravity.h>
+#include <aslam/calibration/model/Joint.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/Sensor.hpp>
 
@@ -34,12 +35,6 @@ class SimpleGravity : public Gravity, public Module, public CalibratableMinimal 
     return gravityVectorExpression;
   }
 
-  void registerWithModel() override {
-    if(isUsed()){
-      getModel().addCalibrationVariables({g_m});
-    }
-    Module::registerWithModel();
-  }
  protected:
   void setActive(bool spatial, bool /*temporal*/){
 //  TODO C USE this  const bool active = ec.getCalibrationActivator().isActive(imu); //TODO B this should be nicer (depend on Imu s)
@@ -47,6 +42,10 @@ class SimpleGravity : public Gravity, public Module, public CalibratableMinimal 
   }
   virtual void writeConfig(std::ostream & out) const{
     out << (", " "g_m" "=") << g_m->getValue();
+  }
+  void registerWithModel() override {
+    Module::registerWithModel();
+    getModel().addCalibrationVariables({g_m});
   }
  private:
   /// Gravity vector in mapping frame (Reasonably should be around (0,0,9.81)
@@ -62,8 +61,8 @@ Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPat
   }
 
   aslam::calibration::SimpleGravity* simpleGravity = new SimpleGravity(*this, config);
-  simpleGravity->registerWithModel();
   gravity.reset(simpleGravity);
+  add(*simpleGravity);
 }
 
 std::ostream & Model::printCalibrationVariables(std::ostream& out) const {
@@ -83,15 +82,36 @@ void Model::print(std::ostream& out) const {
   printCalibrationVariables(out);
 }
 
-void Model::resolveAllLinks() {
+void Model::init() {
   for (Module& m : getModules()) {
     m.resolveLinks(*this);
+  }
+}
+
+void Model::registerModule(Module & m){
+  CHECK_EQ(&m.getModel(), this) << " : Module " << m.getName() << " was created with a different model!";
+
+  modules.emplace_back(m);
+  m.setUid(m.getName()); //TODO A ensure uniqueness for modules uids!!
+  id2moduleMap.emplace(m.getUid(), m);
+
+  m.registerWithModel();
+
+  if(auto p = m.ptrAs<Sensor>()){
+    registerSensor(*p);
+  }
+  if(auto p = m.ptrAs<Joint>()){
+    registerJoint(*p);
   }
 }
 
 void Model::registerSensor(Sensor& s) {
   id2sensorMap.emplace(s.getId(), s);
   sensors.emplace_back(s);
+}
+
+void Model::registerJoint(Joint& j) {
+  joints.emplace_back(j);
 }
 
 std::vector<std::reference_wrapper<const Sensor>> Model::getSensors(SensorType type) const
@@ -242,6 +262,17 @@ ModelAtTime Model::getAtTime(sm::timing::NsecTime, int, const ModelSimplificatio
 
 ModelAtTime Model::getAtTime(const BoundedTimeExpression&, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
+}
+
+void Model::add(Module& module) {
+  if(module.isUsed()){
+    registerModule(module);
+    CHECK(module.isRegistered_) << module.getName() << " did not register itself!";
+  }
+}
+
+void Model::addModulesAndInit() {
+  init();
 }
 
 }

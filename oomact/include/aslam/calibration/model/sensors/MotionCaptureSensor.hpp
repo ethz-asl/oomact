@@ -18,10 +18,10 @@ class MotionCaptureSystem : public Module, public PoseCv, public DelayCv, public
  public:
   MotionCaptureSystem(Model & model, std::string name, sm::value_store::ValueStoreRef config);
 
-  void registerWithModel() override;
  protected:
   void writeConfig(std::ostream & out) const override;
   virtual void setActive(bool spatial, bool temporal) override;
+  void registerWithModel() override;
 };
 
 class MotionCaptureSensor : public AbstractPoseSensor {

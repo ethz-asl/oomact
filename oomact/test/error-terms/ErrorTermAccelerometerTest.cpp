@@ -10,8 +10,6 @@
 #include <aslam/backend/EuclideanPoint.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 
-#include <aslam/calibration/statistics/NormalDistribution.h>
-
 #include "aslam/calibration/error-terms/ErrorTermAccelerometer.h"
 
 using namespace aslam::backend;

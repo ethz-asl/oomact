@@ -3,7 +3,6 @@
 
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 
 namespace aslam {
 namespace calibration {

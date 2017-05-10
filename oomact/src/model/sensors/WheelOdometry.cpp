@@ -5,6 +5,7 @@
 #include <glog/logging.h>
 
 #include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/calibration/model/Model.h>
@@ -14,7 +15,6 @@
 #include "aslam/calibration/data/WheelSpeedsMeasurement.h"
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
 #include "aslam/calibration/CalibratorI.hpp"
-#include "aslam/calibration/algo/OptimizationProblemSpline.h"
 
 using aslam::backend::EuclideanExpression;
 using aslam::backend::RotationExpression;
@@ -28,12 +28,12 @@ WheelOdometry::WheelOdometry(Model& model, const std::string& name, sm::value_st
   L(createCVIfUsed<ScalarCv>("wheelBase", "L")),
   R_l(createCVIfUsed<ScalarCv>("wheelRadiusLeft", "R_l")),
   R_r(createCVIfUsed<ScalarCv>("wheelRadiusRight", "R_r")),
-  assumedWheelBase(myConfig.getDouble("assumedWheelBase")),
-  assumedWheelRadiusLeft(myConfig.getDouble("assumedWheelRadiusLeft")),
-  assumedWheelRadiusRight(myConfig.getDouble("assumedWheelRadiusRight")),
-  lwVariance(myConfig.getDouble("noise/lwVariance")),
-  rwVariance(myConfig.getDouble("noise/rwVariance")),
-  minimalMeasurementsPerBatch(myConfig.getInt("minimalMeasurementsPerBatch", 10)),
+  assumedWheelBase(getMyConfig().getDouble("assumedWheelBase")),
+  assumedWheelRadiusLeft(getMyConfig().getDouble("assumedWheelRadiusLeft")),
+  assumedWheelRadiusRight(getMyConfig().getDouble("assumedWheelRadiusRight")),
+  lwVariance(getMyConfig().getDouble("noise/lwVariance")),
+  rwVariance(getMyConfig().getDouble("noise/rwVariance")),
+  minimalMeasurementsPerBatch(getMyConfig().getInt("minimalMeasurementsPerBatch", 10)),
   groundFrame_(getModel().getFrame(getMyConfig().getString("groundFrame")))
 {
   if(isUsed()){
@@ -53,10 +53,8 @@ WheelOdometry::WheelOdometry(Model& model, const std::string& name, sm::value_st
 
 
 void WheelOdometry::registerWithModel() {
-  if(isUsed()){
-    getModel().addCalibrationVariables({L, R_l, R_r});
-  }
   Sensor::registerWithModel();
+  getModel().addCalibrationVariables({L, R_l, R_r});
 }
 
 void WheelOdometry::setActive(bool spatial, bool temporal){

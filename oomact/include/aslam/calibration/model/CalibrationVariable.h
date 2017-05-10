@@ -1,16 +1,11 @@
-/*
- * CalibrationVariable.h
- *
- *  Created on: Oct 17, 2014
- *      Author: hannes
- */
-
 #ifndef SRC_DESIGN_VARIABLES_CALIBRATIONVARIABLE_H_
 #define SRC_DESIGN_VARIABLES_CALIBRATIONVARIABLE_H_
 
-#include <Eigen/Core>
 #include <string>
 #include <ostream>
+#include <vector>
+
+#include <Eigen/Core>
 
 #include <sm/boost/null_deleter.hpp>
 #include <boost/optional.hpp>
@@ -18,7 +13,6 @@
 
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/ExpressionErrorTerm.hpp>
-#include <aslam/calibration/core/IncrementalEstimator.h>
 
 #include <sm/value_store/ValueStore.hpp>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
@@ -53,10 +47,6 @@ class CalibrationVariable {
   virtual void resetToStore() = 0;
   virtual boost::shared_ptr<backend::ErrorTerm> createPriorErrorTerm() = 0;
 
-  void printObservabilityBasisInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.obsBasis); }
-  void printObservabilityBasisScaledInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.obsBasisScaled); }
-  void printNonObservabilityBasisInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.nobsBasis); }
-  void printNonObservabilityBasisScaledInto(std::ostream & out, const IncrementalEstimator::ReturnValue & ret) const{ printBasisInto(out, ret.nobsBasisScaled); }
   void printFunctorInto(std::ostream& out, std::function<void(int)> f, int limit) const;
 
   virtual void printValuesNiceInto(std::ostream& out) const;
@@ -82,32 +72,20 @@ class CalibrationVariable {
   int _index = -1;
 };
 
-
-constexpr const char * SingleComponent[] = {""};
+namespace internal {
+typedef std::vector<const char *> ComponentNames;
+extern const ComponentNames SingleComponent;
 
 template <typename DesignVariable_>
-struct DVComponentNames{
-  static constexpr decltype(SingleComponent) & value = SingleComponent;
+struct DVComponentNames {
+  static constexpr const ComponentNames & value = SingleComponent;
 };
 
-template <typename T, size_t N>
-constexpr size_t countof(T(&)[N])
-{
-  return N;
-}
-
-template <typename DesignVariable_> int getDim(){
-  return countof(DVComponentNames<DesignVariable_>::value);
-}
+void getPTVector(const std::vector<const char*>& componentNames, std::vector<ValueHandle<double> >& v, ValueStore& pt);
 
 template <typename DesignVariable_>
 void getPTVector(std::vector<ValueHandle<double>> & v, ValueStore & pt){
-  auto & componentNames = DVComponentNames<DesignVariable_>::value;
-  v.resize(countof(componentNames));
-  int i = 0;
-  for(auto & cname : componentNames){
-    v[i++] = pt.getDouble(cname);
-  }
+  return getPTVector(DVComponentNames<DesignVariable_>::value, v, pt);
 }
 
 template <typename DesignVariable>
@@ -116,21 +94,28 @@ struct ParamsPackTraits {
   static Eigen::VectorXd unpack(const Eigen::VectorXd &v) { return v; }
 };
 
-namespace internal {
-  Eigen::VectorXd loadPacked(std::vector<ValueHandle<double>> &vhs);
-  void storePacked(std::vector<ValueHandle<double>> &vhs, const Eigen::VectorXd & vPacked);
+Eigen::VectorXd loadPacked(std::vector<ValueHandle<double>> &vhs);
+void storePacked(std::vector<ValueHandle<double>> &vhs, const Eigen::VectorXd & vPacked);
 
-  inline Eigen::MatrixXd toMatrixXd(double v) {
-    Eigen::MatrixXd m(1, 1);
-    m << v;
-    return m;
-  }
-  inline Eigen::MatrixXd toMatrixXd(Eigen::MatrixXd m){
-    return m;
-  }
+inline Eigen::MatrixXd toMatrixXd(double v) {
+  Eigen::MatrixXd m(1, 1);
+  m << v;
+  return m;
 }
+inline Eigen::MatrixXd toMatrixXd(Eigen::MatrixXd m){
+  return m;
+}
+
+class DVLoadTraitsBase {
+ public:
+  bool isUpdateable() const;
+ protected:
+  std::vector<ValueHandle<double>> vhs;
+};
+
 template <typename DesignVariable_>
-struct DVLoadTraits {
+class DVLoadTraits : public internal::DVLoadTraitsBase {
+ public:
   decltype (ParamsPackTraits<DesignVariable_>::unpack(Eigen::VectorXd())) load(ValueStoreRef & vs){
     assert(vhs.size() == 0);
     getPTVector<DesignVariable_>(vhs, vs);
@@ -139,19 +124,15 @@ struct DVLoadTraits {
   void store(const Eigen::VectorXd & v){
     internal::storePacked(vhs, ParamsPackTraits<DesignVariable_>::pack(v));
   }
-  bool isUpdateable() const {
-    for(auto & v: vhs) if(v.isUpdateable()) return true;
-    return false;
-  }
- private:
-  std::vector<ValueHandle<double>> vhs;
 };
 
+}
+
 template <typename DesignVariable_>
-class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_>, virtual public DesignVariable_, virtual public CalibrationVariable {
+class CalibrationDesignVariable : virtual protected internal::DVLoadTraits<DesignVariable_>, virtual public DesignVariable_, virtual public CalibrationVariable {
  public:
   CalibrationDesignVariable(const std::string & name, ValueStoreRef valueStore) :
-    DVLoadTraits<DesignVariable_>(), DesignVariable_(DVLoadTraits<DesignVariable_>::load(valueStore)),  name_(name), covariance_(valueStore, getDimension()),
+    internal::DVLoadTraits<DesignVariable_>(), DesignVariable_(internal::DVLoadTraits<DesignVariable_>::load(valueStore)),  name_(name), covariance_(valueStore, getDimension()),
     upstreamValue_(getParams()),
     upstreamValueStore_(valueStore)
   {
@@ -165,27 +146,26 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
   boost::shared_ptr<backend::ErrorTerm> createPriorErrorTerm() override;
 
   const char * getTangentComponentName(int i) const override {
-    assert(i < countof(DVComponentNames<DesignVariable_>::value));
-    return DVComponentNames<DesignVariable_>::value[i];
+    return internal::DVComponentNames<DesignVariable_>::value[i];
   }
   Eigen::VectorXd getMinimalComponents() const override {
-    return ParamsPackTraits<DesignVariable_>::pack(getParams());
+    return internal::ParamsPackTraits<DesignVariable_>::pack(getParams());
   }
 
   void setMinimalComponents(const Eigen::VectorXd & v) override {
-    Eigen::MatrixXd val = internal::toMatrixXd(ParamsPackTraits<DesignVariable_>::unpack(v));
+    Eigen::MatrixXd val = internal::toMatrixXd(internal::ParamsPackTraits<DesignVariable_>::unpack(v));
     DesignVariable_::setParameters(val);
   }
 
   void updateStore() override {
     auto v = getParams();
-    DVLoadTraits<DesignVariable_>::store(v);
+    internal::DVLoadTraits<DesignVariable_>::store(v);
     upstreamValue_ = v;
   }
 
   virtual void resetToStore() override {
     Eigen::MatrixXd params;
-    DesignVariable_(DVLoadTraits<DesignVariable_>::load(upstreamValueStore_)).aslam::backend::DesignVariable::getParameters(params);
+    DesignVariable_(internal::DVLoadTraits<DesignVariable_>::load(upstreamValueStore_)).aslam::backend::DesignVariable::getParameters(params);
     DesignVariable_::setParameters(params);
     upstreamValue_ = params;
     covariance_ = Covariance(upstreamValueStore_, getDimension());
@@ -198,7 +178,7 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
   }
 
   bool isUpdateable() const override {
-    return DVLoadTraits<DesignVariable_>::isUpdateable();
+    return internal::DVLoadTraits<DesignVariable_>::isUpdateable();
   }
 
   bool isToBeEstimated() const override { return estimateVh_.get(); }
@@ -218,8 +198,10 @@ class CalibrationDesignVariable : virtual protected DVLoadTraits<DesignVariable_
   ValueStoreRef upstreamValueStore_;
 };
 
+extern const ErrorTermGroupReference CvPriorGroup;
 
 }
+
 namespace backend{
 class Scalar;
 template<typename Scalar_> class GenericScalar;
@@ -227,16 +209,25 @@ class EuclideanPoint;
 class RotationQuaternion;
 }
 
-
-
 namespace calibration {
-template <>
-struct DVComponentNames<backend::EuclideanPoint> {
-  static constexpr const char * value[] = {"x", "y", "z"};
+namespace internal {
+template <> struct DVComponentNames<backend::EuclideanPoint> {
+  static const ComponentNames value;
 };
-template <>
-struct DVComponentNames<backend::RotationQuaternion> {
-  static constexpr const char * value[] = {"roll", "pitch", "yaw"};
+template <> struct DVComponentNames<backend::RotationQuaternion> {
+  static const ComponentNames value;
+};
+
+class RotationQuaternionLoadImpl;
+template<> class DVLoadTraits<backend::RotationQuaternion> {
+ public:
+  DVLoadTraits();
+  ~DVLoadTraits();
+  Eigen::Vector4d load(ValueStoreRef & vs);
+  void store(const Eigen::Vector4d & v);
+  bool isUpdateable() const;
+ private:
+  std::unique_ptr<RotationQuaternionLoadImpl> impl;
 };
 
 template <>
@@ -257,9 +248,6 @@ struct ParamsPackTraits<backend::GenericScalar<Scalar>> {
 };
 
 Eigen::MatrixXd getMinimalComponents(const CalibrationDesignVariable<backend::RotationQuaternion> & cv);
-
-
-extern const ErrorTermGroupReference CvPriorGroup;
 
 
 template<typename DesignVariable_>
@@ -285,10 +273,11 @@ struct PriorErrorTermCreater<backend::GenericScalar<Scalar_>> {
     return boost::make_shared<MeasurementErrorTerm<1, aslam::backend::GenericScalarExpression<Scalar_>>>(dv.toExpression(), dv.getParams()(0, 0), covSqrt, CvPriorGroup, true);
   }
 };
+}
 
 template<typename DesignVariable_>
 boost::shared_ptr<backend::ErrorTerm> CalibrationDesignVariable<DesignVariable_>::createPriorErrorTerm() {
-  return calibration::PriorErrorTermCreater<DesignVariable_>::createPriorErrorTerm(*this, getPriorCovarianceSqrt());
+  return internal::PriorErrorTermCreater<DesignVariable_>::createPriorErrorTerm(*this, getPriorCovarianceSqrt());
 }
 
 }

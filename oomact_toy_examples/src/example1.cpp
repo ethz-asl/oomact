@@ -37,6 +37,7 @@ class MockMotionCaptureSource : public MotionCaptureSource {
 int main(int argc, char **argv) {
   google::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
+  google::SetStderrLogging(FLAGS_v > 0 ? google::INFO : google::WARNING);
 
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
@@ -47,18 +48,11 @@ int main(int argc, char **argv) {
     );
 
   FrameGraphModel m(vs, nullptr, {&world, &body});
-
   MotionCaptureSystem observer(m, "o", vs);
-  observer.registerWithModel();
   MotionCaptureSensor mcSensorA(observer, "a", vs);
-  mcSensorA.registerWithModel();
   MotionCaptureSensor mcSensorB(observer, "b", vs);
-  mcSensorB.registerWithModel();
-
   PoseTrajectory traj(m, "traj", vs);
-  traj.registerWithModel();
-
-  m.resolveAllLinks();
+  m.addModulesAndInit(observer,mcSensorA, mcSensorB, traj);
 
   MockMotionCaptureSource mmcs([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
     p.q = sm::kinematics::quatIdentity();
