@@ -68,8 +68,10 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
 
   auto interval = calib.getCurrentEffectiveBatchInterval();
 
-  auto uLow = interval.start + getDelayUpperBound();
-  auto uUpp = interval.end + getDelayLowerBound();
+  auto conditionalLowerBound = interval.start + getDelayUpperBound();
+  auto conditionalUpperBound = interval.end + getDelayLowerBound();
+  auto certainLowerBound = interval.start + getDelayLowerBound();
+  auto certainUpperBound = interval.end + getDelayUpperBound();
 
   auto & delay = getDelayExpression();
   Timestamp currentDelay = delay.evaluate();
@@ -78,23 +80,31 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
   }
 
   const PoseMeasurement * lastPoseMeasurement = nullptr;
+  Timestamp lastTimestamp(0L);
   aslam::backend::TransformationExpression last_T_m_s;
   for (auto & m : *measurements) {
     Timestamp timestamp = m.first;
     auto & poseMeasurement = m.second;
+    if(certainLowerBound > timestamp || certainUpperBound < timestamp){
+      LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
+      lastPoseMeasurement = nullptr;
+      continue;
+    }
 
-    if(!absoluteMeasurements_){
-      if(isOutlier(poseMeasurement)){
-        LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
-        lastPoseMeasurement = nullptr;
-        continue;
-      }
-      if(uLow > timestamp || uUpp < timestamp){
-        LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
-        continue;
-      }
-      aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
-      boost::shared_ptr<ErrorTermPose> e_pose;
+    if(isOutlier(poseMeasurement)){
+      LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
+      lastPoseMeasurement = nullptr;
+      continue;
+    }
+
+    boost::shared_ptr<ErrorTermPose> e_pose;
+    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
+    Timestamp lowerTimestamp;
+
+    if(absoluteMeasurements_){
+      e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, etgr));
+      lowerTimestamp = timestamp;
+    } else {
       if(lastPoseMeasurement == nullptr){
 //        e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, etgr)); // TODO maybe support first absolute measurement? HANDLE outlier right then..
 //        es.add(timestamp, e_pose, false);
@@ -103,34 +113,29 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
           = sm::kinematics::Transformation(lastPoseMeasurement->q_m_f, lastPoseMeasurement->t_m_mf).inverse()
           * sm::kinematics::Transformation(poseMeasurement.q_m_f, poseMeasurement.t_m_mf);
         e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), poseMeasurement.sigma2_t_m_mf, poseMeasurement.sigma2_t_m_mf, etgr));
-        es.add(timestamp, e_pose, false);
       }
       lastPoseMeasurement = &poseMeasurement;
       last_T_m_s = std::move(T_m_s);
-      continue;
+      lowerTimestamp = lastTimestamp;
+      lastTimestamp = timestamp;
     }
 
-    if(isOutlier(poseMeasurement)){
-      LOG(INFO) << "Outlier removed at " << calib.secsSinceStart(timestamp) << ".";
-      continue;
+    if(e_pose){
+      if(conditionalLowerBound > lowerTimestamp || conditionalUpperBound < timestamp){
+        if(!hasDelay()){
+          LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
+          continue;
+        }
+        LOG(INFO) << "Adding conditional PoseErrorTerm for pose measurement at " << calib.secsSinceStart(timestamp) << " because it could go out of bounds!";
+        if(conditionalLowerBound > lowerTimestamp){
+          e_pose = addConditionShared<ErrorTermPose>(*e_pose, [=](){ return lowerTimestamp - delay.evaluate() >= interval.start; });
+        }
+        if(conditionalUpperBound < timestamp){
+          e_pose = addConditionShared<ErrorTermPose>(*e_pose, [=](){ return timestamp - delay.evaluate() <= interval.end; });
+        }
+      }
+      es.add(timestamp, e_pose, false);
     }
-    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
-    boost::shared_ptr<ErrorTermPose> e_pose(new ErrorTermPose(T_m_s.inverse(), poseMeasurement, etgr));
-    if(uLow > timestamp || uUpp < timestamp){
-      if(!hasDelay()){
-        LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
-        continue;
-      }
-      LOG(INFO) << "Adding conditional PoseErrorTerm for pose measurement at " << calib.secsSinceStart(timestamp) << " because it could go out of bounds!";
-      if(uLow > timestamp){
-        e_pose = addConditionShared<ErrorTermPose>(*e_pose, [=](){ return timestamp - delay.evaluate() >= interval.start; });
-      }
-      if(uUpp < timestamp){
-        e_pose = addConditionShared<ErrorTermPose>(*e_pose, [=](){ return timestamp - delay.evaluate() <= interval.end; });
-      }
-    }
-
-    es.add(timestamp, e_pose, false);
   }
   es.printInto(LOG(INFO));
 }
