@@ -20,7 +20,7 @@ namespace calibration {
 class Sensor;
 class Joint;
 class OptimizationProblem;
-class BoundedTimeExpression;
+struct BoundedTimeExpression;
 
 struct ModelSimplification {
   ModelSimplification(bool needGlobalPosition = true, bool needGlobalOrientation = true) : needGlobalPosition(needGlobalPosition), needGlobalOrientation(needGlobalOrientation) {
@@ -31,7 +31,8 @@ struct ModelSimplification {
 
 class ModelAtTimeImpl;
 
-struct Frame : public virtual Named {
+class Frame : public virtual Named {
+ public:
   bool operator == (const Frame & other) const { return this == &other; }
 };
 

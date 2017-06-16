@@ -28,7 +28,7 @@ class MeasurementContainerI {
       */
     template <typename C> struct MeasurementsContainer : public MeasurementContainerI, private  std::vector<std::pair<sm::timing::NsecTime, C> >  {
       typedef std::vector<std::pair<sm::timing::NsecTime, C> > Super;
-      using Super::value_type;
+      using typename Super::value_type;
       using Super::begin;
       using Super::end;
       using Super::cbegin;

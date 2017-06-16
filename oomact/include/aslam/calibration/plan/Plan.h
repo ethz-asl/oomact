@@ -32,7 +32,6 @@ class Plan : public Printable {
   virtual void print(std::ostream & into) const;
  private:
   std::string id;
-  bool finished = true;
   size_t fragmentIndex = 0;
   std::vector<std::shared_ptr<PlanFragment> > fragments;
 };
