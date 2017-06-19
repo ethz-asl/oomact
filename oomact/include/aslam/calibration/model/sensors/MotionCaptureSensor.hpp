@@ -48,12 +48,12 @@ class MotionCaptureSensor : public AbstractPoseSensor {
     this->motionCaptureSource = motionCaptureSource;
   }
 
-  bool hasMeasurements() const {
+  bool hasMeasurements() const override {
     return bool(measurements);
   }
 
-  const PoseMeasurements & getMeasurements() const;
-  PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const;
+  const PoseMeasurements & getMeasurements() const override;
+  PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const override;
 
   const Frame& getTargetFrame() const override {
     return motionCaptureSystem.getParentFrame();

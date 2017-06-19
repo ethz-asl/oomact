@@ -28,7 +28,7 @@ class ErrorTermStatisticsWithProblemAndPredictor : public ErrorTermStatistics {
   }
 
   template <typename ErrorTerm>
-  void addErrorTerm(const boost::shared_ptr<ErrorTerm> & e) override {
+  void addErrorTerm(const boost::shared_ptr<ErrorTerm> & e) {
     Timestamp t = getTimestampFor(getCounter(), *e);
     add(t, e);
   }

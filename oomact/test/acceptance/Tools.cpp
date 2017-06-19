@@ -19,7 +19,7 @@ struct PT : public sm::BoostPropertyTreeLoader {
   void startingWith(const std::string & path) override {
     LOG(INFO) << "Starting with configuration file " << path;
   }
-  void warn(const std::string & message){
+  void warn(const std::string & message) override {
     LOG(WARNING) << message;
   }
 

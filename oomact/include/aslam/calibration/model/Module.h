@@ -280,7 +280,8 @@ struct ModuleLinkBase : public NamedMinimal {
 };
 
 template <typename Interface>
-struct ModuleLink : public ModuleLinkBase {
+class ModuleLink : public ModuleLinkBase {
+ public:
   using ModuleLinkBase::ModuleLinkBase;
 
   operator Interface & () { return get(); }
@@ -315,7 +316,7 @@ struct ModuleLink : public ModuleLinkBase {
 } /* namespace aslam */
 
 namespace std {
-template <typename> class hash;
+template <typename> struct hash;
 template <>
 struct hash<std::reference_wrapper<aslam::calibration::Activatable> > {
  public :

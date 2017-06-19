@@ -53,15 +53,15 @@ namespace calibration {
 }
 
 namespace std {
-template <typename> class hash;
+template <typename> struct hash;
 
 template <>
-class hash < aslam::calibration::SensorType >{
+struct hash < aslam::calibration::SensorType >{
 public :
     size_t operator()(aslam::calibration::SensorType sensorType) const;
 };
 template <>
-class hash < aslam::calibration::SensorId >{
+struct hash < aslam::calibration::SensorId >{
 public :
     size_t operator()(const aslam::calibration::SensorId & sensorId) const;
 };
