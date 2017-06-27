@@ -107,6 +107,9 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     } else {
       if(lastPoseMeasurement == nullptr){
 //        e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, etgr)); // TODO maybe support first absolute measurement? HANDLE outlier right then..
+//        if(auto me = getMEstimator()){
+//          e_pose->setMEstimatorPolicy(me);
+//        }
 //        es.add(timestamp, e_pose, false);
       } else {
         sm::kinematics::Transformation deltaT
@@ -133,6 +136,9 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
         if(conditionalUpperBound < timestamp){
           e_pose = addConditionShared<ErrorTermPose>(*e_pose, [=](){ return timestamp - delay.evaluate() <= interval.end; });
         }
+      }
+      if(auto me = getMEstimator()){
+        e_pose->setMEstimatorPolicy(me);
       }
       es.add(timestamp, e_pose, false);
     }

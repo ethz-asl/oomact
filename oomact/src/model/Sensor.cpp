@@ -11,6 +11,7 @@
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/CalibratorI.hpp> //TODO A remove this and use frames instead!
+#include <aslam/calibration/tools/tools.h>
 
 size_t std::hash < aslam::calibration::SensorType >::operator()(aslam::calibration::SensorType sensorType) const
 {
@@ -68,7 +69,8 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
     ObserverMinimal(this),
     CalibratableMinimal(this),
     id(isUsed()? model.createNewSensorId() : NoSensorId),
-    maximalExpectedGap(config.getDouble(name + "/maximalExpectedGap", -1.0)) //TODO C RENAME maximalExpectedGap to expectedMaximalGap
+    maximalExpectedGap(config.getDouble(name + "/maximalExpectedGap", -1.0)), //TODO C RENAME maximalExpectedGap to expectedMaximalGap
+    mEstimator(getMestimator(name, getMyConfig().getChild("mestimator"), 1))
 {
 }
 
