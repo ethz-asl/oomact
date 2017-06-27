@@ -255,7 +255,7 @@ void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  cu
         {
           printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: initial cost = " << a.currentCost << ":\n");
         } else {
-          printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated: previous - current = " << a.previousLowestCost << " - " << a.currentCost << " = " << (a.previousLowestCost - a.currentCost) << (wasRegression ? " (REGRESSION)" : "") << ":\n");
+          printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated. Current cost: " << a.currentCost << " (decreased by " << (a.previousLowestCost - a.currentCost) << (wasRegression ? " REGRESSION!" : "") << "):\n");
         }
       }
     });
