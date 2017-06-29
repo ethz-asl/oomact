@@ -246,12 +246,17 @@ void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  cu
     });
   callbackRegistry.add<aslam::backend::callback::event::COST_UPDATED>([this, &currentBatch, printRegessionErrorStatistics](const aslam::backend::callback::event::COST_UPDATED & a)
     {
-      bool wasRegression = a.previousLowestCost > 0  && a.previousLowestCost < a.currentCost;
+      const bool wasRegression = a.previousLowestCost > 0  && a.previousLowestCost < a.currentCost;
       if(wasRegression) {
         LOG(WARNING) << "Last update was a regression: " <<  a.previousLowestCost << " -> " << a.currentCost;
       }
       if(getOptions().getVerbose() && (printRegessionErrorStatistics || !wasRegression)){
-        printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated: previous - current = " << a.previousLowestCost << " - " << a.currentCost << " = " << (a.previousLowestCost - a.currentCost) << (wasRegression ? " (REGRESSION)" : "") << ":\n");
+        if(a.previousLowestCost < 0) // is initial update
+        {
+          printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: initial cost = " << a.currentCost << ":\n");
+        } else {
+          printBatchErrorTermStatistics(currentBatch, false, LOG(INFO) << "Optimizer: cost and residuals updated. Current cost: " << a.currentCost << " (decreased by " << (a.previousLowestCost - a.currentCost) << (wasRegression ? " REGRESSION!" : "") << "):\n");
+        }
       }
     });
   callbackRegistry.add<aslam::backend::callback::event::DESIGN_VARIABLES_UPDATED>([this]() {
