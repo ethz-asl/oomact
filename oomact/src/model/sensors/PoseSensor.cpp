@@ -8,11 +8,12 @@
 #include <glog/logging.h>
 
 #include "aslam/calibration/CalibratorI.hpp"
-#include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/ModuleTools.h>
+#include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 
 namespace aslam {
