@@ -35,6 +35,8 @@ void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t)
 
 void PoseSensor::writeConfig(std::ostream& out) const {
   Sensor::writeConfig(out);
+  MODULE_WRITE_PARAMETER(targetFrame);
+  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
 }
 
 PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
