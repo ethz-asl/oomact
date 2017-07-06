@@ -158,7 +158,7 @@ bool PoseSensor::hasMeasurements() const {
   return measurements && !measurements->empty();
 }
 
-const PoseMeasurements& PoseSensor::getMeasurements() const {
+const PoseMeasurements& PoseSensor::getAllMeasurements() const {
   CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
   return *measurements;
 }

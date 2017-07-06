@@ -21,7 +21,6 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
     return *this;
   }
 
-  using PoseSensorI::getMeasurements;
   virtual PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const override;
 };
 

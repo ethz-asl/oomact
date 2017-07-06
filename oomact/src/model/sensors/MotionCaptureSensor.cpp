@@ -168,8 +168,8 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
   es.printInto(LOG(INFO));
 }
 
-const PoseMeasurements& MotionCaptureSensor::getMeasurements() const {
-  assert(measurements);
+const PoseMeasurements& MotionCaptureSensor::getAllMeasurements() const {
+  CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
   return measurements->poses;
 }
 

@@ -18,7 +18,7 @@ SensorType AbstractPoseSensor::getType() const {
 }
 
 PoseMeasurements AbstractPoseSensor::getMeasurements(Timestamp from, Timestamp till) const {
-  auto & allMeasurements = getMeasurements();
+  auto & allMeasurements = getAllMeasurements();
   PoseMeasurements poses;
   std::copy_if(allMeasurements.begin(), allMeasurements.end(), poses.begin(), [=](const PoseMeasurements::value_type & p){
     auto t = Timestamp(p.first);

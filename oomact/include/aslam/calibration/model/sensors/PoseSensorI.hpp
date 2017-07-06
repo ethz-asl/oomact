@@ -17,7 +17,7 @@ class PoseSensorI {
   virtual ~PoseSensorI(){}
 
   virtual bool hasMeasurements() const = 0;
-  virtual const PoseMeasurements & getMeasurements() const = 0;
+  virtual const PoseMeasurements & getAllMeasurements() const = 0;
   virtual PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const = 0;
 
   virtual const Frame & getTargetFrame() const = 0;
