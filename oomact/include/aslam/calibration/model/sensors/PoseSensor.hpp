@@ -21,7 +21,8 @@ class PoseSensor : public AbstractPoseSensor {
   void addMeasurement(const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, const Timestamp t);
 
   virtual bool hasMeasurements() const override;
-  virtual const PoseMeasurements & getMeasurements() const override;
+
+  virtual const PoseMeasurements & getAllMeasurements() const override;
 
   const Covariance& getCovOrientation() const {
     return covOrientation;

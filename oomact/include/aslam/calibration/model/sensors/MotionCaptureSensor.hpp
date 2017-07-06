@@ -52,7 +52,7 @@ class MotionCaptureSensor : public AbstractPoseSensor {
     return bool(measurements);
   }
 
-  const PoseMeasurements & getMeasurements() const override;
+  const PoseMeasurements & getAllMeasurements() const override;
   PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const override;
 
   const Frame& getTargetFrame() const override {

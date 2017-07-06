@@ -93,7 +93,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
     return false;
   }
 
-  const PoseMeasurements & measurements = poseSensor.getMeasurements();
+  const PoseMeasurements & measurements = poseSensor.getAllMeasurements();
 
   const Interval & effectiveBatchInterval = calib.getCurrentEffectiveBatchInterval();
   SM_ASSERT_TRUE(Exception, effectiveBatchInterval, "effectiveBatchInterval must be set");
