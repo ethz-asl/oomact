@@ -52,7 +52,7 @@ struct SmartDriver {
     d(d)
   {
     stop();
-    repeatCommandThread = std::move(std::thread([this](){
+    repeatCommandThread = std::thread([this](){
       while(!closing){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         {
@@ -64,7 +64,7 @@ struct SmartDriver {
           }
         }
       }
-    }));
+    });
   }
 
   ~SmartDriver(){
