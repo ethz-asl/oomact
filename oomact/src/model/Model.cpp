@@ -36,11 +36,11 @@ class SimpleGravity : public Gravity, public Module, public CalibratableMinimal 
   }
 
  protected:
-  void setActive(bool spatial, bool /*temporal*/){
+  void setActive(bool spatial, bool /*temporal*/) override {
 //  TODO C USE this  const bool active = ec.getCalibrationActivator().isActive(imu); //TODO B this should be nicer (depend on Imu s)
     g_m->setActive(isToBeCalibrated() && spatial);
   }
-  virtual void writeConfig(std::ostream & out) const{
+  virtual void writeConfig(std::ostream & out) const override {
     out << (", " "g_m" "=") << g_m->getValue();
   }
   void registerWithModel() override {
