@@ -199,7 +199,7 @@ logger:
       <reOptMaxIterations>10</reOptMaxIterations>
       <optimizer>
         <method>ObservabilityAware</method>
-        <convergenceDeltaJ>1e-2</convergenceDeltaJ>
+        <convergenceDeltaError>1e-2</convergenceDeltaError>
         <convergenceDeltaX>1e-3</convergenceDeltaX>
         <maxIterations>30</maxIterations>
         <linearSolverMaximumFails>0</linearSolverMaximumFails>
