@@ -60,9 +60,11 @@ Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPat
     if(f) addFrame(*f);
   }
 
-  aslam::calibration::SimpleGravity* simpleGravity = new SimpleGravity(*this, config);
-  gravity.reset(simpleGravity);
-  add(*simpleGravity);
+  if(config.hasKey("Gravity")){
+    aslam::calibration::SimpleGravity* simpleGravity = new SimpleGravity(*this, config);
+    gravity.reset(simpleGravity);
+    add(*simpleGravity);
+  }
 }
 
 std::ostream & Model::printCalibrationVariables(std::ostream& out) const {
@@ -90,11 +92,21 @@ void Model::init() {
 
 void Model::registerModule(Module & m){
   CHECK_EQ(&m.getModel(), this) << " : Module " << m.getName() << " was created with a different model!";
+  CHECK(!m.getName().empty()) << "Module names must not be empty but there is a " << typeid(m).name() << " instance with an empty name.";
+
+  std::string uidCandidate = m.getName();
+  int i = 0;
+  while(id2moduleMap.count(uidCandidate)){
+    uidCandidate = m.getName() + std::to_string(++i);
+  }
+  m.setUid(uidCandidate);
+  if(i > 0){
+    LOG(WARNING) << "One module " << m.getName() << " had to be given a unique name different from its name (" << m.getUid() << ") because the original name was already taken as id";
+  }
+  auto emplaceResult = id2moduleMap.emplace(uidCandidate, m);
+  CHECK(emplaceResult.second);
 
   modules.emplace_back(m);
-  m.setUid(m.getName()); //TODO A ensure uniqueness for modules uids!!
-  id2moduleMap.emplace(m.getUid(), m);
-
   m.registerWithModel();
 
   if(auto p = m.ptrAs<Sensor>()){
@@ -254,6 +266,15 @@ Eigen::VectorXd Model::getParameters() const {
   }
   assert(index == int(numOdometryParameters));
   return params;
+}
+
+const Gravity& Model::getGravity() const {
+  CHECK(gravity);
+  return *gravity;
+}
+Gravity& Model::getGravity() {
+  CHECK(gravity);
+  return *gravity;
 }
 
 ModelAtTime Model::getAtTime(sm::timing::NsecTime, int, const ModelSimplification&) const {
