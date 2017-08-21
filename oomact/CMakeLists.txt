@@ -60,6 +60,7 @@ cs_add_library(${PROJECT_NAME}
   src/plan/Logger.cpp
   src/plan/CalibrationServer.cpp
   src/tools/Interval.cpp
+  src/tools/Typename.cpp
   src/tools/tools.cpp
   src/tools/Parallelizer.cpp
   src/tools/ErrorTermStatistics.cpp

@@ -37,9 +37,6 @@ class Sensor : public Module, public PoseCv, public DelayCv, public ObserverMini
   bool operator == (const Sensor & other) const { return this == &other; };
   bool operator != (const Sensor & other) const { return !(*this == other); };
 
-
-  virtual SensorType getType() const = 0;
-
   friend std::ostream & operator << (std::ostream & out, const Sensor & sensor);
 
   double getMaximalExpectedGap() const {
@@ -73,8 +70,6 @@ class Sensor : public Module, public PoseCv, public DelayCv, public ObserverMini
   double maximalExpectedGap;
   boost::shared_ptr<aslam::backend::MEstimator> mEstimator;
 };
-
-inline bool isPointCloudSensor(const Sensor & sensor) { return isPointCloudSensor(sensor.getType()); }
 
 }
 }

@@ -13,10 +13,6 @@ AbstractPoseSensor::AbstractPoseSensor(Model& model, std::string name, sm::value
 AbstractPoseSensor::~AbstractPoseSensor() {
 }
 
-SensorType AbstractPoseSensor::getType() const {
-  return SensorType::POSE;
-}
-
 PoseMeasurements AbstractPoseSensor::getMeasurements(Timestamp from, Timestamp till) const {
   auto & allMeasurements = getAllMeasurements();
   PoseMeasurements poses;

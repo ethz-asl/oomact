@@ -23,8 +23,6 @@ class PositionSensor : public Sensor {
 
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
-  SensorType getType() const override;
-
   void addMeasurement(const PositionMeasurement& Position, const Timestamp t);
 
  private:

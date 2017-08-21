@@ -36,30 +36,13 @@ namespace calibration {
 
   constexpr SensorId NoSensorId(std::numeric_limits<size_t>::max());
 
-  enum class SensorType {
-    POINT_CLOUD_2D,
-    POINT_CLOUD_3D,
-    POSE,
-    IMU,
-    ODOMETRY,
-    POSITION
-  };
-
-  bool isPointCloudSensor(SensorType type);
-
   std::ostream & operator << (std::ostream & o, SensorId id);
-  std::ostream & operator << (std::ostream & o, SensorType type);
 }
 }
 
 namespace std {
 template <typename> struct hash;
 
-template <>
-struct hash < aslam::calibration::SensorType >{
-public :
-    size_t operator()(aslam::calibration::SensorType sensorType) const;
-};
 template <>
 struct hash < aslam::calibration::SensorId >{
 public :

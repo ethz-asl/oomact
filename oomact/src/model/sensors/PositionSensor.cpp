@@ -42,10 +42,6 @@ PositionSensor::PositionSensor(Model& model, std::string name, sm::value_store::
 PositionSensor::~PositionSensor() {
 }
 
-SensorType PositionSensor::getType() const {
-  return SensorType::POSITION;
-}
-
 void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Position";
   if(!measurements || measurements->empty()){

@@ -74,10 +74,6 @@ MotionCaptureSensor::MotionCaptureSensor(MotionCaptureSystem& motionCaptureSyste
 MotionCaptureSensor::~MotionCaptureSensor() {
 }
 
-SensorType MotionCaptureSensor::getType() const {
-  return SensorType::POSE;
-}
-
 PoseMeasurements MotionCaptureSensor::getMeasurements(Timestamp from, Timestamp till) const
 {
   PoseMeasurements poses;

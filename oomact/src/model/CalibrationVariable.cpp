@@ -8,8 +8,7 @@
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/error-terms/MeasurementErrorTerm.h>
-
-#include <boost/algorithm/string.hpp>
+#include <aslam/calibration/tools/tools.h>
 
 #include <glog/logging.h>
 #include <boost/make_shared.hpp>
@@ -246,7 +245,6 @@ boost::shared_ptr<backend::ErrorTerm> PriorErrorTermCreater<backend::RotationQua
 }
 }
 
-
 Covariance::Covariance(ValueStoreRef valueStore, int dim) {
   std::string s = valueStore.getString("sigma", std::string());
   if(s.empty()){
@@ -259,8 +257,7 @@ Covariance::Covariance(ValueStoreRef valueStore, int dim) {
     } else if(commas == dim - 1){
       boost::replace_all(s, " ", "");
       covarianceSqrt.setIdentity(dim, dim);
-      std::vector<std::string> parts;
-      boost::split(parts, s, boost::is_any_of(","));
+      std::vector<std::string> parts = splitString(s, ",");
       int i = 0;
       for(auto p : parts){
         covarianceSqrt(i, i) = std::stod(p.c_str());
