@@ -1,17 +1,19 @@
-#include "aslam/calibration/model/CalibrationVariable.h"
+#include <aslam/calibration/model/CalibrationVariable.h>
 
-#include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
-#include <sm/kinematics/quaternion_algebra.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/make_shared.hpp>
+#include <glog/logging.h>
+
+#include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/Scalar.hpp>
-#include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
+#include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
+#include <sm/kinematics/quaternion_algebra.hpp>
+
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/error-terms/MeasurementErrorTerm.h>
 #include <aslam/calibration/tools/tools.h>
-
-#include <glog/logging.h>
-#include <boost/make_shared.hpp>
 
 using aslam::backend::ScalarExpression;
 
@@ -255,7 +257,7 @@ Covariance::Covariance(ValueStoreRef valueStore, int dim) {
       covarianceSqrt.setIdentity(dim, dim);
       covarianceSqrt *= valueStore.getDouble("sigma").get();
     } else if(commas == dim - 1){
-      boost::replace_all(s, " ", "");
+      boost::algorithm::replace_all(s, " ", "");
       covarianceSqrt.setIdentity(dim, dim);
       std::vector<std::string> parts = splitString(s, ",");
       int i = 0;
