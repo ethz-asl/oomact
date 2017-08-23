@@ -1,14 +1,16 @@
+#include <aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp>
 #include <aslam/backend/OptimizationProblem.hpp>
-#include <aslam/calibration/CalibratorI.hpp>
-#include <aslam/calibration/AbstractCalibrator.h>
-#include <aslam/calibration/CalibrationProblem.hpp>
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/backend/Optimizer2.hpp>
+#include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
 #include <sm/BoostPropertyTree.hpp>
 
-#include "aslam/backend/Optimizer2.hpp"
-#include "aslam/backend/SparseCholeskyLinearSystemSolver.hpp"
+#include <aslam/calibration/AbstractCalibrator.h>
+#include <aslam/calibration/CalibratorI.hpp>
+#include <aslam/calibration/CalibrationProblem.hpp>
+#include <aslam/calibration/data/MapStorage.h>
+#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/model/Sensor.hpp>
 
-#include "aslam/backend/LevenbergMarquardtTrustRegionPolicy.hpp"
 namespace aslam {
 namespace calibration {
 
@@ -61,8 +63,8 @@ class BatchEstConf : public EstConf {
 class BatchCalibrationProblem : public CalibrationProblem, public BatchStateReceiver {
  public:
   BatchCalibrationProblem() :
-    problemSp(new backend::OptimizationProblem()),
-    problem(*problemSp)
+    problemSp_(new backend::OptimizationProblem()),
+    problem_(*problemSp_)
   {
   }
 
@@ -70,28 +72,28 @@ class BatchCalibrationProblem : public CalibrationProblem, public BatchStateRece
 
   void addCalibrationVariable(CalibrationVariable* c) override {
     CHECK_NOTNULL(c);
-    dimCalibVariables += c->getDesignVariable().minimalDimensions();
-    problem.addDesignVariable(aslam::backend::DesignVariable::Ptr(&c->getDesignVariable(), sm::null_deleter()));
+    dimCalibVariables_ += c->getDesignVariable().minimalDimensions();
+    problem_.addDesignVariable(aslam::backend::DesignVariable::Ptr(&c->getDesignVariable(), sm::null_deleter()));
   }
 
   void addStateVariable(backend::DesignVariable* s) override {
     CHECK_NOTNULL(s);
-    dimStateVariables += s->minimalDimensions();
-    problem.addDesignVariable(aslam::backend::DesignVariable::Ptr(s, sm::null_deleter()));
+    dimStateVariables_ += s->minimalDimensions();
+    problem_.addDesignVariable(aslam::backend::DesignVariable::Ptr(s, sm::null_deleter()));
   }
 
   size_t getDimCalibrationVariables() const override {
-    return dimCalibVariables;
+    return dimCalibVariables_;
   }
   size_t getDimStateVariables() const override {
-    return dimStateVariables;
+    return dimStateVariables_;
   }
   size_t getNumErrorTerms() const override {
-    return problem.numErrorTerms();
+    return problem_.numErrorTerms();
   }
 
   void addErrorTerm(const boost::shared_ptr<aslam::backend::ErrorTerm> & et) override {
-    problem.addErrorTerm(et);
+    problem_.addErrorTerm(et);
   }
 
   void addBatchState(StateCarrier & /*stateCarrier*/, const BatchStateSP& /*batchState*/) override {
@@ -105,22 +107,22 @@ class BatchCalibrationProblem : public CalibrationProblem, public BatchStateRece
       }
     };
 
-    return static_cast<A&>(problem).getErrorTerms();
+    return static_cast<A&>(problem_).getErrorTerms();
   }
 
   virtual void getErrors(const backend::DesignVariable* dv, std::set<backend::ErrorTerm*>& outErrorSet) const override {
-    problem.getErrors(dv, outErrorSet);
+    problem_.getErrors(dv, outErrorSet);
   }
 
   const boost::shared_ptr<backend::OptimizationProblem>& getProblemSp() const {
-    return problemSp;
+    return problemSp_;
   }
 
  private:
-  boost::shared_ptr<backend::OptimizationProblem> problemSp;
-  backend::OptimizationProblem & problem;
+  boost::shared_ptr<backend::OptimizationProblem> problemSp_;
+  backend::OptimizationProblem & problem_;
 
-  size_t dimCalibVariables = 0, dimStateVariables = 0;
+  size_t dimCalibVariables_ = 0, dimStateVariables_ = 0;
 };
 
 class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrator {
@@ -190,9 +192,14 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     }
   }
 
+  virtual Module::Storage & getCurrentStorage() override {
+    return storage_;
+  }
+
  private:
   sm::value_store::ValueStoreRef config_;
   BatchCalibratorOptions options_;
+  MapStorage<const Module *> storage_;
 };
 
 

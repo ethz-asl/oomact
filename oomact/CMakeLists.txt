@@ -32,6 +32,8 @@ cs_add_library(${PROJECT_NAME}
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/algo/OdometryPath.cpp
+  src/data/MapStorage.cpp
+  src/data/StorageI.cpp
   src/model/Module.cpp
   src/model/ModuleList.cpp
   src/model/Model.cpp
@@ -84,6 +86,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
   test/data/MeasurementsContainerTest.cpp
+  test/data/StorageTest.cpp
   test/acceptance/SimpleModelTest.cpp
   test/model/ModelTest.cpp
   

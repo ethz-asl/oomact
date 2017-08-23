@@ -4,7 +4,7 @@
 
 #include <aslam/calibration/data/MeasurementsContainer.h>
 
-TEST(AslamCalibrationTestSuite, testOrder) {
+TEST(MeasurementContainerTestSuite, testOrder) {
   using namespace aslam::calibration;
 
   std::vector<Duration> expected = {0., 3., 4., 5., 6.};

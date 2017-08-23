@@ -7,6 +7,7 @@
 #include <sm/assert_macros.hpp>
 
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/data/StorageI.h>
 
 namespace aslam {
 namespace calibration {
@@ -48,6 +49,11 @@ void Module::registerWithModel() {
   isRegistered_ = true;
 }
 
+void Module::clearMeasurements(Storage& storage) {
+  storage.remove(this);
+  clearMeasurements();
+}
+
 void Module::clearMeasurements() {
 }
 
@@ -58,14 +64,22 @@ bool Module::shouldObserveOnly(const EstConf& ec) const {
   return observeOnly || errorTermsInactive;
 }
 
-void Module::addErrorTerms(CalibratorI& calib, const EstConf & ec, ErrorTermReceiver & problem) const {
+
+void Module::addErrorTerms(CalibratorI& /*calib*/, const EstConf& /*ec*/, ErrorTermReceiver& /*errorTermReceiver*/) const {
+}
+
+void Module::addErrorTerms(CalibratorI& calib, const Storage & storage, const EstConf & ec, ErrorTermReceiver & problem) const {
   if(isUsed()){
+    addErrorTerms(calib, ec, problem);
     const bool observeOnly = shouldObserveOnly(ec);
     LOG(INFO) << "Adding measurement" << (observeOnly ? " observer" : "") << " error terms for module " << getName() << ".";
+    addMeasurementErrorTerms(calib, storage, ec, problem, observeOnly);
     addMeasurementErrorTerms(calib, ec, problem, observeOnly);
   }
 }
 
+void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const Storage & /*storage*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
+}
 void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }
 
@@ -168,3 +182,4 @@ void Module::estimatesUpdated(CalibratorI& /*calib*/) const {
 
 } /* namespace calibration */
 } /* namespace aslam */
+

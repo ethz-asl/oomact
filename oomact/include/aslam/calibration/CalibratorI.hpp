@@ -56,6 +56,8 @@ class CalibratorI {
 
   //TODO C sort functions into other interfaces, such as calibrator state
 
+  virtual Module::Storage & getCurrentStorage() = 0;
+
   virtual void addMeasurementTimestamp(Timestamp t, const Sensor & sensor) = 0;
 
   virtual std::shared_ptr<PredictionFunctorWriter> createPredictionCollector(const std::string & name) = 0; //TODO make private again and only expose via special interface available during addMeasurements ..

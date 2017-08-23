@@ -141,16 +141,22 @@ class IsA {
 
 std::string normalizeName(const char * parameter);
 
+template <typename Key> class StorageI;
+
 class Module : public virtual Named, public virtual Used, public IsA<Module> {
  public:
+  typedef StorageI<const Module*> Storage;
+
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
 
-  virtual bool initState(CalibratorI & calib);
   virtual void setCalibrationActive(const EstConf & ec);
+  virtual bool initState(CalibratorI & calib);
   virtual void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
-  virtual void clearMeasurements();
-  virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
+
+  virtual void clearMeasurements(Storage & storage);
+  virtual void clearMeasurements(); //TODO Deprecate in favor of clearMeasurements(Storage & storage); and make that one const. AND remove all the non storage compat functions.
+  virtual void addErrorTerms(CalibratorI & calib, const Storage & storage, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
   virtual void preProcessNewWindow(CalibratorI & calib);
 
   virtual void estimatesUpdated(CalibratorI & calib) const;
@@ -217,6 +223,8 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
 
   void resolveLinks(ModuleRegistry & reg);
 
+  virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
+  virtual void addMeasurementErrorTerms(CalibratorI & calib, const Storage & storage, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
   virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
   void setUid(const std::string& uid) { uid_ = uid; }
 
