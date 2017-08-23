@@ -29,6 +29,8 @@ cs_add_library(${PROJECT_NAME}
   
   src/laser-scanner/laser3d.cpp
   
+  src/calibrator/BatchCalibrator.cpp
+  src/calibrator/AbstractCalibrator.cpp
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/algo/OdometryPath.cpp
@@ -68,9 +70,6 @@ cs_add_library(${PROJECT_NAME}
   src/tools/Parallelizer.cpp
   src/tools/ErrorTermStatistics.cpp
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
-
-  src/BatchCalibrator.cpp
-  src/AbstractCalibrator.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
