@@ -12,8 +12,6 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
   AbstractPoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config);
   virtual ~AbstractPoseSensor();
 
-  SensorType getType() const override;
-
   AbstractPoseSensor & getSensor() override {
     return *this;
   }

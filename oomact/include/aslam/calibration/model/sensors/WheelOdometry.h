@@ -14,9 +14,6 @@ class WheelOdometry : public Sensor {
  public:
   WheelOdometry(Model & model, const std::string & name, sm::value_store::ValueStoreRef config);
 
-  SensorType getType() const override { return SensorType::ODOMETRY; };
-
-
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
   void clearMeasurements() override;
 

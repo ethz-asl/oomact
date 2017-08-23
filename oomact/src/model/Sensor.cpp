@@ -12,54 +12,18 @@
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/CalibratorI.hpp> //TODO A remove this and use frames instead!
 #include <aslam/calibration/tools/tools.h>
-
-size_t std::hash < aslam::calibration::SensorType >::operator()(aslam::calibration::SensorType sensorType) const
-{
-  return std::hash<int>()((int)sensorType);
-}
+#include <aslam/calibration/tools/Typename.h>
 
 size_t std::hash < aslam::calibration::SensorId >::operator()(const aslam::calibration::SensorId & sensorId) const
 {
   return std::hash<size_t>()(sensorId.getValue());
 }
 
-
 namespace aslam {
 namespace calibration {
-bool isPointCloudSensor(SensorType type) {
-  switch(type) {
-    case SensorType::POINT_CLOUD_2D:
-    case SensorType::POINT_CLOUD_3D:
-      return true;
-    default:
-      return false;
-   }
-}
 
 std::ostream & operator << (std::ostream & o, SensorId id){
   return o << id.getValue();
-}
-std::ostream & operator << (std::ostream & o, SensorType type){
-  switch(type){
-    case SensorType::POINT_CLOUD_2D:
-      o << "PointCloud2d";
-      break;
-    case SensorType::POINT_CLOUD_3D:
-      o << "PointCloud3d";
-      break;
-    case SensorType::POSE:
-      o << "Pose";
-      break;
-    case SensorType::IMU:
-      o << "Imu";
-      break;
-    case SensorType::ODOMETRY:
-      o << "Odometry";
-      break;
-    default:
-      o << (int)(type);
-  }
-  return o;
 }
 
 Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
@@ -75,7 +39,7 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
 }
 
 void Sensor::writeConfig(std::ostream& out) const {
-  out << ", id=" << id << ", type=" << getType() << ", parentFrame=" << getParentFrame();
+  out << ", id=" << id << ", type=" << Typename(*this) << ", parentFrame=" << getParentFrame();
   if(maximalExpectedGap > 0){
     MODULE_WRITE_PARAMETER(maximalExpectedGap);
   }

@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sm/value_store/ValueStore.hpp>
 #include <string>
+#include <vector>
 
 namespace aslam {
 namespace backend {
@@ -25,6 +26,8 @@ template <typename T, typename = typename std::enable_if<std::is_integral<T>::va
 std::string operator + (const std::string & s , T t){
   return s + toString(t);
 }
+
+std::vector<std::string> splitString(const std::string & s, const std::string & byAnyOf);
 
 void openStream(std::ofstream & outputFile, std::string pathPrefix);
 void writeToFile(const std::string & fileName, std::function<void(std::ostream &o)> writer);

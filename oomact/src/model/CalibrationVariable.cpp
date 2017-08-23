@@ -1,18 +1,19 @@
-#include "aslam/calibration/model/CalibrationVariable.h"
+#include <aslam/calibration/model/CalibrationVariable.h>
 
-#include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
-#include <sm/kinematics/quaternion_algebra.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/make_shared.hpp>
+#include <glog/logging.h>
+
+#include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/Scalar.hpp>
-#include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
+#include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
+#include <sm/kinematics/quaternion_algebra.hpp>
+
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/error-terms/MeasurementErrorTerm.h>
-
-#include <boost/algorithm/string.hpp>
-
-#include <glog/logging.h>
-#include <boost/make_shared.hpp>
+#include <aslam/calibration/tools/tools.h>
 
 using aslam::backend::ScalarExpression;
 
@@ -246,7 +247,6 @@ boost::shared_ptr<backend::ErrorTerm> PriorErrorTermCreater<backend::RotationQua
 }
 }
 
-
 Covariance::Covariance(ValueStoreRef valueStore, int dim) {
   std::string s = valueStore.getString("sigma", std::string());
   if(s.empty()){
@@ -257,10 +257,9 @@ Covariance::Covariance(ValueStoreRef valueStore, int dim) {
       covarianceSqrt.setIdentity(dim, dim);
       covarianceSqrt *= valueStore.getDouble("sigma").get();
     } else if(commas == dim - 1){
-      boost::replace_all(s, " ", "");
+      boost::algorithm::replace_all(s, " ", "");
       covarianceSqrt.setIdentity(dim, dim);
-      std::vector<std::string> parts;
-      boost::split(parts, s, boost::is_any_of(","));
+      std::vector<std::string> parts = splitString(s, ",");
       int i = 0;
       for(auto p : parts){
         covarianceSqrt(i, i) = std::stod(p.c_str());

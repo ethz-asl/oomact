@@ -1,10 +1,11 @@
 #include <aslam/calibration/model/Model.h>
 
 #include <atomic>
-#include <Eigen/Core>
-#include <glog/logging.h>
 #include <iostream>
 #include <vector>
+
+#include <Eigen/Core>
+#include <glog/logging.h>
 
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/OptimizationProblemBase.hpp>
@@ -14,6 +15,7 @@
 #include <aslam/calibration/model/Joint.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/tools/tools.h>
 
 using aslam::calibration::OptimizationProblem;
 
@@ -58,6 +60,11 @@ Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPat
 {
   for(auto f : frames){
     if(f) addFrame(*f);
+  }
+  if(config.hasKey("frames")){
+    for(auto & f : splitString(config.getString("frames"), ",:")){
+      createFrame(f);
+    }
   }
 
   if(config.hasKey("Gravity")){
@@ -126,16 +133,6 @@ void Model::registerJoint(Joint& j) {
   joints.emplace_back(j);
 }
 
-std::vector<std::reference_wrapper<const Sensor>> Model::getSensors(SensorType type) const
-{
-  std::vector<std::reference_wrapper<const Sensor> > ret;
-  for (const Sensor& s: getSensors()) {
-    if (s.getType() == type)
-    ret.emplace_back(s);
-  }
-  return ret;
-}
-
 Sensor& Model::getSensor(SensorId id) {
   auto it = id2sensorMap.find(id);
   if (it == id2sensorMap.end()){
@@ -170,6 +167,7 @@ void Model::addFrame(const Frame& frame) {
 }
 
 const Frame & Model::createFrame(const std::string& name) {
+  LOG(INFO) << "Creating generic frame " << name << ".";
   Frame * f = new GenericFrame(name);
   addFrame(*f);
 

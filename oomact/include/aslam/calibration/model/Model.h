@@ -97,7 +97,8 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 
   const std::vector<boost::shared_ptr<CalibrationVariable>> & getCalibrationVariables() const { return calibrationVariables; }
   const std::vector<std::reference_wrapper<Sensor>> & getSensors() const { return sensors; }
-  std::vector<std::reference_wrapper<const Sensor> > getSensors(SensorType type) const;
+  template <typename Sensor_>
+  std::vector<std::reference_wrapper<const Sensor_> > getSensors() const;
 
   const std::vector<std::reference_wrapper<Joint>> & getJoints() const { return joints; }
   const std::vector<std::reference_wrapper<Module>> & getModules() const { return modules; }
@@ -168,6 +169,19 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 
   std::unique_ptr<Gravity> gravity;
 };
+
+template<typename Sensor_>
+inline std::vector<std::reference_wrapper<const Sensor_>> Model::getSensors() const
+{
+  static_assert(std::is_base_of<Sensor, Sensor_>::value, "Only sensors may be given as type parameter for getSensors<>()!");
+  std::vector<std::reference_wrapper<const Sensor_> > ret;
+  for (const Module& s: getModules()) {
+    if (auto p = s.ptrAs<Sensor_>()) {
+      ret.emplace_back(*p);
+    }
+  }
+  return ret;
+}
 
 }
 }

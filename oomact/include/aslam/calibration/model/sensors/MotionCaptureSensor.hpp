@@ -38,8 +38,6 @@ class MotionCaptureSensor : public AbstractPoseSensor {
 
   Interval getSnappedWindow(CalibratorI & calib, const Interval & i);
 
-  SensorType getType() const override;
-
   const std::shared_ptr<MotionCaptureSource>& getMotionCaptureSource() const {
     return motionCaptureSource;
   }

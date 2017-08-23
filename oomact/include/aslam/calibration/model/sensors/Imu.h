@@ -85,8 +85,6 @@ class Imu : public Sensor, public StateCarrier {
 
   void addPriorFactors(CalibratorI & calib, backend::ErrorTermReceiver & errorTermReceiver, double priorFactor) const;
 
-  virtual SensorType getType() const override { return SensorType::IMU; }
-
   double getMaximalTimeGap() const;
 
   virtual ~Imu();

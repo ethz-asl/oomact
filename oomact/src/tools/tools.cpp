@@ -5,15 +5,15 @@
 #include <iomanip>
 #include <iostream>
 
-#include <glog/logging.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <sm/kinematics/Transformation.hpp>
-
-#include "aslam/backend/MEstimatorPolicies.hpp"
 #include <Eigen/Core>
+#include <glog/logging.h>
+
+#include <sm/kinematics/Transformation.hpp>
+#include <aslam/backend/MEstimatorPolicies.hpp>
 
 namespace aslam {
 namespace calibration {
@@ -37,6 +37,12 @@ void createDirs(const std::string & path, bool ignoreErrors){
       throw e;
     }
   }
+}
+
+std::vector<std::string> splitString(const std::string & s, const std::string & byAnyOf) {
+  std::vector<std::string> parts;
+  boost::split(parts, s, boost::is_any_of(byAnyOf));
+  return parts;
 }
 
 void openStream(std::ofstream & outputFile, std::string path) {
