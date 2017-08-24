@@ -7,7 +7,7 @@
 #include <glog/logging.h>
 
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
-#include "aslam/calibration/tools/SplineWriter.h"
+#include <aslam/calibration/tools/SplineWriter.h>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 
@@ -22,13 +22,15 @@ So3R3Trajectory::So3R3Trajectory(const So3R3TrajectoryCarrier & carrier) :
   translationSpline(carrier.getTransSplineOrder()),
   carrier(carrier)
 {
+	static_assert(std::is_same<sm::timing::NsecTime, Timestamp::Integer>::value, "");
+	static_assert(1e9 == Timestamp::getDivider(), "");
 }
 
 
 template<typename BSpline_, typename Functor>
 struct WhiteNoiseIntegrationErrorExpressionFactory {
   typedef BSpline_ BSplineT;
-  typedef typename BSplineT::time_t TimeT;
+  typedef typename BSplineT::time_t SplineTime;
   enum {PointSize = 3 };
   typedef VectorExpression<PointSize> value_expression_t;
   typedef Eigen::Matrix<double, 1, 1>  value_t;
@@ -39,14 +41,14 @@ struct WhiteNoiseIntegrationErrorExpressionFactory {
 
   WhiteNoiseIntegrationErrorExpressionFactory(const BSplineT & bspline, Functor funct, Eigen::Matrix<double, PointSize, PointSize> sqrtInvR) : _bspline(bspline), _sqrtInvR(sqrtInvR), _funct(funct) {}
 
-  inline value_expression_t getExpressionAt(const BSplineT & bspline, TimeT time) const {
+  inline value_expression_t getExpressionAt(const BSplineT & bspline, SplineTime time) const {
     return _funct(bspline, time);
   }
-  inline value_expression_t operator()(TimeT time) const {
+  inline value_expression_t operator()(SplineTime time) const {
     return getExpressionAt(_bspline, time);
   }
 
-  inline value_t eval(const BSplineT & spline, TimeT t) const {
+  inline value_t eval(const BSplineT & spline, SplineTime t) const {
     auto error = (_sqrtInvR * getExpressionAt(spline, t).evaluate()).eval();
     return (value_t() << error.dot(error)).finished();
   }
@@ -71,8 +73,8 @@ void addWhiteNoiseModelErrorTerms(ErrorTermReceiver & errorTermReceiver, const S
 }
 
 void So3R3Trajectory::addWhiteNoiseModelErrorTerms(ErrorTermReceiver & errorTermReceiver, std::string name, const double invSigma) const {
-  calibration::addWhiteNoiseModelErrorTerms(errorTermReceiver, getTranslationSpline(), [&](const TranslationSpline & bspline, sm::timing::NsecTime time){ return bspline.getExpressionFactoryAt<2>(time).getValueExpression(2);}, name + "WhiteNoiseAcceleration", Eigen::Matrix3d::Identity() * invSigma);
-  calibration::addWhiteNoiseModelErrorTerms(errorTermReceiver, getRotationSpline(), [&](const RotationSpline & bspline, sm::timing::NsecTime time){ return bspline.getExpressionFactoryAt<2>(time).getAngularAccelerationExpression();}, name + "WhiteNoiseAngularAcceleration", Eigen::Matrix3d::Identity() * invSigma);
+  calibration::addWhiteNoiseModelErrorTerms(errorTermReceiver, getTranslationSpline(), [&](const TranslationSpline & bspline, typename TranslationSpline::time_t time){ return bspline.getExpressionFactoryAt<2>(time).getValueExpression(2);}, name + "WhiteNoiseAcceleration", Eigen::Matrix3d::Identity() * invSigma);
+  calibration::addWhiteNoiseModelErrorTerms(errorTermReceiver, getRotationSpline(), [&](const RotationSpline & bspline, typename RotationSpline::time_t time){ return bspline.getExpressionFactoryAt<2>(time).getAngularAccelerationExpression();}, name + "WhiteNoiseAngularAcceleration", Eigen::Matrix3d::Identity() * invSigma);
 }
 
 
@@ -87,7 +89,7 @@ void So3R3Trajectory::writeToFile(const CalibratorI& calib, const std::string& p
   writeSpline(rotationSpline, calib.getOptions().getSplineOutputSamplePeriod(), pathPrefix + "rot");
 }
 
-void So3R3Trajectory::fitSplines(const Interval& effectiveBatchInterval, const size_t numMeasurements, const std::vector<NsecTime> & timestamps, const std::vector<Eigen::Vector3d> & transPoses, const std::vector<Eigen::Vector4d> & rotPoses) {
+void So3R3Trajectory::fitSplines(const Interval& effectiveBatchInterval, const size_t numMeasurements, const std::vector<sm::timing::NsecTime> & timestamps, const std::vector<Eigen::Vector3d> & transPoses, const std::vector<Eigen::Vector4d> & rotPoses) {
   const double elapsedTime = effectiveBatchInterval.getElapsedTime();
   const int measPerSec = std::round(numMeasurements / elapsedTime);
   int numSegments;
