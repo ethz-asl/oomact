@@ -173,7 +173,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
   }
 
   bool handleNewTimeBaseTimestamp(Timestamp t) override {
-    if (_currentEffectiveBatchInterval.start == Timestamp(-1L)){
+    if (_currentEffectiveBatchInterval.start == InvalidTimestamp()){
       _currentEffectiveBatchInterval.start = t;
       _currentEffectiveBatchInterval.end = t;
       return true;

@@ -105,7 +105,7 @@ sm::kinematics::Transformation Sensor::getTransformationTo(const ModelAtTime& ro
 }
 
 sm::kinematics::Transformation Sensor::getTransformationTo(const CalibratorI & calib, const Frame& to) const {
-  return getTransformationTo(calib.getModelAt(Timestamp(0L), 0, {false, false}), to);
+  return getTransformationTo(calib.getModelAt(Timestamp::Zero(), 0, {false, false}), to);
 }
 
 Interval Sensor::getCurrentMeasurementTimestampRange(const CalibratorI & /*calib*/) const {

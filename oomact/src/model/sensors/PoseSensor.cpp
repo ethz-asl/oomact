@@ -83,7 +83,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
   }
 
   const PoseMeasurement * lastPoseMeasurement = nullptr;
-  Timestamp lastTimestamp(0L);
+  auto lastTimestamp = Timestamp::Zero();
   aslam::backend::TransformationExpression last_T_m_s;
   for (auto & m : *measurements) {
     Timestamp timestamp = m.first;

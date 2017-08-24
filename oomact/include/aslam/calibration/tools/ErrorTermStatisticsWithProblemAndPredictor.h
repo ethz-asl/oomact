@@ -13,7 +13,7 @@ class CalibratorI;
 
 template <typename ErrorTerm>
 Timestamp getTimestampFor(size_t counter, ErrorTerm & /* errorTerm */){
-  return Timestamp(Timestamp::Integer(counter));
+  return Timestamp(Timestamp::Numerator(counter));
 }
 
 class ErrorTermStatisticsWithProblemAndPredictor : public ErrorTermStatistics {

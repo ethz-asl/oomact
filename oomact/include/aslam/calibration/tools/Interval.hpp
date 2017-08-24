@@ -29,8 +29,8 @@ struct BoundedTimeExpression {
 
 
 struct Interval {
-  Timestamp start = -1L;
-  Timestamp end = -1L;
+  Timestamp start = InvalidTimestamp();
+  Timestamp end = InvalidTimestamp();
   Interval() = default;
   Interval(Timestamp start, Timestamp end) : start(start), end(end) {}
 
@@ -38,7 +38,7 @@ struct Interval {
     *this = Interval();
   }
   operator bool () const {
-    return start >= Timestamp(0L);
+    return start >= Timestamp::Zero();
   }
 
   bool contains(Timestamp t) const {

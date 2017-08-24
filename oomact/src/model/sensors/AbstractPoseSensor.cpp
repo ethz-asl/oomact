@@ -17,7 +17,7 @@ PoseMeasurements AbstractPoseSensor::getMeasurements(Timestamp from, Timestamp t
   auto & allMeasurements = getAllMeasurements();
   PoseMeasurements poses;
   std::copy_if(allMeasurements.begin(), allMeasurements.end(), poses.begin(), [=](const PoseMeasurements::value_type & p){
-    auto t = Timestamp(p.first);
+    Timestamp t = p.first;
     return t <= till && t >= from;
   });
   return poses;

@@ -37,8 +37,8 @@ namespace aslam {
       /** \name Public members
         @{
         */
-      sm::timing::NsecTime timestamp_k;
-      sm::timing::NsecTime timestamp_km1;
+      Timestamp timestamp_k;
+      Timestamp timestamp_km1;
       /// Relative position of the reference frame of velodyne (Fv) w.r. to the mapping frame
       Eigen::Vector3d r_km1_k;
       /// Covariance matrix for r_m_mv

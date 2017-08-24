@@ -31,9 +31,9 @@ class DelayCv {
   DelayCv(const Module * module);
 
   bool hasDelay() const { return bool(dt_r_s); }
-  Timestamp getDelay() const { return hasDelay() ? dt_r_s->toScalar() : Timestamp(0L); }
-  Timestamp getDelayLowerBound() const { return hasDelay() ? dt_r_s->getLowerBound() : Timestamp(0L); }
-  Timestamp getDelayUpperBound() const { return hasDelay() ? dt_r_s->getUpperBound() : Timestamp(0L); }
+  Timestamp getDelay() const { return hasDelay() ? dt_r_s->toScalar() : Timestamp::Zero(); }
+  Timestamp getDelayLowerBound() const { return hasDelay() ? dt_r_s->getLowerBound() : Timestamp::Zero(); }
+  Timestamp getDelayUpperBound() const { return hasDelay() ? dt_r_s->getUpperBound() : Timestamp::Zero(); }
 
   const TimeExpression & getDelayExpression() const { return delayExp; }
   const TimeDesignVariableCv& getDelayVariable() const {

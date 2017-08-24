@@ -318,7 +318,7 @@ aslam::backend::EuclideanExpression Bias::getBiasExpression(Timestamp t) const {
 
 void Imu::addPriorFactors(CalibratorI & calib, ErrorTermReceiver & errorTermReceiver, double priorFactor) const {
   const double invSigma = 1e-2 * priorFactor;
-  sm::timing::NsecTime startTime = calib.getCurrentEffectiveBatchInterval().start;
+  Timestamp startTime = calib.getCurrentEffectiveBatchInterval().start;
   if(accBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(accBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity()*invSigma));
   if(gyroBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(gyroBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity()*invSigma));
 }

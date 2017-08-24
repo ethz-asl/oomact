@@ -83,8 +83,8 @@ protected:
   void updateOptimizerInspector(const CalibrationProblem &  currentBatch, bool printRegessionErrorStatistics, std::function<void(std::ostream & o)> printOptimizationState, backend::callback::Registry & callbackRegistry);
   virtual void addFactors(const EstConf& estimationConfig, backend::ErrorTermReceiver & problem, std::function<void()> statusCallback);
 
-  Timestamp _lastTimestamp = -1L;
-  Timestamp _lowestTimestamp = -1L;
+  Timestamp _lastTimestamp = InvalidTimestamp();
+  Timestamp _lowestTimestamp = InvalidTimestamp();
   bool _lowesTimestampProvided = false;
 
   Interval _currentEffectiveBatchInterval;
@@ -100,7 +100,7 @@ protected:
   const std::shared_ptr<Model> _modelSP;
   Model & _model;
  private:
-  void addMeasurementTimestamp(Timestamp lowerBound, Timestamp upperBound = -1L);
+  void addMeasurementTimestamp(Timestamp lowerBound, Timestamp upperBound = InvalidTimestamp());
 
   void setCalibrationVariablesActivity(const EstConf& ec);
 

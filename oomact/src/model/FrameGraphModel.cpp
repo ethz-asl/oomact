@@ -18,7 +18,7 @@ class FrameGraph: public Tree<const Frame*, PoseTrajectory*> {
 constexpr int getVariability(BoundedTimeExpression*){
   return 1;
 }
-constexpr int getVariability(NsecTime*){
+constexpr int getVariability(Timestamp*){
   return 0;
 }
 
@@ -119,8 +119,8 @@ FrameGraphModel::FrameGraphModel(ValueStoreRef config, std::shared_ptr<ConfigPat
 FrameGraphModel::~FrameGraphModel(){
 }
 
-ModelAtTime FrameGraphModel::getAtTime(sm::timing::NsecTime timestamp, int maximalDerivativeOrder, const ModelSimplification& simplification) const {
-  return ModelAtTime(std::unique_ptr<ModelAtTimeImpl>(new FrameGraphModelAtTimeImpl<sm::timing::NsecTime>(*this, timestamp, maximalDerivativeOrder, simplification)));
+ModelAtTime FrameGraphModel::getAtTime(Timestamp timestamp, int maximalDerivativeOrder, const ModelSimplification& simplification) const {
+  return ModelAtTime(std::unique_ptr<ModelAtTimeImpl>(new FrameGraphModelAtTimeImpl<Timestamp>(*this, timestamp, maximalDerivativeOrder, simplification)));
 }
 
 ModelAtTime FrameGraphModel::getAtTime(const BoundedTimeExpression& boundedTimeExpresion, int maximalDerivativeOrder, const ModelSimplification& simplification) const {
