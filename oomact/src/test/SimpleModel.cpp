@@ -1,4 +1,4 @@
-#include "../test_tools/SimpleModel.hpp"
+#include <aslam/calibration/test/SimpleModel.hpp>
 
 #include <cmath>
 
@@ -10,6 +10,7 @@
 
 namespace aslam {
 namespace calibration {
+namespace test {
 
 SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver)
   : Model(config, configPathResolver),
@@ -20,5 +21,6 @@ SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolve
   add(wheelOdometry_);
 }
 
+}
 }
 }

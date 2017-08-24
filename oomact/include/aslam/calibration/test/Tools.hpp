@@ -7,6 +7,7 @@
 
 namespace aslam {
 namespace calibration {
+namespace test {
 
 
 class SimpleConfigPathResolver : public ConfigPathResolver {
@@ -15,6 +16,7 @@ class SimpleConfigPathResolver : public ConfigPathResolver {
 
 sm::value_store::ValueStoreRef readConfig(const std::string & fileList);
 
+}
 }
 }
 

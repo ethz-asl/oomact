@@ -4,48 +4,20 @@
 #include <glog/logging.h>
 
 #include <sm/boost/null_deleter.hpp>
-#include<eigen-checks/gtest.h>
+#include <eigen-checks/gtest.h>
 
+#include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
-#include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/model/FrameGraphModel.h>
+#include <aslam/calibration/test/MockMotionCaptureSource.h>
 
-#include "aslam/calibration/algo/MotionCaptureSource.hpp"
 
 using namespace aslam::calibration;
-
-class MockMotionCaptureSource : public MotionCaptureSource {
- public:
-  MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
-  virtual ~MockMotionCaptureSource() = default;
-  virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override {
-    Timestamp inc(1e-2);
-    std::vector<PoseStamped> poses;
-    for(auto t = from; t <= till + inc; t += inc){
-      poses.resize(poses.size() + 1);
-      poses.back().time = t;
-      func(from, t, poses.back());
-    }
-    return poses;
-  }
-
- private:
-  std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
-};
-
-MockMotionCaptureSource mmcsStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  p.q = sm::kinematics::quatIdentity();
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
-});
-
-MockMotionCaptureSource mmcsRotatingStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  p.q = sm::kinematics::axisAngle2quat({double(now - start), 0, 0});
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
-});
+using namespace aslam::calibration::test;
 
 MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
   const auto angleX = double(now - start) * 3;
@@ -53,6 +25,7 @@ MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptu
   auto rotRQPlusQuaterRotation = sm::kinematics::axisAngle2R({angleX, 0, 0});
   p.p = Eigen::Vector3d::UnitX() * (now - start) + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
 });
+
 
 TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto vs = ValueStoreRef::fromString(
@@ -70,8 +43,6 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   EXPECT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
-
-
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
       "acceptConstantErrorTerms=true\n"
@@ -81,7 +52,7 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto c = createBatchCalibrator(vsCalib, std::shared_ptr<Model>(&m, sm::null_deleter()));
 
   const double startTime = 0, endTime = 1.0;
-  for (auto& p : mmcsStraightLine.getPoses(startTime, endTime)) {
+  for (auto& p : test::mmcsStraightLine.getPoses(startTime, endTime)) {
     mcSensorA.addMeasurement(p.q, p.p, p.time);
     c->addMeasurementTimestamp(p.time, mcSensorA);
   }

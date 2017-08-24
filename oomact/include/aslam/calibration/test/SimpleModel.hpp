@@ -2,12 +2,13 @@
 #define H2C92550D_9A2D_4436_A900_7F53EDF85E01
 
 #include <aslam/calibration/model/Model.h>
-#include "aslam/calibration/model/sensors/WheelOdometry.h"
+#include <aslam/calibration/model/sensors/WheelOdometry.h>
 
 #include "Tools.hpp"
 
 namespace aslam {
 namespace calibration {
+namespace test {
 
 class SimpleModel : public Model {
  public:
@@ -20,6 +21,7 @@ class SimpleModel : public Model {
   WheelOdometry wheelOdometry_;
 };
 
+}
 }
 }
 

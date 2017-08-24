@@ -1,10 +1,11 @@
-#include "Tools.hpp"
+#include <aslam/calibration/test/Tools.hpp>
 
 #include <glog/logging.h>
 #include <sm/BoostPropertyTreeLoader.hpp>
 
 namespace aslam {
 namespace calibration {
+namespace test {
 
 struct PT : public sm::BoostPropertyTreeLoader {
   PT(){
@@ -40,7 +41,6 @@ std::string SimpleConfigPathResolver::resolve(const std::string& path) const
   return ptLoader.resolveFullFilePath(path, "");
 }
 
-
-
+}
 }
 }
