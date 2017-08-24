@@ -64,6 +64,8 @@ cs_add_library(${PROJECT_NAME}
   src/plan/Driver.cpp
   src/plan/Logger.cpp
   src/plan/CalibrationServer.cpp
+  src/test/Tools.cpp
+  src/test/SimpleModel.cpp
   src/tools/Interval.cpp
   src/tools/Typename.cpp
   src/tools/tools.cpp
@@ -75,8 +77,6 @@ target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
-  test/test_tools/Tools.cpp
-  test/test_tools/SimpleModel.cpp
   test/error-terms/ErrorTermAccelerometerTest.cpp
   test/error-terms/ErrorTermGyroscopeTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
