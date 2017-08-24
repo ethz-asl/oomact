@@ -10,7 +10,7 @@ class FrameGraph;
 
 class FrameGraphModel : public Model {
  public:
-  FrameGraphModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver, const std::vector<const Frame *> frames = {});
+  FrameGraphModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver = nullptr, const std::vector<const Frame *> frames = {});
   virtual ~FrameGraphModel();
 
   ModelAtTime getAtTime(Timestamp timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;

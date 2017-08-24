@@ -17,11 +17,6 @@
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"
 
 using namespace aslam::calibration;
-class SimpleModelFrame : public Frame, public NamedMinimal {
-  using NamedMinimal::NamedMinimal;
-};
-SimpleModelFrame world("world");
-SimpleModelFrame body("body");
 
 class MockMotionCaptureSource : public MotionCaptureSource {
  public:
@@ -62,11 +57,12 @@ MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptu
 TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs, nullptr);
   PoseSensor mcSensorA(m, "a", vs);
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, traj);
@@ -102,12 +98,13 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
 TEST(TestCalibration, testEstimateTwoPoseSensors) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,targetFrame=world,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   PoseSensor mcSensorA(m, "a", vs);
   PoseSensor mcSensorB(m, "b", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -141,12 +138,13 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
 TEST(TestCalibration, testEstimateRelativePoseSensor) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,absoluteMeasurements=true,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,targetFrame=world,absoluteMeasurements=false,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=30,rotSplineOrder=4,rotFittingLambda=0.0000001,transSplineOrder=4,transFittingLambda=0.00000001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   PoseSensor mcSensorA(m, "a", vs);
   PoseSensor mcSensorB(m, "b", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -181,12 +179,13 @@ TEST(TestCalibration, testEstimateRelativePoseSensor) {
 TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "o{frame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "a{frame=body,rotation/used=false,translation{used=true,estimate=false,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=10,rotSplineOrder=4,rotFittingLambda=0.000001,transSplineOrder=4,transFittingLambda=0.0000001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   MotionCaptureSystem observer(m, "o", vs);
   MotionCaptureSensor mcSensorA(observer, "a", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -219,6 +218,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
 TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "o{frame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "a{frame=body,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
@@ -227,7 +227,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   //TODO Support some validation!
   //TODO find C++ solution to validation
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   MotionCaptureSystem observer(m, "o", vs);
   MotionCaptureSensor mcSensorA(observer, "a", vs);
   MotionCaptureSensor mcSensorB(observer, "b", vs);
