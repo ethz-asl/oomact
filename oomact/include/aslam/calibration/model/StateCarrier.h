@@ -1,6 +1,7 @@
 #ifndef HCD72CF91_0489_4EEA_BFFB_E7E21C9B4799
 #define HCD72CF91_0489_4EEA_BFFB_E7E21C9B4799
 
+#include <functional>
 #include <memory>
 #include <string>
 

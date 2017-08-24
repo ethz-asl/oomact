@@ -2,6 +2,7 @@
 #define EUROPA_CALIBRATION_COMMON_TYPES_H_
 
 #include <iosfwd>
+#include <functional>
 
 #include <aslam/backend/FixedPointNumber.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>
@@ -41,7 +42,6 @@ namespace calibration {
 }
 
 namespace std {
-template <typename> struct hash;
 
 template <>
 struct hash < aslam::calibration::SensorId >{
