@@ -1,8 +1,9 @@
 #ifndef INCLUDE_ASLAM_CALIBRATION_MODULE_H_
 #define INCLUDE_ASLAM_CALIBRATION_MODULE_H_
 
-#include <string>
+#include <functional>
 #include <iosfwd>
+#include <string>
 
 #include <aslam/calibration/plan/Printable.h>
 #include <sm/value_store/ValueStore.hpp>
@@ -316,7 +317,6 @@ class ModuleLink : public ModuleLinkBase {
 } /* namespace aslam */
 
 namespace std {
-template <typename> struct hash;
 template <>
 struct hash<std::reference_wrapper<aslam::calibration::Activatable> > {
  public :
