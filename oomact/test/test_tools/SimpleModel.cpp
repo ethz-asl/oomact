@@ -10,16 +10,9 @@
 
 namespace aslam {
 namespace calibration {
-namespace {
-
-class SimpleModelFrame : public Frame, public NamedMinimal {
-  using NamedMinimal::NamedMinimal;
-} global("Global"), lowerBody("LowerBody"), upperBody("UpperBody");
-
-}
 
 SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver)
-  : Model(config, configPathResolver, {&global, &lowerBody, &upperBody}),
+  : Model(config, configPathResolver),
     config_(config),
     sensorsConfig_(config.getChild("sensors")),
     wheelOdometry_(*this, "WheelOdometry", sensorsConfig_)
