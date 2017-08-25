@@ -7,7 +7,7 @@
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
-#include "aslam/calibration/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
 #include <aslam/calibration/model/Model.h>

@@ -2,8 +2,8 @@
 #define H2E153EC9_9902_41A1_A522_E4E0A04D6F76
 
 #include "CalibratorI.hpp"
-#include <aslam/calibration/CommonTypes.hpp>
-#include <aslam/calibration/algo/PredictionWriter.h>
+#include "../algo/PredictionWriter.h"
+#include "../SensorId.hpp"
 
 namespace aslam {
 namespace backend {

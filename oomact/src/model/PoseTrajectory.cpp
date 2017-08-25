@@ -3,28 +3,24 @@
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
-#include <sm/timing/NsecTimeUtilities.hpp>
-#include <sm/kinematics/quaternion_algebra.hpp>
-#include <bsplines/NsecTimePolicy.hpp>
-
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
+#include <bsplines/NsecTimePolicy.hpp>
+#include <sm/kinematics/quaternion_algebra.hpp>
+#include <sm/kinematics/Transformation.hpp>
 
-#include <aslam/calibration/CalibratorI.hpp>
+#include "aslam/calibration/algo/OdometryPath.h"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/DesignVariableReceiver.hpp>
+#include "aslam/calibration/data/PoseMeasurement.h"
+#include <aslam/calibration/error-terms/ErrorTermTangency.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
 #include <aslam/calibration/model/sensors/PoseSensorI.hpp>
-#include "aslam/calibration/data/PoseMeasurement.h"
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
-
-#include <aslam/calibration/error-terms/ErrorTermTangency.h>
-#include <sm/kinematics/Transformation.hpp>
-
-#include "aslam/calibration/algo/OdometryPath.h"
 
 using bsplines::NsecTimePolicy;
 using sm::kinematics::Transformation;

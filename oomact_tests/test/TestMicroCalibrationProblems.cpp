@@ -6,7 +6,7 @@
 #include <sm/boost/null_deleter.hpp>
 #include <eigen-checks/gtest.h>
 
-#include <aslam/calibration/CalibratorI.hpp>
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>

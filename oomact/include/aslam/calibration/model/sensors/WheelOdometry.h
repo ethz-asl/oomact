@@ -1,11 +1,11 @@
 #ifndef H2E963BC0_3111_4293_88B0_3AB8B916345D
 #define H2E963BC0_3111_4293_88B0_3AB8B916345D
 
-#include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/Sensor.hpp>
 #include <aslam/calibration/data/WheelSpeedsMeasurement.h>
+#include "../../Timestamp.hpp"
 
 namespace aslam {
 namespace calibration {

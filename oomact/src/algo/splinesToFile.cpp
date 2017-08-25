@@ -1,8 +1,11 @@
 #include "aslam/calibration/algo/splinesToFile.h"
-#include <glog/logging.h>
+
 #include <string>
 #include <vector>
-#include <aslam/calibration/CalibratorI.hpp>
+
+#include <glog/logging.h>
+
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 
 using namespace sm::timing;
 using namespace sm::kinematics;

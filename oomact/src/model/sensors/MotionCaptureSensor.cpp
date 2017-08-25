@@ -7,7 +7,7 @@
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <boost/make_shared.hpp>
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
-#include "aslam/calibration/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/model/Model.h>
 #include "aslam/calibration/algo/MotionCaptureSource.hpp"

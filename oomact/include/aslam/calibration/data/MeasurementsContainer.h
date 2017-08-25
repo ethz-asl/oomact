@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include <aslam/calibration/CommonTypes.hpp>
+#include "../Timestamp.hpp"
 
 namespace aslam {
 namespace calibration {

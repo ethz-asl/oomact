@@ -1,7 +1,7 @@
 #ifndef H3B9CD3B6_B657_40D3_8741_16FE63E05C0F
 #define H3B9CD3B6_B657_40D3_8741_16FE63E05C0F
 
-#include <aslam/calibration/CommonTypes.hpp>
+#include "../../Timestamp.hpp"
 
 namespace aslam {
 namespace calibration {

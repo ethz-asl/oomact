@@ -1,6 +1,6 @@
+#include <aslam/calibration/SensorId.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/test/MockMotionCaptureSource.h>
 
 namespace aslam {

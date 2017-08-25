@@ -4,8 +4,8 @@
 #include <aslam/backend/SparseCholeskyLinearSystemSolver.hpp>
 #include <sm/BoostPropertyTree.hpp>
 
-#include <aslam/calibration/AbstractCalibrator.h>
-#include <aslam/calibration/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/AbstractCalibrator.h>
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/CalibrationProblem.hpp>
 #include <aslam/calibration/data/MapStorage.h>
 #include <aslam/calibration/model/StateCarrier.h>

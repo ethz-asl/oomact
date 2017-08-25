@@ -4,13 +4,15 @@
 #include <vector>
 #include <functional>
 
-#include <aslam/calibration/CommonTypes.hpp>
+#include <sm/value_store/ValueStore.hpp>
+#include <aslam/backend/TransformationExpression.hpp>
+
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/tools/ConfigPathResolver.hpp>
-#include <aslam/backend/TransformationExpression.hpp>
 #include <aslam/calibration/model/fragments/Gravity.h>
-#include <sm/value_store/ValueStore.hpp>
+#include <aslam/calibration/SensorId.hpp>
+#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/tools/ConfigPathResolver.hpp>
 
 namespace aslam {
 namespace backend {

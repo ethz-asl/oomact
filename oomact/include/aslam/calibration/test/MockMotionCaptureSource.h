@@ -1,14 +1,17 @@
 #ifndef H481BD7A1_2233_4044_B4F2_CDD02D575958
 #define H481BD7A1_2233_4044_B4F2_CDD02D575958
 
-#include <aslam/calibration/algo/MotionCaptureSource.hpp>
 #include <functional>
 #include <vector>
+
+#include "../algo/MotionCaptureSource.hpp"
 
 namespace aslam {
 namespace calibration {
 namespace test {
-
+/**
+ * A mock motion capture source sampling at 100Hz from a function providing a pose given start and current time.
+ */
 class MockMotionCaptureSource : public MotionCaptureSource {
  public:
   MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}

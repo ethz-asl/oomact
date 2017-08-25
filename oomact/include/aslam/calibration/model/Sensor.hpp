@@ -1,14 +1,13 @@
 #ifndef INCLUDE_ASLAM_CALIBRATION_SENSOR_HPP_
 #define INCLUDE_ASLAM_CALIBRATION_SENSOR_HPP_
 
-#include <aslam/calibration/CommonTypes.hpp>
-
 #include <aslam/backend/Scalar.hpp>
 
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
 #include <aslam/calibration/model/fragments/DelayCv.h>
+#include <aslam/calibration/SensorId.hpp>
 #include <aslam/calibration/tools/Interval.hpp>
 
 namespace aslam {

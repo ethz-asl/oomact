@@ -2,10 +2,10 @@
 
 #include <aslam/backend/QuadraticIntegralError.hpp>
 #include <aslam/backend/VectorExpression.hpp>
-#include <aslam/calibration/CalibratorI.hpp>
 #include <bsplines/BSplineFitter.hpp>
 #include <glog/logging.h>
 
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
 #include <aslam/calibration/tools/SplineWriter.h>
 #include <aslam/calibration/DesignVariableReceiver.hpp>

@@ -3,9 +3,10 @@
 
 #include <aslam/backend/FixedPointNumber.hpp>
 #include <aslam/backend/OptimizationProblemBase.hpp>
+
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/algo/PredictionWriter.h>
-#include <aslam/calibration/CommonTypes.hpp>
+#include <aslam/calibration/SensorId.hpp>
 
 namespace aslam {
 namespace calibration {

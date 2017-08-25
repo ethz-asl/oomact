@@ -10,11 +10,11 @@
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/OptimizationProblemBase.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/model/fragments/Gravity.h>
 #include <aslam/calibration/model/Joint.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/SensorId.hpp>
 #include <aslam/calibration/tools/tools.h>
 
 using aslam::calibration::OptimizationProblem;

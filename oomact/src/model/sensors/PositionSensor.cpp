@@ -6,14 +6,14 @@
 #include <glog/logging.h>
 #include <boost/make_shared.hpp>
 
-#include <aslam/calibration/CalibratorI.hpp>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include "aslam/calibration/error-terms/ErrorTermPosition.h"
-#include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
-#include <aslam/calibration/model/Model.h>
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include "aslam/calibration/data/PositionMeasurement.h"
 #include "aslam/calibration/data/MeasurementsContainer.h"
+#include "aslam/calibration/error-terms/ErrorTermPosition.h"
+#include <aslam/calibration/tools/ErrorTermStatistics.h>
+#include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/Sensor.hpp>
 
 namespace aslam {
 namespace calibration {

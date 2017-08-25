@@ -5,27 +5,21 @@
 #include <boost/make_shared.hpp>
 #include <bsplines/NsecTimePolicy.hpp>
 #include <bsplines/EuclideanBSpline.hpp>
-#include <aslam/splines/OPTBSpline.hpp>
-
 #include <aslam/backend/QuadraticIntegralError.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
+#include <aslam/splines/OPTBSpline.hpp>
 
-#include <aslam/calibration/model/Model.h>
-
-#include <aslam/calibration/CalibratorI.hpp>
-#include <aslam/calibration/DesignVariableReceiver.hpp>
-#include <aslam/calibration/algo/splinesToFile.h>
-#include <aslam/calibration/model/fragments/TrajectoryCarrier.h>
-#include <aslam/calibration/model/StateCarrier.h>
-#include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
-
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include "aslam/calibration/data/AccelerometerMeasurement.h"
 #include "aslam/calibration/data/GyroscopeMeasurement.h"
-
-
+#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include <aslam/calibration/algo/splinesToFile.h>
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/fragments/TrajectoryCarrier.h>
+#include <aslam/calibration/model/StateCarrier.h>
 #include "aslam/calibration/error-terms/ErrorTermAccelerometer.h"
 #include "aslam/calibration/error-terms/ErrorTermGyroscope.h"
-
+#include "aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h"
 #include "aslam/calibration/tools/SplineWriter.h"
 
 

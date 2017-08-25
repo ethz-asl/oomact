@@ -5,7 +5,7 @@ find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 # enable warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-register")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-register -Wno-unknown-pragmas")
 
 # enable C++11 support
 if(CMAKE_VERSION VERSION_LESS "3.1")
@@ -34,6 +34,7 @@ cs_add_library(${PROJECT_NAME}
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/algo/OdometryPath.cpp
+  src/data/ObservationManagerI.cpp
   src/data/MapStorage.cpp
   src/data/StorageI.cpp
   src/model/Module.cpp
