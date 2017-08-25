@@ -17,6 +17,7 @@ class MockMotionCaptureSource : public MotionCaptureSource {
   MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
   virtual ~MockMotionCaptureSource();
   virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override;
+  virtual PoseStamped getPoseAt(Timestamp start, Timestamp at) const;
  private:
   std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
 };

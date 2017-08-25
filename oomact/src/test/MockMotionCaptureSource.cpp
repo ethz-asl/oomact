@@ -10,13 +10,18 @@ namespace test {
 MockMotionCaptureSource::~MockMotionCaptureSource() {
 }
 
+MotionCaptureSource::PoseStamped MockMotionCaptureSource::getPoseAt(Timestamp start, Timestamp at) const {
+  PoseStamped p;
+  p.time = at;
+  func(start, at, p);
+  return p;
+}
+
 std::vector<MotionCaptureSource::PoseStamped> MockMotionCaptureSource::getPoses(Timestamp from, Timestamp till) const {
   Timestamp inc(1e-2);
   std::vector<PoseStamped> poses;
   for(auto t = from; t <= till + inc; t += inc){
-    poses.resize(poses.size() + 1);
-    poses.back().time = t;
-    func(from, t, poses.back());
+    poses.emplace_back(getPoseAt(from, t));
   }
   return poses;
 }
@@ -34,3 +39,4 @@ MockMotionCaptureSource mmcsRotatingStraightLine([](Timestamp start, Timestamp n
 } /* namespace test */
 } /* namespace calibration */
 } /* namespace aslam */
+
