@@ -11,13 +11,13 @@ namespace calibration {
 void boundsEventHandler(TimeDesignVariableCv & cv, BoundsEnforceEvent event){
   switch(event){
     case BoundsEnforceEvent::CLAMPED_TO_LOWER:
-      LOG(WARNING) << "Delay " << cv.getName() << " had to be clamped to its lower bound " << cv.getLowerBound().getNumerator() << "!";
+      LOG(WARNING) << "Delay " << cv.getName() << " had to be clamped to its lower bound " << static_cast<double>(cv.getLowerBound()) << " s!";
       break;
     case BoundsEnforceEvent::CLAMPED_TO_UPPER:
-      LOG(WARNING) << "Delay " << cv.getName() << " had to be clamped to its upper bound " << cv.getUpperBound().getNumerator() << "!";
+      LOG(WARNING) << "Delay " << cv.getName() << " had to be clamped to its upper bound " << static_cast<double>(cv.getUpperBound()) << " s!";
       break;
     case BoundsEnforceEvent::NOP:
-      LOG(INFO) << "Delay " << cv.getName() << " has been updated to " << cv.getValue().getNumerator() << ".";
+      LOG(INFO) << "Delay " << cv.getName() << " has been updated to " << static_cast<double>(cv.getValue()) << " s.";
       break;
   }
 }
