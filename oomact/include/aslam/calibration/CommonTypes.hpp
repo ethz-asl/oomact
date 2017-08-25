@@ -18,6 +18,7 @@ namespace calibration {
   /// Time type
   typedef aslam::backend::FixedPointNumber<sm::timing::NsecTime, std::uintmax_t(1e9)> Timestamp;
   typedef Timestamp Duration;
+  inline constexpr Timestamp InvalidTimestamp() { return Timestamp::Numerator(-1); }
 
   struct SensorId{
     explicit constexpr SensorId(size_t id) : id(id) {};

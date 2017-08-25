@@ -135,7 +135,7 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 
   void print(std::ostream& stream) const override;
 
-  virtual ModelAtTime getAtTime(sm::timing::NsecTime timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const;
+  virtual ModelAtTime getAtTime(Timestamp timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const;
   virtual ModelAtTime getAtTime(const BoundedTimeExpression & boundedTimeExpresion, int maximalDerivativeOrder, const ModelSimplification & simplification) const;
 
   const Gravity& getGravity() const;

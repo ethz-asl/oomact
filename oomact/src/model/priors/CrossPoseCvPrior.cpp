@@ -36,7 +36,7 @@ void CrossPoseCvPrior::addMeasurementErrorTerms(CalibratorI& calib, const EstCon
     auto e = boost::make_shared<ErrorTermPose>(to.getTransformationToParentExpression().inverse() * from.getTransformationToParentExpression(), pose, getName());
 
     LOG(INFO) << getName() << " initial prediction="<< e->getPrediction().transpose() << ", measurement=" << e->getMeasurement().transpose();
-    dest.add(0L, e);
+    dest.add(Timestamp::Zero(), e);
     dest.printInto(LOG(INFO));
   }
 }

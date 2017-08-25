@@ -89,7 +89,7 @@ void WheelOdometry::addMeasurement(CalibratorI & calib, const Timestamp t, const
 void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, bool observeOnly) const {
   LOG(INFO) << "Adding " << 2 * measurements_.size() << " wheels error terms";
 
-  sm::timing::NsecTime minTime = std::numeric_limits<sm::timing::NsecTime>::max(), maxTime = -1;
+  Timestamp minTime = Timestamp::Numerator(std::numeric_limits<Timestamp::Integer>::max()), maxTime = InvalidTimestamp();
 
   auto R_l = getWheelRadiusL()->toExpression();
   auto R_r = getWheelRadiusR()->toExpression();
@@ -105,20 +105,20 @@ void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const EstConf 
 
   auto & timeDelay = getDelayExpression();
 
-  sm::timing::NsecTime prevTimestamp = validRange.start;
+  Timestamp prevTimestamp = validRange.start;
 
   const auto lHalf = (L * 0.5);
 
-  for (auto it = measurements_.cbegin(); it != measurements_.cend(); ++it) {
-    if(Timestamp(it->first) <= validRange.start){
-      VLOG(1) << "Skipping out of bounds wheel measurement at " << calib.secsSinceStart(it->first) << ".";
+  for (auto & m : measurements_) {
+    if(Timestamp(m.first) <= validRange.start){
+      VLOG(1) << "Skipping out of bounds wheel measurement at " << calib.secsSinceStart(m.first) << ".";
       continue;
     }
 
     // first of the pair of measurements in measurements container
-    SM_ASSERT_LE(std::runtime_error, prevTimestamp, it->first, "Expecting monotone increasing timestamps in measurements");
-    auto timestamp = ((it->first + prevTimestamp) / 2);
-    prevTimestamp = it->first;
+    SM_ASSERT_LE(std::runtime_error, prevTimestamp, m.first, "Expecting monotone increasing timestamps in measurements");
+    auto timestamp = ((m.first + prevTimestamp) / Timestamp(2.0));
+    prevTimestamp = m.first;
 
     auto timestampDelayed = backend::GenericScalarExpression<Timestamp>(timestamp) - timeDelay;
     auto lBound = Timestamp(timestamp) - getDelayUpperBound();
@@ -147,9 +147,9 @@ void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const EstConf 
       auto w_m_mr = -EuclideanExpression(rotationExpressionFactory.getAngularVelocityExpression());
       auto w_r_mr = R_m_r.inverse() * w_m_mr;
 
-      auto v_r_mr_m = EuclideanExpression(Eigen::Vector3d(1.0, 0.0, 0.0)) * (R_l * it->second.left + R_r * it->second.right) * 0.5;
+      auto v_r_mr_m = EuclideanExpression(Eigen::Vector3d(1.0, 0.0, 0.0)) * (R_l * m.second.left + R_r * m.second.right) * 0.5;
 
-      auto w_r_mr_m = EuclideanExpression(Eigen::Vector3d(0.0, 0.0, 1.0)) * (R_r * it->second.right - R_l * it->second.left);
+      auto w_r_mr_m = EuclideanExpression(Eigen::Vector3d(0.0, 0.0, 1.0)) * (R_r * m.second.right - R_l * m.second.left);
       // Z speed constraint
       double sigma2_vx = (_options.lwVariance * R_l_val*R_l_val + _options.rwVariance * R_r_val * R_r_val)/0.25;
       double sigma2_wz = (_options.lwVariance * R_l_val*R_l_val + _options.rwVariance * R_r_val * R_r_val);///(L_val * L_val);
@@ -195,8 +195,8 @@ void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const EstConf 
       return 1.;
     };
 
-    auto e_rlw = boost::make_shared<ErrorTermWheel>(v_r_mwl, R_l, it->second.left, motionBasedFactor(it->second.left) * lwVariance);
-    auto e_rrw = boost::make_shared<ErrorTermWheel>(v_r_mwr, R_r, it->second.right, motionBasedFactor(it->second.right) * rwVariance);
+    auto e_rlw = boost::make_shared<ErrorTermWheel>(v_r_mwl, R_l, m.second.left, motionBasedFactor(m.second.left) * lwVariance);
+    auto e_rrw = boost::make_shared<ErrorTermWheel>(v_r_mwr, R_r, m.second.right, motionBasedFactor(m.second.right) * rwVariance);
 
     if(!observeOnly){
       problem.addErrorTerm(e_rlw);

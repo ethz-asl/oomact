@@ -275,7 +275,7 @@ Gravity& Model::getGravity() {
   return *gravity;
 }
 
-ModelAtTime Model::getAtTime(sm::timing::NsecTime, int, const ModelSimplification&) const {
+ModelAtTime Model::getAtTime(Timestamp, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
 }
 

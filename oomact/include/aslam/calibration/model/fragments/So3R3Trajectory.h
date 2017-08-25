@@ -1,15 +1,15 @@
 #ifndef H8E4AC88D_C8F7_417C_8732_BFF3DB9C79DE
 #define H8E4AC88D_C8F7_417C_8732_BFF3DB9C79DE
 
-#include <bsplines/NsecTimePolicy.hpp>
-#include <bsplines/EuclideanBSpline.hpp>
-#include <bsplines/UnitQuaternionBSpline.hpp>
 #include <aslam/splines/OPTBSpline.hpp>
 #include <aslam/splines/OPTUnitQuaternionBSpline.hpp>
+#include <bsplines/EuclideanBSpline.hpp>
+#include <bsplines/NsecTimePolicy.hpp>
+#include <bsplines/UnitQuaternionBSpline.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>
-#include <aslam/calibration/tools/Interval.hpp>
 
-using sm::timing::NsecTime;
+#include <aslam/calibration/CommonTypes.hpp>
+#include <aslam/calibration/tools/Interval.hpp>
 
 namespace aslam {
 namespace backend {
@@ -34,7 +34,7 @@ auto getEF(Spline & s, BoundedTimeExpression t) -> decltype(s.template getExpres
   return s.template getExpressionFactoryAt<MaxDerivative>(t.timestampExpresion, t.lBound, t.uBound);
 }
 template <int MaxDerivative, typename Spline>
-auto getEF(Spline & s, sm::timing::NsecTime t) -> decltype(s.template getExpressionFactoryAt<MaxDerivative>(t)) {
+auto getEF(Spline & s, Timestamp t) -> decltype(s.template getExpressionFactoryAt<MaxDerivative>(t)) {
   return s.template getExpressionFactoryAt<MaxDerivative>(t);
 }
 
@@ -62,7 +62,7 @@ class So3R3Trajectory {
   void addToProblem(const bool stateActive, DesignVariableReceiver & designVariableReceiver);
   void addWhiteNoiseModelErrorTerms(backend::ErrorTermReceiver & errorTermReceiver, std::string name, const double invSigma) const;
 
-  void fitSplines(const Interval& effectiveBatchInterval, const size_t numMeasurements, const std::vector<NsecTime> & timestamps, const std::vector<Eigen::Vector3d> & transPoses, const std::vector<Eigen::Vector4d> & rotPoses);
+  void fitSplines(const Interval& effectiveBatchInterval, const size_t numMeasurements, const std::vector<sm::timing::NsecTime> & timestamps, const std::vector<Eigen::Vector3d> & transPoses, const std::vector<Eigen::Vector4d> & rotPoses);
 
   void initSplinesConstant(const Interval& effectiveBatchInterval, const size_t numMeasurements, const Eigen::Vector3d & transPose = Eigen::Vector3d::Zero(), const Eigen::Vector4d & rotPose = sm::kinematics::quatIdentity());
 

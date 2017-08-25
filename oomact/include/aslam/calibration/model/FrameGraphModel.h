@@ -13,7 +13,7 @@ class FrameGraphModel : public Model {
   FrameGraphModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver, const std::vector<const Frame *> frames = {});
   virtual ~FrameGraphModel();
 
-  ModelAtTime getAtTime(sm::timing::NsecTime timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;
+  ModelAtTime getAtTime(Timestamp timestamp, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;
   ModelAtTime getAtTime(const BoundedTimeExpression & boundedTimeExpresion, int maximalDerivativeOrder, const ModelSimplification & simplification) const override;
 
   void init() override;

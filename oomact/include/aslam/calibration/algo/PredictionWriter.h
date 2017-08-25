@@ -1,22 +1,16 @@
-/*
- * PredictionWriter.h
- *
- *  Created on: Oct 8, 2014
- *      Author: hannes
- */
-
 #ifndef PREDICTIONWRITER_H_
 #define PREDICTIONWRITER_H_
 
-#include <string>
-#include <functional>
-#include <vector>
-#include <iostream>
 #include <fstream>
-#include <boost/shared_ptr.hpp>
-#include <sm/timing/NsecTimeUtilities.hpp>
+#include <functional>
+#include <iostream>
+#include <vector>
+#include <string>
 
-#include "aslam/calibration/error-terms/ConditionalErrorTerm.hpp"
+#include <boost/shared_ptr.hpp>
+
+#include <aslam/calibration/CommonTypes.hpp>
+#include <aslam/calibration/error-terms/ConditionalErrorTerm.hpp>
 
 namespace aslam {
 namespace backend {
@@ -31,15 +25,15 @@ class ErrorTermPose;
 
 namespace internal {
 template <int D, typename PredictionExpression>
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const MeasurementErrorTerm<D, PredictionExpression> & e, std::ostream &outPred, std::ostream &outMeasure){
+void outMeasurementsAndPredictions(Timestamp timestamp, const MeasurementErrorTerm<D, PredictionExpression> & e, std::ostream &outPred, std::ostream &outMeasure){
   outPred << timestamp << " " << e.getPrediction().transpose(); outPred << std::endl;
   outMeasure << timestamp << " " << e.getMeasurement().transpose(); outMeasure << std::endl;
 }
 
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const MeasurementErrorTerm<1, aslam::backend::ScalarExpression> & e, std::ostream &outPred, std::ostream &outMeasure);
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const ErrorTermTangency & e, std::ostream &outPred, std::ostream &outMeasure);
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const ErrorTermPose & e, std::ostream &outPred, std::ostream &outMeasure);
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const backend::ErrorTerm & e, std::ostream &outPred, std::ostream &outMeasure);
+void outMeasurementsAndPredictions(Timestamp timestamp, const MeasurementErrorTerm<1, aslam::backend::ScalarExpression> & e, std::ostream &outPred, std::ostream &outMeasure);
+void outMeasurementsAndPredictions(Timestamp timestamp, const ErrorTermTangency & e, std::ostream &outPred, std::ostream &outMeasure);
+void outMeasurementsAndPredictions(Timestamp timestamp, const ErrorTermPose & e, std::ostream &outPred, std::ostream &outMeasure);
+void outMeasurementsAndPredictions(Timestamp timestamp, const backend::ErrorTerm & e, std::ostream &outPred, std::ostream &outMeasure);
 }
 
 class PredictionWriter {
@@ -69,7 +63,7 @@ class PredictionFunctorWriter : public PredictionWriter {
 
 
   template <typename ErrorTerm>
-  void add(sm::timing::NsecTime timestamp, boost::shared_ptr<ErrorTerm> e){
+  void add(Timestamp timestamp, boost::shared_ptr<ErrorTerm> e){
     add([=](std::ostream &outPred, std::ostream &outMeasure, std::ostream &outErr, std::ostream & outNormalizedErr){
       e->evaluateError();
       internal::outMeasurementsAndPredictions(timestamp, *e, outPred, outMeasure);

@@ -12,17 +12,17 @@ namespace aslam {
 namespace calibration {
 
 namespace internal {
-void outMeasurementsAndPredictions(sm::timing::NsecTime /* timestamp */, const ErrorTermTangency & /* e */, std::ostream &/* outPred */, std::ostream &/* outMeasure */){
+void outMeasurementsAndPredictions(Timestamp /* timestamp */, const ErrorTermTangency & /* e */, std::ostream &/* outPred */, std::ostream &/* outMeasure */){
   //TODO D implement
 }
 
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const ErrorTermPose & e, std::ostream & outPred, std::ostream & outMeasure){
+void outMeasurementsAndPredictions(Timestamp timestamp, const ErrorTermPose & e, std::ostream & outPred, std::ostream & outMeasure){
   outPred << timestamp << " " << e.getPrediction().transpose(); outPred << std::endl;
   outMeasure << timestamp << " " << e.getMeasurement().transpose(); outMeasure << std::endl;
 }
-void outMeasurementsAndPredictions(sm::timing::NsecTime /* timestamp */, const backend::ErrorTerm & /* e */, std::ostream &/* outPred */, std::ostream &/* outMeasure */){
+void outMeasurementsAndPredictions(Timestamp /* timestamp */, const backend::ErrorTerm & /* e */, std::ostream &/* outPred */, std::ostream &/* outMeasure */){
 }
-void outMeasurementsAndPredictions(sm::timing::NsecTime timestamp, const MeasurementErrorTerm<1, aslam::backend::ScalarExpression> & e, std::ostream &outPred, std::ostream &outMeasure){
+void outMeasurementsAndPredictions(Timestamp timestamp, const MeasurementErrorTerm<1, aslam::backend::ScalarExpression> & e, std::ostream &outPred, std::ostream &outMeasure){
   outPred << timestamp << " " << e.getPrediction(); outPred << std::endl;
   outMeasure << timestamp << " " << e.getMeasurement(); outMeasure << std::endl;
 }

@@ -29,6 +29,7 @@
 using bsplines::NsecTimePolicy;
 using sm::kinematics::Transformation;
 using sm::timing::NsecTime;
+
 namespace aslam {
 namespace calibration {
 
@@ -113,15 +114,15 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   auto & trajectoryFrame = trajectory.getCarrier().getFrame();
   auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
 
-  NsecTime currentDelay = poseSensor.getSensor().hasDelay() ? NsecTime(poseSensor.getSensor().getDelay()) : 0L;
+  Timestamp currentDelay = poseSensor.getSensor().hasDelay() ? poseSensor.getSensor().getDelay() : Timestamp::Zero();
 
   for (auto it = measurements.cbegin(); it != measurements.cend(); ++it) {
-    NsecTime timestamp = it->first - currentDelay;
+    Timestamp timestamp = it->first - currentDelay;
     if(effectiveBatchInterval.contains(timestamp)){
       sm::kinematics::Transformation T_measured(it->second.q_m_f, it->second.t_m_mf);
       T_measured = T_measured * T_sens_traj;
 
-      timestamps.push_back(timestamp);
+      timestamps.push_back(timestamp.getNumerator());
       rotPoses.push_back(rotPoses.empty() ? T_measured.q() : negateQuatIfThatBringsItCloser(rotPoses.back(), T_measured.q()));
       transPoses.push_back(T_measured.t());
     }
@@ -190,8 +191,8 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   const Interval & effectiveBatchInterval = calib.getCurrentEffectiveBatchInterval();
   assert(effectiveBatchInterval);
 
-  const sm::timing::NsecTime startTimestamp = effectiveBatchInterval.start;
-  const sm::timing::NsecTime endTimestamp = effectiveBatchInterval.end;
+  const Timestamp startTimestamp = effectiveBatchInterval.start;
+  const Timestamp endTimestamp = effectiveBatchInterval.end;
 
   std::vector<NsecTime> timestampsWheelSpeeds;
   timestampsWheelSpeeds.reserve(numWheelSpeedsMeasurements);
@@ -203,13 +204,13 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   transPoses.reserve(numWheelSpeedsMeasurements);
   rotPoses.reserve(numWheelSpeedsMeasurements);
 
-  NsecTime prevTimestamp = startTimestamp;
+  Timestamp prevTimestamp = startTimestamp;
 
   if(poseSensor.isResolved()) {
     Timestamp tmpStart(prevTimestamp);
     auto pose = getFirstPoseMeasurement(calib, tmpStart, poseSensor.get().getSensor(), false, &trajectory.getCarrier().getFrame()); //TODO B sync
 
-    if(double(tmpStart - Timestamp(prevTimestamp)) > 0.02){
+    if(double(tmpStart - prevTimestamp) > 0.02){
       LOG(WARNING) << "Motion capture data is quite sparse or starts too late (searched for "<< calib.secsSinceStart(prevTimestamp) << " found " << calib.secsSinceStart(tmpStart) << "!";
     }
     transPose = pose.t_m_mf;
@@ -228,8 +229,8 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   auto prevTransPose = transPose;
 
   wheelOdometry.getDelayVariable().printValuesNiceInto(LOG(INFO) << "Using wheelDelay:\n");
-  const NsecTime delayValue = wheelOdometry.getDelay().getNumerator();
-  NsecTime timestamp;
+  const Timestamp delayValue = wheelOdometry.getDelay();
+  Timestamp timestamp;
 
   for (auto it = wheelSpeedsMeasurements.cbegin(), end = wheelSpeedsMeasurements.cend(); it != end; ++it) {
     timestamp = it->first - delayValue;
@@ -247,7 +248,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
     const auto w_r_mr_km1 = pairLocVel.second;
 
     const auto q_m_r_km1 = prevRotPose;
-    Transformation T_m_r_k = integrateMotionModel(prevTransPose, q_m_r_km1, v_r_mr_km1, w_r_mr_km1, double(timestamp-prevTimestamp)/(double)NsecTimePolicy::getOne());
+    Transformation T_m_r_k = integrateMotionModel(prevTransPose, q_m_r_km1, v_r_mr_km1, w_r_mr_km1, timestamp - prevTimestamp);
 
     prevRotPose = T_m_r_k.q();
     prevTransPose = T_m_r_k.t();
@@ -255,7 +256,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
 
     VLOG(2) << "t: " << T_m_r_k.t().transpose() << " q: " << T_m_r_k.q().transpose();
 
-    timestampsWheelSpeeds.push_back(timestamp);
+    timestampsWheelSpeeds.push_back(timestamp.getNumerator());
 
     // Best quaternion correction
     auto q_m_r_k = negateQuatIfThatBringsItCloser(q_m_r_km1, T_m_r_k.q());

@@ -6,7 +6,6 @@
 
 #include <glog/logging.h>
 #include <sm/MatrixArchive.hpp>
-#include <sm/timing/NsecTimeUtilities.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
 
@@ -164,7 +163,7 @@ void AbstractCalibrator::addMeasurementTimestamp(const Timestamp lowerBound, Tim
   if(upperBound.getNumerator() < 0L) { upperBound = lowerBound; }
 
   _lastTimestamp = lowerBound;
-  if (_lowestTimestamp == Timestamp(-1L) || _lowestTimestamp > lowerBound){
+  if (_lowestTimestamp == InvalidTimestamp() || _lowestTimestamp > lowerBound){
     _lowestTimestamp = lowerBound;
     {
       SM_ASSERT_FALSE(std::runtime_error, _lowesTimestampProvided, "Found even lower timestamp!");
