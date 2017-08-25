@@ -16,7 +16,7 @@
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 
-using std::chrono::_V2::system_clock;
+using std::chrono::system_clock;
 
 namespace aslam {
 namespace calibration {
