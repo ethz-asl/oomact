@@ -68,6 +68,7 @@ cs_add_library(${PROJECT_NAME}
   src/test/SimpleModel.cpp
   src/test/Tools.cpp
   src/test/MockMotionCaptureSource.cpp
+  src/tools/CheckNotNull.cpp
   src/tools/Interval.cpp
   src/tools/Typename.cpp
   src/tools/tools.cpp
