@@ -54,7 +54,7 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
 
   const double startTime = 0, endTime = 1.0;
   for (auto& p : test::MmcsStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
   }
   EXPECT_EQ(1, c->getCurrentStorage().size());
@@ -98,9 +98,9 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
   const double startTime = 0, endTime = 1.0;
 
   for (auto& p : MmcsRotatingStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
+    mcSensorB.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
   }
   c->calibrate();
 
@@ -139,9 +139,9 @@ TEST(TestCalibration, testEstimateRelativePoseSensor) {
   const double startTime = 0, endTime = 1.0;
 
   for (auto& p : mmcsHelix.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
+    mcSensorB.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
   }
   c->calibrate();
 
