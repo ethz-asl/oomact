@@ -189,7 +189,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   std::vector<Eigen::Vector3d> transPoses;
 
   const Interval & effectiveBatchInterval = calib.getCurrentEffectiveBatchInterval();
-  assert(effectiveBatchInterval);
+  CHECK(effectiveBatchInterval);
 
   const Timestamp startTimestamp = effectiveBatchInterval.start;
   const Timestamp endTimestamp = effectiveBatchInterval.end;
@@ -269,9 +269,9 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
     rotPoses.push_back(rotPoses.back());
   }
 
-  assert(timestampsWheelSpeeds.size() == transPoses.size());
-  assert(rotPoses.size() == transPoses.size());
-  assert(!transPoses.empty());
+  CHECK_EQ(timestampsWheelSpeeds.size(), transPoses.size());
+  CHECK_EQ(rotPoses.size(), transPoses.size());
+  CHECK(!transPoses.empty());
 
   trajectory.fitSplines(effectiveBatchInterval, numWheelSpeedsMeasurements, timestampsWheelSpeeds, transPoses, rotPoses);
 
@@ -283,12 +283,10 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   //const int measPerSec = std::round(numWheelSpeedsMeasurements / elapsedTime);
   //int numSegments;
 
-
-  assert(trajectory.getRotationSpline().getMinTime() == startTimestamp);
-  assert(trajectory.getRotationSpline().getMaxTime() == endTimestamp);
-  assert(trajectory.getTranslationSpline().getMinTime() == startTimestamp);
-  assert(trajectory.getTranslationSpline().getMaxTime() == endTimestamp);
-
+  CHECK_EQ(Timestamp(trajectory.getRotationSpline().getMinTime()), startTimestamp);
+  CHECK_EQ(Timestamp(trajectory.getRotationSpline().getMaxTime()), endTimestamp);
+  CHECK_EQ(Timestamp(trajectory.getTranslationSpline().getMinTime()), startTimestamp);
+  CHECK_EQ(Timestamp(trajectory.getTranslationSpline().getMaxTime()), endTimestamp);
   return true;
 }
 
@@ -378,12 +376,12 @@ PoseTrajectory::~PoseTrajectory() {
 }
 
 const So3R3Trajectory& PoseTrajectory::getCurrentTrajectory() const {
-  assert(state_);
+  CHECK(state_);
   return *state_;
 }
 
 So3R3Trajectory& PoseTrajectory::getCurrentTrajectory() {
-  assert(state_);
+  CHECK(state_);
   return *state_;
 }
 
