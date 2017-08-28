@@ -15,8 +15,8 @@ class PoseSensor : public AbstractPoseSensor {
 
   virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
-  void addMeasurement(const PoseMeasurement& pose, const Timestamp t, Storage & storage) const;
-  void addMeasurement(const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, const Timestamp t, Storage & storage) const;
+  void addMeasurement(const PoseMeasurement& pose, const Timestamp t, ModuleStorage & storage) const;
+  void addMeasurement(const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, const Timestamp t, ModuleStorage & storage) const;
 
   const Covariance& getCovOrientation() const {
     return covOrientation_;

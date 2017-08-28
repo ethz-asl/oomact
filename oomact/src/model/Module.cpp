@@ -49,7 +49,7 @@ void Module::registerWithModel() {
   isRegistered_ = true;
 }
 
-void Module::clearMeasurements(Storage& storage) {
+void Module::clearMeasurements(ModuleStorage& storage) {
   storage.remove(this);
   clearMeasurements();
 }
@@ -68,7 +68,7 @@ bool Module::shouldObserveOnly(const EstConf& ec) const {
 void Module::addErrorTerms(CalibratorI& /*calib*/, const EstConf& /*ec*/, ErrorTermReceiver& /*errorTermReceiver*/) const {
 }
 
-void Module::addErrorTerms(CalibratorI& calib, const Storage & storage, const EstConf & ec, ErrorTermReceiver & problem) const {
+void Module::addErrorTerms(CalibratorI& calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & problem) const {
   if(isUsed()){
     addErrorTerms(calib, ec, problem);
     const bool observeOnly = shouldObserveOnly(ec);
@@ -78,7 +78,7 @@ void Module::addErrorTerms(CalibratorI& calib, const Storage & storage, const Es
   }
 }
 
-void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const Storage & /*storage*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
+void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const ModuleStorage & /*storage*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }
 void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }

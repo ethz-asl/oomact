@@ -20,7 +20,7 @@ namespace aslam {
 namespace calibration {
 
 
-void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t, Storage & storage) const {
+void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t, ModuleStorage & storage) const {
   PoseMeasurement p;
   p.t_m_mf = trans;
   p.q_m_f = quat;
@@ -29,7 +29,7 @@ void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector
   addMeasurement(p, t, storage);
 }
 
-void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t, Storage & storage) const
+void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t, ModuleStorage & storage) const
 {
   getAllMeasurements(storage).push_back({t, pose});
 }
@@ -59,7 +59,7 @@ PoseSensor::~PoseSensor() {
 
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
-  ConstStorage & storage = calib.getCurrentStorage();
+  const ModuleStorage & storage = calib.getCurrentStorage();
   if(!hasMeasurements(storage)){
     LOG(WARNING) << "No measurements available for " << errorTermGroupName;
     return;

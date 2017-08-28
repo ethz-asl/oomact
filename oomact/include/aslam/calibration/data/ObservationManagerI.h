@@ -2,25 +2,22 @@
 #define H579F5188_F15B_47A4_B00E_B16F5109EE17
 
 #include <string>
+#include <aslam/calibration/model/Module.h>
 
-#include "StorageI.h"
 #include "../Timestamp.hpp"
 
 namespace aslam {
 namespace calibration {
 
 struct Interval;
-class Module;
 class Sensor;
 
 class ObservationManagerI {
  public:
-  typedef StorageI<const Module*> Storage;
-
   ObservationManagerI();
   virtual ~ObservationManagerI();
 
-  virtual Storage & getCurrentStorage() = 0;
+  virtual ModuleStorage & getCurrentStorage() = 0;
 
   virtual void setLowestTimestamp(Timestamp lowestTimeStamp) = 0;
   virtual void addMeasurementTimestamp(Timestamp t, const Sensor & sensor) = 0;

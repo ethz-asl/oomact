@@ -15,12 +15,10 @@ class Sensor;
 
 class PoseSensorI {
  public:
-  typedef const Module::Storage ConstStorage;
-
   virtual ~PoseSensorI(){}
 
-  virtual bool hasMeasurements(ConstStorage & storage) const = 0;
-  virtual const PoseMeasurements & getAllMeasurements(ConstStorage & storage) const = 0;
+  virtual bool hasMeasurements(const ModuleStorage & storage) const = 0;
+  virtual const PoseMeasurements & getAllMeasurements(const ModuleStorage & storage) const = 0;
 
   virtual const Frame & getTargetFrame() const = 0;
 

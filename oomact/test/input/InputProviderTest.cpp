@@ -15,19 +15,17 @@
 using namespace aslam;
 using namespace aslam::calibration;
 
-typedef ObservationManagerI::Storage Storage;
-
 class MockFeederI {
  public:
   virtual ~MockFeederI() = default;
-  virtual void feed(Timestamp at, Storage & storage) const = 0;
+  virtual void feed(Timestamp at, ModuleStorage & storage) const = 0;
   virtual const Sensor & getSensor() const = 0;
 };
 
 class SimpleMockFeeder : public MockFeederI {
  public:
-  SimpleMockFeeder(const Sensor & sensor, std::function<void(Timestamp, Storage &)> feeder) : sensor_(sensor), feeder_(feeder){}
-  virtual void feed(Timestamp at, Storage & storage) const override {
+  SimpleMockFeeder(const Sensor & sensor, std::function<void(Timestamp, ModuleStorage &)> feeder) : sensor_(sensor), feeder_(feeder){}
+  virtual void feed(Timestamp at, ModuleStorage & storage) const override {
     feeder_(at, storage);
   }
   virtual const Sensor & getSensor() const override {
@@ -35,7 +33,7 @@ class SimpleMockFeeder : public MockFeederI {
   }
  private:
   const Sensor & sensor_;
-  std::function<void(Timestamp, Storage &)> feeder_;
+  std::function<void(Timestamp, ModuleStorage &)> feeder_;
 };
 
 class FeederFactoryI {
@@ -137,7 +135,7 @@ TEST(InputProviderSuite, testEasy) {
   ip.add([](const Sensor & s) -> SimpleMockFeeder* {
     auto ptr = s.ptrAs<const PoseSensor>();
     if(ptr && s.getName() == "a"){
-      return new SimpleMockFeeder(s, [ptr](Timestamp at, Storage & storage) {
+      return new SimpleMockFeeder(s, [ptr](Timestamp at, ModuleStorage & storage) {
         auto p = test::MmcsRotatingStraightLine.getPoseAt(at);
         ptr->addMeasurement(p.q, p.p, p.time, storage);
       });

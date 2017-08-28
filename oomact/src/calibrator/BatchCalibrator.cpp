@@ -192,7 +192,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     }
   }
 
-  virtual Module::Storage & getCurrentStorage() override {
+  virtual ModuleStorage & getCurrentStorage() override {
     return storage_;
   }
 

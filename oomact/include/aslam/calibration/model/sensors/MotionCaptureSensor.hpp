@@ -38,7 +38,7 @@ class MotionCaptureSensor : public AbstractPoseSensor {
 
   Interval getSnappedWindow(CalibratorI & calib, const Interval & i);
 
-  const PoseMeasurements & fetchMeasurementsFromSourceInto(Timestamp from, Timestamp till, Storage & storage) const;
+  const PoseMeasurements & fetchMeasurementsFromSourceInto(Timestamp from, Timestamp till, ModuleStorage & storage) const;
 
   const std::shared_ptr<MotionCaptureSource>& getMotionCaptureSource() const {
     return motionCaptureSource;

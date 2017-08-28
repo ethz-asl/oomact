@@ -17,15 +17,15 @@ AbstractPoseSensor::AbstractPoseSensor(Model& model, std::string name, sm::value
 AbstractPoseSensor::~AbstractPoseSensor() {
 }
 
-bool AbstractPoseSensor::hasMeasurements(ConstStorage & storage) const {
+bool AbstractPoseSensor::hasMeasurements(const ModuleStorage & storage) const {
   return storageConnector_.hasData(storage);
 }
 
-const PoseMeasurements& AbstractPoseSensor::getAllMeasurements(const Storage & storage) const {
+const PoseMeasurements& AbstractPoseSensor::getAllMeasurements(const ModuleStorage & storage) const {
   return storageConnector_.getDataFrom(storage);
 }
 
-PoseMeasurements& AbstractPoseSensor::getAllMeasurements(Storage & storage) const {
+PoseMeasurements& AbstractPoseSensor::getAllMeasurements(ModuleStorage & storage) const {
   return storageConnector_.getDataFrom(storage);
 }
 

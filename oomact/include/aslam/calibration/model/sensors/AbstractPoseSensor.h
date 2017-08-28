@@ -20,13 +20,13 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
     return *this;
   }
 
-  virtual bool hasMeasurements(ConstStorage & storage) const override;
-  virtual const PoseMeasurements & getAllMeasurements(ConstStorage & storage) const override;
+  virtual bool hasMeasurements(const ModuleStorage & storage) const override;
+  virtual const PoseMeasurements & getAllMeasurements(const ModuleStorage & storage) const override;
 
  protected:
-  PoseMeasurements & getAllMeasurements(Storage & storage) const;
+  PoseMeasurements & getAllMeasurements(ModuleStorage & storage) const;
  private:
-  Storage::Connector<PoseMeasurements> storageConnector_;
+  ModuleStorage::Connector<PoseMeasurements> storageConnector_;
 };
 
 } /* namespace calibration */
