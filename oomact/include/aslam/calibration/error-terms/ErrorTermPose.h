@@ -54,7 +54,9 @@ namespace aslam {
           ErrorTermGroupReference etgr);
 
       ErrorTermPose(
-          const aslam::backend::TransformationExpression& T, const PoseMeasurement & pm, ErrorTermGroupReference etgr
+          const aslam::backend::TransformationExpression& T, const PoseMeasurement & pm,
+          const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r,
+          ErrorTermGroupReference etgr
           );
 
       virtual Eigen::VectorXd getPrediction() const;

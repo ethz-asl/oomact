@@ -96,12 +96,10 @@ TEST(AslamCalibrationTestSuite, testConditionalErrorTermWithPose) {
 
   ErrorTermGroupReference etgr("test");
   PoseMeasurement p;
-  p.sigma2_q_m_f.setIdentity();
-  p.sigma2_t_m_mf.setIdentity();
   p.q_m_f = sm::kinematics::quatIdentity();
   p.t_m_mf.setZero();
 
-  auto ewS = boost::make_shared<ErrorTermPose>(T, p, etgr);
+  auto ewS = boost::make_shared<ErrorTermPose>(T, p, Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Identity(), etgr);
 
   bool active = true;
   auto cewS = addConditionShared(*ewS, [&](){ return active; });

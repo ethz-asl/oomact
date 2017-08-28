@@ -29,11 +29,16 @@ void CrossPoseCvPrior::addMeasurementErrorTerms(CalibratorI& calib, const EstCon
     ErrorTermStatisticsWithProblemAndPredictor dest(calib, getName(), problem, observeOnly);
     PoseMeasurement pose{
       getTranslationToParent(),
-      squaredMatrix(getTranslationVariable().getPriorCovarianceSqrt()),
-      getRotationQuaternionToParent(), squaredMatrix(getRotationVariable().getPriorCovarianceSqrt())
+      getRotationQuaternionToParent()
     };
 
-    auto e = boost::make_shared<ErrorTermPose>(to.getTransformationToParentExpression().inverse() * from.getTransformationToParentExpression(), pose, getName());
+    auto e = boost::make_shared<ErrorTermPose>(
+        to.getTransformationToParentExpression().inverse() * from.getTransformationToParentExpression(),
+        pose,
+        squaredMatrix(getTranslationVariable().getPriorCovarianceSqrt()),
+        squaredMatrix(getRotationVariable().getPriorCovarianceSqrt()),
+        getName()
+      );
 
     LOG(INFO) << getName() << " initial prediction="<< e->getPrediction().transpose() << ", measurement=" << e->getMeasurement().transpose();
     dest.add(Timestamp::Zero(), e);

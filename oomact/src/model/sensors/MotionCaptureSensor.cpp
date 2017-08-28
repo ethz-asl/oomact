@@ -79,12 +79,10 @@ const PoseMeasurements & MotionCaptureSensor::fetchMeasurementsFromSourceInto(Ti
 {
   auto & poses = getAllMeasurements(storage);
   if(getMotionCaptureSource()){
-    Eigen::Matrix3d cov_t = covPosition.getValue();
-    Eigen::Matrix3d cov_o = covOrientation.getValue();
     auto posesFromSource = getMotionCaptureSource()->getPoses(from, till);
     poses.reserve(posesFromSource.size());
     for(auto & p : posesFromSource){
-      poses.emplace_back(p.time, {p.p, cov_t, p.q, cov_o});
+      poses.emplace_back(p.time, {p.p, p.q});
     }
   }
   return poses;
@@ -140,6 +138,9 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
     throw std::runtime_error("Delay already out of bounds!");
   }
 
+  const Eigen::Matrix3d cov_t = covPosition.getValue();
+  const Eigen::Matrix3d cov_r = covOrientation.getValue();
+
   for (auto & m : getAllMeasurements(storage)) {
     const Timestamp timestamp = m.first;
     const bool timestampIsPossiblyOutOfBounds = uLow > timestamp || uUpp < timestamp;
@@ -151,7 +152,8 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
     const auto & pose = m.second;
 
     aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, motionCaptureSystem.getParentFrame(), true);
-    boost::shared_ptr<ErrorTermPose> e_pose(new ErrorTermPose(aslam::backend::TransformationExpression(mCSFromGlobalTransformation * T_m_s), pose, etgr));
+    boost::shared_ptr<ErrorTermPose> e_pose(new ErrorTermPose(aslam::backend::TransformationExpression(mCSFromGlobalTransformation * T_m_s), pose, cov_t, cov_r, etgr));
+
     if (timestampIsPossiblyOutOfBounds) {
       LOG(INFO) << "Adding conditional PoseErrorTerm for pose measurement at " << calib.secsSinceStart(timestamp) << " because it could go out of bounds!";
       if(uLow > timestamp){
