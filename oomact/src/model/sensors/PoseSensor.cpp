@@ -20,14 +20,18 @@ namespace aslam {
 namespace calibration {
 
 
-void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t, ModuleStorage & storage) const {
+void PoseSensor::addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStorage& storage) const {
+  addMeasurement(t, pose, storage);
+}
+
+void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, ModuleStorage & storage) const {
   PoseMeasurement p;
   p.t_m_mf = trans;
   p.q_m_f = quat;
-  addMeasurement(p, t, storage);
+  addMeasurement(t, p, storage);
 }
 
-void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t, ModuleStorage & storage) const
+void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const
 {
   getAllMeasurements(storage).push_back({t, pose});
 }

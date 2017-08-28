@@ -134,7 +134,7 @@ TEST(InputProviderSuite, testEasy) {
     return (ptr && s.getName() == "a") ?
         new SimpleMockFeeder(s, [ptr](Timestamp at, ModuleStorage & storage) {
           auto p = test::MmcsRotatingStraightLine.getPoseAt(at);
-          ptr->addMeasurement(p.q, p.p, p.time, storage);
+          ptr->addMeasurement(p.time, p.q, p.p, storage);
         })
       : nullptr;
   });

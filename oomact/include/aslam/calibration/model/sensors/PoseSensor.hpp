@@ -1,13 +1,14 @@
 #ifndef POSE_SENSOR_HPP_
 #define POSE_SENSOR_HPP_
 
+#include <aslam/calibration/input/InputRecieverI.h>
 #include <aslam/calibration/model/sensors/AbstractPoseSensor.h>
 #include <aslam/calibration/tools/Interval.hpp>
 
 namespace aslam {
 namespace calibration {
 
-class PoseSensor : public AbstractPoseSensor {
+class PoseSensor : public AbstractPoseSensor, public InputReceiverIT<PoseMeasurement> {
  public:
   PoseSensor(Model & model, std::string name, sm::value_store::ValueStoreRef config);
 
@@ -15,8 +16,9 @@ class PoseSensor : public AbstractPoseSensor {
 
   virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
-  void addMeasurement(const PoseMeasurement& pose, const Timestamp t, ModuleStorage & storage) const;
-  void addMeasurement(const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, const Timestamp t, ModuleStorage & storage) const;
+  void addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const override;
+  void addMeasurement(Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const;
+  void addMeasurement(Timestamp t, const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, ModuleStorage & storage) const;
 
   const Covariance& getCovOrientation() const {
     return covOrientation_;
