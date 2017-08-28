@@ -131,14 +131,12 @@ TEST(InputProviderSuite, testEasy) {
 
   ip.add([](const Sensor & s) -> SimpleMockFeeder* {
     auto ptr = s.ptrAs<const PoseSensor>();
-    if(ptr && s.getName() == "a"){
-      return new SimpleMockFeeder(s, [ptr](Timestamp at, ModuleStorage & storage) {
-        auto p = test::MmcsRotatingStraightLine.getPoseAt(at);
-        ptr->addMeasurement(p.q, p.p, p.time, storage);
-      });
-    } else {
-      return nullptr;
-    }
+    return (ptr && s.getName() == "a") ?
+        new SimpleMockFeeder(s, [ptr](Timestamp at, ModuleStorage & storage) {
+          auto p = test::MmcsRotatingStraightLine.getPoseAt(at);
+          ptr->addMeasurement(p.q, p.p, p.time, storage);
+        })
+      : nullptr;
   });
 
   ip.init();
