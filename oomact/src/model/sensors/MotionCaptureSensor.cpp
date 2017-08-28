@@ -1,17 +1,18 @@
 #include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
 
-#include <aslam/backend/TransformationExpression.hpp>
+#include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
+#include <aslam/backend/TransformationExpression.hpp>
+
+#include "aslam/calibration/algo/MotionCaptureSource.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/data/MeasurementsContainer.h"
+#include "aslam/calibration/error-terms/ErrorTermPose.h"
+#include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/Sensor.hpp>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include <boost/make_shared.hpp>
-#include "aslam/calibration/error-terms/ErrorTermPose.h"
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
-#include <aslam/calibration/model/Model.h>
-#include "aslam/calibration/algo/MotionCaptureSource.hpp"
-#include "aslam/calibration/data/MeasurementsContainer.h"
 
 namespace aslam {
 namespace calibration {
@@ -74,12 +75,12 @@ MotionCaptureSensor::MotionCaptureSensor(MotionCaptureSystem& motionCaptureSyste
 MotionCaptureSensor::~MotionCaptureSensor() {
 }
 
-PoseMeasurements MotionCaptureSensor::getMeasurements(Timestamp from, Timestamp till) const
+const PoseMeasurements & MotionCaptureSensor::fetchMeasurementsFromSourceInto(Timestamp from, Timestamp till, Storage & storage) const
 {
-  PoseMeasurements poses;
+  auto & poses = getAllMeasurements(storage);
   if(getMotionCaptureSource()){
     Eigen::Matrix3d cov_t = covPosition.getValue();
-    Eigen::Matrix3d cov_o = covOrientation.getValue(); //TODO C this should be per model
+    Eigen::Matrix3d cov_o = covOrientation.getValue();
     auto posesFromSource = getMotionCaptureSource()->getPoses(from, till);
     poses.reserve(posesFromSource.size());
     for(auto & p : posesFromSource){
@@ -90,24 +91,25 @@ PoseMeasurements MotionCaptureSensor::getMeasurements(Timestamp from, Timestamp 
 }
 
 void MotionCaptureSensor::preProcessNewWindow(CalibratorI& calib) {
-  if(getMotionCaptureSource() && !measurements){
+  if(getMotionCaptureSource()){
     auto currentEffectiveBatchInterval = calib.getCurrentEffectiveBatchInterval();
-    measurements = std::make_shared<MotionCaptureSensorMeasurements>();
     if(hasDelay()){
       currentEffectiveBatchInterval.start += getDelayLowerBound();
       currentEffectiveBatchInterval.end += getDelayUpperBound();
     }
-    measurements->poses = getMeasurements(currentEffectiveBatchInterval.start, currentEffectiveBatchInterval.end);
-    LOG(INFO) << "Found " << measurements->poses.size() << " motion capture measurements for " << getName();
+    auto & poses = fetchMeasurementsFromSourceInto(currentEffectiveBatchInterval.start, currentEffectiveBatchInterval.end, calib.getCurrentStorage());
+    LOG(INFO) << "Found " << poses.size() << " motion capture measurements for " << getName();
   }
 }
 
 Interval MotionCaptureSensor::getSnappedWindow(CalibratorI& calib, const Interval& i) { //TODO C use interval parameter!
   SM_ASSERT_FALSE(std::runtime_error, hasDelay(), "Delay not supported here!");
   preProcessNewWindow(calib);
-  SM_ASSERT_FALSE(std::runtime_error, measurements->poses.empty(), "Could not find measurements!");
+  auto & storage = calib.getCurrentStorage();
+  SM_ASSERT_TRUE(std::runtime_error, hasMeasurements(storage), "Could not find measurements!");
 
-  Interval res(measurements->poses.front().first, measurements->poses.back().first);
+  auto poses = getAllMeasurements(storage);
+  Interval res(poses.front().first, poses.back().first);
   SM_ASSERT_GE(std::runtime_error, res.start, i.start, "");
   SM_ASSERT_LE(std::runtime_error, res.end, i.end, "");
   return res;
@@ -115,7 +117,8 @@ Interval MotionCaptureSensor::getSnappedWindow(CalibratorI& calib, const Interva
 
 void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
-  if(!measurements || measurements->poses.empty()){
+  auto & storage = calib.getCurrentStorage();
+  if(!hasMeasurements(storage)){
     LOG(WARNING) << "No measurements available for " << errorTermGroupName;
     return;
   }
@@ -137,7 +140,7 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
     throw std::runtime_error("Delay already out of bounds!");
   }
 
-  for (auto & m : measurements->poses) {
+  for (auto & m : getAllMeasurements(storage)) {
     const Timestamp timestamp = m.first;
     const bool timestampIsPossiblyOutOfBounds = uLow > timestamp || uUpp < timestamp;
     if(timestampIsPossiblyOutOfBounds && !hasDelay()){
@@ -162,15 +165,6 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
     es.add(timestamp, e_pose, false);
   }
   es.printInto(LOG(INFO));
-}
-
-const PoseMeasurements& MotionCaptureSensor::getAllMeasurements() const {
-  CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
-  return measurements->poses;
-}
-
-void MotionCaptureSensor::clearMeasurements() {
-  measurements.reset();
 }
 
 } /* namespace calibration */

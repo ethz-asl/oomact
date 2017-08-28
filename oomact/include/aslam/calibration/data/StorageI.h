@@ -6,6 +6,8 @@
 
 #include <glog/logging.h>
 
+#include "../tools/CheckNotNull.h"
+
 namespace aslam {
 namespace calibration {
 
@@ -53,26 +55,30 @@ class StorageI {
 
   virtual void remove(Key key) = 0;
 
+  virtual size_t size() const = 0;
+
   template <typename Value>
   class Connector {
    public:
     Connector(Key key) : key_(key){ };
 
-    Value* getDataPtrFrom(StorageI<Key> & storage, bool createIfMissing = true) const {
-      auto ptr = static_cast<Value*>(storage.get(key_));
-      if (createIfMissing && !ptr) {
-        ptr = createNewStorage();
-        storage.add(key_, ptr);
-      }
-      return ptr;
+    Value* getDataPtrFrom(StorageI<Key>& storage, bool createIfMissing = true) const;
+
+    const Value* getDataPtrFrom(const StorageI<Key> & storage) const {
+      return static_cast<const Value*>(storage.get(key_));
     }
 
     Value & getDataFrom(StorageI<Key> & storage) const {
-      const auto ptr = getDataPtrFrom(storage, false);
-      CHECK(ptr);
-      return *ptr;
+      return *getDataPtrFrom(storage, true);
     }
 
+    const Value & getDataFrom(const StorageI<Key> & storage) const {
+      return *checkNotNull(getDataPtrFrom(storage));
+    }
+
+    bool hasData(const StorageI<Key> & storage) const {
+      return storage.get(key_);
+    }
    private:
     Value * createNewStorage() const {
       return new Value;
@@ -84,6 +90,17 @@ class StorageI {
   virtual void add(Key key, StorageElement && data) = 0;
   template <typename> friend class Connector;
 };
+
+template<typename Key>
+template<typename Value>
+inline Value* StorageI<Key>::Connector<Value>::getDataPtrFrom(StorageI<Key>& storage, bool createIfMissing) const {
+  auto ptr = static_cast<Value*>(storage.get(key_));
+  if (createIfMissing && !ptr) {
+    ptr = createNewStorage();
+    storage.add(key_, ptr);
+  }
+  return ptr;
+}
 
 } /* namespace calibration */
 } /* namespace aslam */

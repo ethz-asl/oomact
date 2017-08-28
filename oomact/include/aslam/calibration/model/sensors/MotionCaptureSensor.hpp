@@ -1,8 +1,10 @@
 #ifndef MOTION_CAPTURE_SENSOR_HPP_
 #define MOTION_CAPTURE_SENSOR_HPP_
 
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/sensors/AbstractPoseSensor.h>
+#include <aslam/calibration/tools/Interval.hpp>
 
 namespace aslam {
 namespace calibration {
@@ -32,11 +34,11 @@ class MotionCaptureSensor : public AbstractPoseSensor {
 
   void preProcessNewWindow(CalibratorI & calib) override;
 
-  virtual void clearMeasurements() override;
-
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
   Interval getSnappedWindow(CalibratorI & calib, const Interval & i);
+
+  const PoseMeasurements & fetchMeasurementsFromSourceInto(Timestamp from, Timestamp till, Storage & storage) const;
 
   const std::shared_ptr<MotionCaptureSource>& getMotionCaptureSource() const {
     return motionCaptureSource;
@@ -46,21 +48,12 @@ class MotionCaptureSensor : public AbstractPoseSensor {
     this->motionCaptureSource = motionCaptureSource;
   }
 
-  bool hasMeasurements() const override {
-    return bool(measurements);
-  }
-
-  const PoseMeasurements & getAllMeasurements() const override;
-  PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const override;
-
   const Frame& getTargetFrame() const override {
     return motionCaptureSystem.getParentFrame();
   }
-
  private:
   MotionCaptureSystem & motionCaptureSystem;
   std::shared_ptr<MotionCaptureSource> motionCaptureSource;
-  std::shared_ptr<MotionCaptureSensorMeasurements> measurements;
 
   Covariance covPosition, covOrientation;
 };

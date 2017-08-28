@@ -7,6 +7,8 @@
 
 #include <aslam/calibration/plan/Printable.h>
 #include <sm/value_store/ValueStore.hpp>
+#include <aslam/calibration/data/StorageI.h>
+
 namespace boost {
   template<typename T> class shared_ptr;
 }
@@ -140,8 +142,6 @@ class IsA {
 };
 
 std::string normalizeName(const char * parameter);
-
-template <typename Key> class StorageI;
 
 class Module : public virtual Named, public virtual Used, public IsA<Module> {
  public:

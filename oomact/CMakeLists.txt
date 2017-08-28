@@ -37,6 +37,7 @@ cs_add_library(${PROJECT_NAME}
   src/data/ObservationManagerI.cpp
   src/data/MapStorage.cpp
   src/data/StorageI.cpp
+  src/input/InputProviderI.cpp
   src/model/Module.cpp
   src/model/ModuleList.cpp
   src/model/Model.cpp
@@ -87,6 +88,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/error-terms/ConditionalErrorTerm.cpp
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
+  test/input/InputProviderTest.cpp
   test/data/MeasurementsContainerTest.cpp
   test/data/StorageTest.cpp
   test/acceptance/SimpleModelTest.cpp

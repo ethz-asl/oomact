@@ -20,38 +20,37 @@ namespace aslam {
 namespace calibration {
 
 
-void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t) {
+void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t, Storage & storage) const {
   PoseMeasurement p;
   p.t_m_mf = trans;
   p.q_m_f = quat;
   p.sigma2_t_m_mf = getCovPosition().getValue();
   p.sigma2_q_m_f = getCovOrientation().getValue();
-  addMeasurement(p, t);
+  addMeasurement(p, t, storage);
 }
 
-void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t)
+void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t, Storage & storage) const
 {
-  measurements->push_back({t, pose});
+  getAllMeasurements(storage).push_back({t, pose});
 }
 
 void PoseSensor::writeConfig(std::ostream& out) const {
   Sensor::writeConfig(out);
-  MODULE_WRITE_PARAMETER(targetFrame);
+  MODULE_WRITE_PARAMETER(targetFrame_);
   MODULE_WRITE_PARAMETER(absoluteMeasurements_);
 }
 
 PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   AbstractPoseSensor(model, name, config),
-  covPosition(getMyConfig().getChild("covPosition"), 3),
-  covOrientation(getMyConfig().getChild("covOrientation"), 3),
-  targetFrame(getModel().getFrame(getMyConfig().getString("targetFrame"))),
+  covPosition_(getMyConfig().getChild("covPosition"), 3),
+  covOrientation_(getMyConfig().getChild("covOrientation"), 3),
+  targetFrame_(getModel().getFrame(getMyConfig().getString("targetFrame"))),
   absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
 {
   if(isUsed()) {
-    measurements = std::make_shared<PoseMeasurements>();
     LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition.getValueSqrt() << std::endl
-      << "covPosition\n" << covOrientation.getValueSqrt();
+      << getName() << ":covPosition=\n" << covPosition_.getValueSqrt() << std::endl
+      << "covPosition\n" << covOrientation_.getValueSqrt();
   }
 }
 
@@ -60,7 +59,8 @@ PoseSensor::~PoseSensor() {
 
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
-  if(!measurements || measurements->empty()){
+  ConstStorage & storage = calib.getCurrentStorage();
+  if(!hasMeasurements(storage)){
     LOG(WARNING) << "No measurements available for " << errorTermGroupName;
     return;
   }
@@ -85,7 +85,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
   const PoseMeasurement * lastPoseMeasurement = nullptr;
   auto lastTimestamp = Timestamp::Zero();
   aslam::backend::TransformationExpression last_T_m_s;
-  for (auto & m : *measurements) {
+  for (auto & m : getAllMeasurements(storage)) {
     Timestamp timestamp = m.first;
     auto & poseMeasurement = m.second;
     if(certainLowerBound > timestamp || certainUpperBound < timestamp){
@@ -101,7 +101,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     }
 
     boost::shared_ptr<ErrorTermPose> e_pose;
-    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
+    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame_, true);
     Timestamp lowerTimestamp;
 
     if(absoluteMeasurements_){
@@ -147,20 +147,6 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     }
   }
   es.printInto(LOG(INFO));
-}
-
-
-void PoseSensor::clearMeasurements() {
-  measurements.reset();
-}
-
-bool PoseSensor::hasMeasurements() const {
-  return measurements && !measurements->empty();
-}
-
-const PoseMeasurements& PoseSensor::getAllMeasurements() const {
-  CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
-  return *measurements;
 }
 
 static bool isOutlier_(const PoseMeasurement& p) {

@@ -14,17 +14,19 @@ namespace test {
  */
 class MockMotionCaptureSource : public MotionCaptureSource {
  public:
-  MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
+  constexpr static Timestamp StartTime = Timestamp::Zero();
+
+  MockMotionCaptureSource(std::function<void(Timestamp now, PoseStamped & p)> func) : func(func){}
   virtual ~MockMotionCaptureSource();
   virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override;
-  virtual PoseStamped getPoseAt(Timestamp start, Timestamp at) const;
+  virtual std::vector<PoseStamped> getPoses(Timestamp till) const { return getPoses(StartTime, till); }
+  virtual PoseStamped getPoseAt(Timestamp at) const;
  private:
-  std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
+  std::function<void(Timestamp now, PoseStamped & p)> func;
 };
 
-extern MockMotionCaptureSource mmcsStraightLine;
-
-extern MockMotionCaptureSource mmcsRotatingStraightLine;
+extern MockMotionCaptureSource MmcsStraightLine;
+extern MockMotionCaptureSource MmcsRotatingStraightLine;
 
 } /* namespace test */
 } /* namespace calibration */

@@ -7,13 +7,15 @@ namespace aslam {
 namespace calibration {
 namespace test {
 
+constexpr Timestamp MockMotionCaptureSource::StartTime;
+
 MockMotionCaptureSource::~MockMotionCaptureSource() {
 }
 
-MotionCaptureSource::PoseStamped MockMotionCaptureSource::getPoseAt(Timestamp start, Timestamp at) const {
+MotionCaptureSource::PoseStamped MockMotionCaptureSource::getPoseAt(Timestamp at) const {
   PoseStamped p;
   p.time = at;
-  func(start, at, p);
+  func(at, p);
   return p;
 }
 
@@ -21,19 +23,20 @@ std::vector<MotionCaptureSource::PoseStamped> MockMotionCaptureSource::getPoses(
   Timestamp inc(1e-2);
   std::vector<PoseStamped> poses;
   for(auto t = from; t <= till + inc; t += inc){
-    poses.emplace_back(getPoseAt(from, t));
+    poses.emplace_back(getPoseAt(t));
   }
   return poses;
 }
 
-MockMotionCaptureSource mmcsStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
+MockMotionCaptureSource MmcsStraightLine([](Timestamp now, MotionCaptureSource::PoseStamped & p){
   p.q = sm::kinematics::quatIdentity();
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
+  p.p = Eigen::Vector3d::UnitX() * (now - MockMotionCaptureSource::StartTime);
 });
 
-MockMotionCaptureSource mmcsRotatingStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  p.q = sm::kinematics::axisAngle2quat({double(now - start), 0, 0});
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
+MockMotionCaptureSource MmcsRotatingStraightLine([](Timestamp now, MotionCaptureSource::PoseStamped & p){
+  const double deltaTime = now - MockMotionCaptureSource::StartTime;
+  p.q = sm::kinematics::axisAngle2quat({deltaTime, 0, 0});
+  p.p = Eigen::Vector3d::UnitX() * deltaTime;
 });
 
 } /* namespace test */

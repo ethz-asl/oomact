@@ -10,7 +10,7 @@ namespace internal {
 
 
 /**
- * The MapStorageUnsafe class is a helper for Storage below.
+ * The MapStorageUnsafe class is a helper for Storage below doing the heavy lifting but not typesafe.
  */
 class MapStorageUnsafe {
  public:
@@ -18,6 +18,8 @@ class MapStorageUnsafe {
   void * get(size_t key) const;
   void add(size_t key, StorageElement && se);
   void remove(size_t key);
+
+  size_t size() const { return data_.size(); }
  private:
   std::unordered_map<size_t, StorageElement> data_;
 };
@@ -48,6 +50,10 @@ class MapStorage : public StorageI<Key> {
   }
   void add(Key key, StorageElement && data) override {
     impl.add(convertKey(key), std::move(data));
+  }
+
+  virtual size_t size() const override {
+    return impl.size();
   }
 
   internal::MapStorageUnsafe impl;

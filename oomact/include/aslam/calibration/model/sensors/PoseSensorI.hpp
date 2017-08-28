@@ -1,6 +1,7 @@
 #ifndef H3B9CD3B6_B657_40D3_8741_16FE63E05C0F
 #define H3B9CD3B6_B657_40D3_8741_16FE63E05C0F
 
+#include <aslam/calibration/model/Module.h>
 #include "../../Timestamp.hpp"
 
 namespace aslam {
@@ -14,11 +15,12 @@ class Sensor;
 
 class PoseSensorI {
  public:
+  typedef const Module::Storage ConstStorage;
+
   virtual ~PoseSensorI(){}
 
-  virtual bool hasMeasurements() const = 0;
-  virtual const PoseMeasurements & getAllMeasurements() const = 0;
-  virtual PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const = 0;
+  virtual bool hasMeasurements(ConstStorage & storage) const = 0;
+  virtual const PoseMeasurements & getAllMeasurements(ConstStorage & storage) const = 0;
 
   virtual const Frame & getTargetFrame() const = 0;
 

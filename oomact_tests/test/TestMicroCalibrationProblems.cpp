@@ -19,11 +19,12 @@
 using namespace aslam::calibration;
 using namespace aslam::calibration::test;
 
-MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  const auto angleX = double(now - start) * 3;
+MockMotionCaptureSource mmcsHelix([](Timestamp now, MotionCaptureSource::PoseStamped & p){
+  double deltaTimeSecs = now - MockMotionCaptureSource::StartTime;
+  const auto angleX = deltaTimeSecs * 3;
   p.q = sm::kinematics::axisAngle2quat({angleX, 0, 0});
   auto rotRQPlusQuaterRotation = sm::kinematics::axisAngle2R({angleX, 0, 0});
-  p.p = Eigen::Vector3d::UnitX() * (now - start) + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
+  p.p = Eigen::Vector3d::UnitX() * deltaTimeSecs + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
 });
 
 
@@ -52,10 +53,12 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto c = createBatchCalibrator(vsCalib, std::shared_ptr<Model>(&m, sm::null_deleter()));
 
   const double startTime = 0, endTime = 1.0;
-  for (auto& p : test::mmcsStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+  for (auto& p : test::MmcsStraightLine.getPoses(startTime, endTime)) {
+    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
   }
+  EXPECT_EQ(1, c->getCurrentStorage().size());
+
   c->calibrate();
 
   EXPECT_NEAR(5.0, mcSensorA.getTranslationToParent()[1], 0.0001);
@@ -94,10 +97,10 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
 
   const double startTime = 0, endTime = 1.0;
 
-  for (auto& p : mmcsRotatingStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+  for (auto& p : MmcsRotatingStraightLine.getPoses(startTime, endTime)) {
+    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time);
+    mcSensorB.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
   }
   c->calibrate();
 
@@ -136,9 +139,9 @@ TEST(TestCalibration, testEstimateRelativePoseSensor) {
   const double startTime = 0, endTime = 1.0;
 
   for (auto& p : mmcsHelix.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+    mcSensorA.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time);
+    mcSensorB.addMeasurement(p.q, p.p, p.time, c->getCurrentStorage());
   }
   c->calibrate();
 
@@ -165,7 +168,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
@@ -208,8 +211,8 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
 
 
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
-  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
+  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "acceptConstantErrorTerms=true\n"

@@ -1,6 +1,7 @@
 #ifndef H224E4723_D72A_4715_947A_F81E0A1714EB
 #define H224E4723_D72A_4715_947A_F81E0A1714EB
 
+#include "../../data/StorageI.h"
 #include "../Sensor.hpp"
 #include "PoseSensorI.hpp"
 
@@ -19,7 +20,13 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
     return *this;
   }
 
-  virtual PoseMeasurements getMeasurements(Timestamp from, Timestamp till) const override;
+  virtual bool hasMeasurements(ConstStorage & storage) const override;
+  virtual const PoseMeasurements & getAllMeasurements(ConstStorage & storage) const override;
+
+ protected:
+  PoseMeasurements & getAllMeasurements(Storage & storage) const;
+ private:
+  Storage::Connector<PoseMeasurements> storageConnector_;
 };
 
 } /* namespace calibration */
