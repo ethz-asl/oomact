@@ -59,10 +59,8 @@ class SimpleFeederFactory : public FeederFactoryI {
 
 class MockInputProvider : public InputProviderI {
  public:
-  MockInputProvider(std::shared_ptr<const Model> model, std::shared_ptr<ObservationManagerI> obsManager) :
-    model_(model),
-    obsManager_(obsManager)
-    {
+  MockInputProvider(std::shared_ptr<const Model> model) : model_(model)
+  {
   }
 
   void add(std::unique_ptr<FeederFactoryI> ptr) {
@@ -89,18 +87,17 @@ class MockInputProvider : public InputProviderI {
       }
     }
   }
-  void simulateData (Timestamp fromTime, Timestamp toTime) const {
-    auto && storage = obsManager_->getCurrentStorage();
+  void simulateData(Timestamp fromTime, Timestamp toTime, ObservationManagerI & obsManager) const {
+    auto && storage = obsManager.getCurrentStorage();
     for(auto t = fromTime; t <= toTime + TimeInc; t += TimeInc){
       for(auto & f : feeder_){
         f->feed(t, storage);
-        obsManager_->addMeasurementTimestamp(t, f->getSensor());
+        obsManager.addMeasurementTimestamp(t, f->getSensor());
       }
     }
   }
  private:
   std::shared_ptr<const Model> model_;
-  std::shared_ptr<ObservationManagerI> obsManager_;
 
   std::vector<std::unique_ptr<FeederFactoryI>> feederFactories_;
   std::vector<std::unique_ptr<MockFeederI>> feeder_;
@@ -129,8 +126,8 @@ TEST(InputProviderSuite, testEasy) {
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
   auto spModel = to_local_shared_ptr(m);
-  auto c = unique_to_shared_ptr(createBatchCalibrator(vsCalib, spModel));
-  MockInputProvider ip(spModel, c);
+  auto c = createBatchCalibrator(vsCalib, spModel);
+  MockInputProvider ip(spModel);
 
   ip.add([](const Sensor & s) -> SimpleMockFeeder* {
     auto ptr = s.ptrAs<const PoseSensor>();
@@ -145,7 +142,7 @@ TEST(InputProviderSuite, testEasy) {
   });
 
   ip.init();
-  ip.simulateData(0.0, 1.0);
+  ip.simulateData(0.0, 1.0, *c);
 
   c->calibrate();
   EXPECT_NEAR(5.0, mcSensorA.getTranslationToParent()[1], 0.0001);
