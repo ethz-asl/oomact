@@ -5,9 +5,10 @@
 #include <iosfwd>
 #include <string>
 
-#include <aslam/calibration/plan/Printable.h>
 #include <sm/value_store/ValueStore.hpp>
+
 #include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/tools/Printable.h>
 
 namespace boost {
   template<typename T> class shared_ptr;
