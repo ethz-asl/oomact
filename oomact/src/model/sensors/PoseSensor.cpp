@@ -47,8 +47,8 @@ void PoseSensor::addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStor
 
 void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, ModuleStorage & storage) const {
   PoseMeasurement p;
-  p.t_m_mf = trans;
-  p.q_m_f = quat;
+  p.t = trans;
+  p.q = quat;
   addMeasurement(t, p, storage);
 }
 
@@ -119,8 +119,8 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
 //        es.add(timestamp, e_pose, false);
       } else {
         sm::kinematics::Transformation deltaT
-          = sm::kinematics::Transformation(lastPoseMeasurement->q_m_f, lastPoseMeasurement->t_m_mf).inverse()
-          * sm::kinematics::Transformation(poseMeasurement.q_m_f, poseMeasurement.t_m_mf);
+          = sm::kinematics::Transformation(lastPoseMeasurement->q, lastPoseMeasurement->t).inverse()
+          * sm::kinematics::Transformation(poseMeasurement.q, poseMeasurement.t);
         e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), sigma2_t_m_mf, sigma2_t_m_mf, etgr));
       }
       lastPoseMeasurement = &poseMeasurement;
@@ -153,11 +153,11 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
 }
 
 static bool isOutlier_(const PoseMeasurement& p) {
-  return std::isnan(p.t_m_mf[0]);
+  return std::isnan(p.t[0]);
 }
 static PoseMeasurement createOutlier_() {
   PoseMeasurement outlier;
-  outlier.t_m_mf[0] = std::numeric_limits<double>::signaling_NaN();
+  outlier.t[0] = std::numeric_limits<double>::signaling_NaN();
   CHECK(isOutlier_(outlier));
   return outlier;
 }

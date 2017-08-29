@@ -29,11 +29,6 @@ namespace aslam {
        * @param am acceleration measurement (\f$[x,y,z]\f$) in F_i, i_am_mi
        * @param sigma2 Covariance matrix of the pose measurement
        */
-      // Attention!! Maybe it is better to calculate directly in loco, since due to the choice
-      // Of the spline placed on the axle and not on the IMU, the parameters to pass to the error term
-      // Might be too many, also angular speed and angular acceleration, so better do it in the CarCalibrator.cpp
-      // On the countrary we can solve this by putting the translation and rotation spline directly on the IMU.
-      //const aslam::backend::EuclideanExpression& i_a_mi,
       ErrorTermAccelerometer(const aslam::backend::EuclideanExpression& a_m_mi,
                              const aslam::backend::RotationExpression& R_i_m,
                              const aslam::backend::EuclideanExpression& g_m,

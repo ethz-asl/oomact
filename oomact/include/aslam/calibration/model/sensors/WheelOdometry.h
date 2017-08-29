@@ -54,8 +54,6 @@ class WheelOdometry : public Sensor {
   const double assumedWheelBase, assumedWheelRadiusLeft, assumedWheelRadiusRight;
  private:
   mutable MeasurementsContainer<WheelSpeedsMeasurement> measurements_;
-  double maximallyPossibleRotationalVelocity = 5.0; //TODO C make maximallyPossibleRotationalVelocity and maximallyPossibleTranslationalVelocity parameters;
-  double maximallyPossibleTranslationalVelocity = 3.0;
   double lwVariance;
   double rwVariance;
   int minimalMeasurementsPerBatch;

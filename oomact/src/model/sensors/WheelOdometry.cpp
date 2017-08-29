@@ -75,11 +75,6 @@ void WheelOdometry::writeConfig(std::ostream& out) const {
 
 void WheelOdometry::addMeasurement(CalibratorI & calib, const Timestamp t, const WheelSpeedsMeasurement& data) const {
   if(isUsed()){
-    // Taking away the outliers 15.0 rad/s -> 3 m/s abundantly above our working range
-    if(fabs(data.rv) > maximallyPossibleRotationalVelocity || fabs(data.tv) > maximallyPossibleTranslationalVelocity){ // TODO C make these thresholds configuration parameters
-      LOG(INFO) << "throwing away bogus wheel measurement rv=" << data.rv  << " tv=" << data.tv;
-      return;
-    }
     calib.addMeasurementTimestamp(t, *this);
     measurements_.push_back(std::make_pair(t, data));
   } else {

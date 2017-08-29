@@ -39,8 +39,8 @@ namespace aslam {
       setDesignVariablesIterator(dv.begin(), dv.end());
     }
 
-    ErrorTermPosition::ErrorTermPosition(const aslam::backend::EuclideanExpression& p, const PositionMeasurement& pm, ErrorTermGroupReference etgr) :
-      ErrorTermPosition(p, pm.t_m_mf, pm.sigma2_t_m_mf, etgr) {
+    ErrorTermPosition::ErrorTermPosition(const aslam::backend::EuclideanExpression& p, const PositionMeasurement& pm, const Covariance& sigma2, ErrorTermGroupReference etgr) :
+      ErrorTermPosition(p, pm.t, sigma2, etgr) {
     }
 
     double ErrorTermPosition::evaluateErrorImplementation() {

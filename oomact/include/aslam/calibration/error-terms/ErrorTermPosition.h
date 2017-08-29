@@ -42,11 +42,13 @@ namespace aslam {
           const aslam::backend::EuclideanExpression& p,
           const Eigen::Vector3d & pm,
           const Covariance& sigma2,
-          ErrorTermGroupReference r);
+          ErrorTermGroupReference etgr);
 
       ErrorTermPosition(
-          const aslam::backend::EuclideanExpression& p, const PositionMeasurement & pm, ErrorTermGroupReference etgr
-          );
+          const aslam::backend::EuclideanExpression& p,
+          const PositionMeasurement & pm,
+          const Covariance& sigma2,
+          ErrorTermGroupReference etgr);
 
       virtual Eigen::VectorXd getPrediction() const;
       Eigen::VectorXd getMeasurement() const;
