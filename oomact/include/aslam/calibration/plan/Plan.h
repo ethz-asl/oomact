@@ -3,7 +3,7 @@
 #include <string>
 #include <sm/value_store/ValueStore.hpp>
 
-#include "Printable.h"
+#include "../tools/Printable.h"
 #include "PlanFragment.h"
 
 namespace aslam {

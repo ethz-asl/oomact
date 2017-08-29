@@ -3,16 +3,14 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <sm/value_store/ValueStore.hpp>
-
 #include <aslam/backend/FixedPointNumber.hpp>
 #include <aslam/backend/GenericScalarExpression.hpp>
 #include <aslam/backend/GenericScalar.hpp>
+#include <sm/value_store/ValueStore.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/model/BoundedCalibrationVariable.hpp>
-
 #include <aslam/calibration/model/Module.h>
+#include <aslam/calibration/Timestamp.hpp>
 
 namespace aslam {
 namespace calibration {

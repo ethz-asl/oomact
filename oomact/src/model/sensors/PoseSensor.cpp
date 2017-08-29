@@ -7,7 +7,7 @@
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
-#include "aslam/calibration/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
 #include <aslam/calibration/model/Model.h>
@@ -19,48 +19,48 @@
 namespace aslam {
 namespace calibration {
 
-
-void PoseSensor::addMeasurement(const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, const Timestamp t) {
-  PoseMeasurement p;
-  p.t_m_mf = trans;
-  p.q_m_f = quat;
-  p.sigma2_t_m_mf = getCovPosition().getValue();
-  p.sigma2_q_m_f = getCovOrientation().getValue();
-  addMeasurement(p, t);
-}
-
-void PoseSensor::addMeasurement(const PoseMeasurement& pose, const Timestamp t)
-{
-  measurements->push_back({t, pose});
-}
-
-void PoseSensor::writeConfig(std::ostream& out) const {
-  Sensor::writeConfig(out);
-  MODULE_WRITE_PARAMETER(targetFrame);
-  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
-}
-
 PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   AbstractPoseSensor(model, name, config),
-  covPosition(getMyConfig().getChild("covPosition"), 3),
-  covOrientation(getMyConfig().getChild("covOrientation"), 3),
-  targetFrame(getModel().getFrame(getMyConfig().getString("targetFrame"))),
+  covPosition_(getMyConfig().getChild("covPosition"), 3),
+  covOrientation_(getMyConfig().getChild("covOrientation"), 3),
+  targetFrame_(getModel().getFrame(getMyConfig().getString("targetFrame"))),
   absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
 {
   if(isUsed()) {
-    measurements = std::make_shared<PoseMeasurements>();
     LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition.getValueSqrt() << std::endl
-      << "covPosition\n" << covOrientation.getValueSqrt();
+      << getName() << ":covPosition=\n" << covPosition_.getValueSqrt() << std::endl
+      << "covPosition\n" << covOrientation_.getValueSqrt();
   }
+}
+void PoseSensor::writeConfig(std::ostream& out) const {
+  Sensor::writeConfig(out);
+  MODULE_WRITE_PARAMETER(targetFrame_);
+  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
 }
 
 PoseSensor::~PoseSensor() {
 }
 
+void PoseSensor::addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStorage& storage) const {
+  addMeasurement(t, pose, storage);
+}
+
+void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, ModuleStorage & storage) const {
+  PoseMeasurement p;
+  p.t_m_mf = trans;
+  p.q_m_f = quat;
+  addMeasurement(t, p, storage);
+}
+
+void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const
+{
+  getAllMeasurements(storage).push_back({t, pose});
+}
+
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
-  if(!measurements || measurements->empty()){
+  const ModuleStorage & storage = calib.getCurrentStorage();
+  if(!hasMeasurements(storage)){
     LOG(WARNING) << "No measurements available for " << errorTermGroupName;
     return;
   }
@@ -85,7 +85,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
   const PoseMeasurement * lastPoseMeasurement = nullptr;
   auto lastTimestamp = Timestamp::Zero();
   aslam::backend::TransformationExpression last_T_m_s;
-  for (auto & m : *measurements) {
+  for (auto & m : getAllMeasurements(storage)) {
     Timestamp timestamp = m.first;
     auto & poseMeasurement = m.second;
     if(certainLowerBound > timestamp || certainUpperBound < timestamp){
@@ -101,11 +101,14 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     }
 
     boost::shared_ptr<ErrorTermPose> e_pose;
-    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
+    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame_, true);
     Timestamp lowerTimestamp;
 
+    const auto sigma2_t_m_mf = getCovPosition().getValue();
+    const auto sigma2_q_m_f = getCovOrientation().getValue();
+
     if(absoluteMeasurements_){
-      e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, etgr));
+      e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, sigma2_t_m_mf, sigma2_q_m_f, etgr));
       lowerTimestamp = timestamp;
     } else {
       if(lastPoseMeasurement == nullptr){
@@ -118,7 +121,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
         sm::kinematics::Transformation deltaT
           = sm::kinematics::Transformation(lastPoseMeasurement->q_m_f, lastPoseMeasurement->t_m_mf).inverse()
           * sm::kinematics::Transformation(poseMeasurement.q_m_f, poseMeasurement.t_m_mf);
-        e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), poseMeasurement.sigma2_t_m_mf, poseMeasurement.sigma2_t_m_mf, etgr));
+        e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), sigma2_t_m_mf, sigma2_t_m_mf, etgr));
       }
       lastPoseMeasurement = &poseMeasurement;
       last_T_m_s = std::move(T_m_s);
@@ -147,20 +150,6 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     }
   }
   es.printInto(LOG(INFO));
-}
-
-
-void PoseSensor::clearMeasurements() {
-  measurements.reset();
-}
-
-bool PoseSensor::hasMeasurements() const {
-  return measurements && !measurements->empty();
-}
-
-const PoseMeasurements& PoseSensor::getAllMeasurements() const {
-  CHECK(measurements) << "Use hasMeasurements to test for measurements first!";
-  return *measurements;
 }
 
 static bool isOutlier_(const PoseMeasurement& p) {

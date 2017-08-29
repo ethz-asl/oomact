@@ -45,17 +45,17 @@ namespace aslam {
     }
 
     ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const Eigen::Vector3d & t,
-        const Eigen::Vector4d & q, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_q, ErrorTermGroupReference etgr):
+        const Eigen::Vector4d & q, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r, ErrorTermGroupReference etgr):
         ErrorTermPose(T, t, q, Covariance::Identity(), etgr) {
       Covariance Q = Covariance::Zero();
       Q.topLeftCorner<3, 3>() = cov_t;
-      Q.bottomRightCorner<3, 3>() = cov_q;
+      Q.bottomRightCorner<3, 3>() = cov_r;
       setInvR(Q.inverse());
     }
 
 
-    ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement& pm, ErrorTermGroupReference etgr) :
-      ErrorTermPose(T, pm.t_m_mf, pm.q_m_f, pm.sigma2_t_m_mf, pm.sigma2_q_m_f, etgr) {
+    ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement& pm, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r, ErrorTermGroupReference etgr) :
+      ErrorTermPose(T, pm.t_m_mf, pm.q_m_f, cov_t, cov_r, etgr) {
     }
 
     sm::kinematics::RotationVector rotVec;

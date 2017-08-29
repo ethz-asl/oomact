@@ -9,8 +9,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
-#include <aslam/calibration/error-terms/ConditionalErrorTerm.hpp>
+#include "aslam/calibration/error-terms/ConditionalErrorTerm.hpp"
+#include "aslam/calibration/Timestamp.hpp"
 
 namespace aslam {
 namespace backend {

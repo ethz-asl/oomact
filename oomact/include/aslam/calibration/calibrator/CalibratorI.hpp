@@ -6,9 +6,10 @@
 
 #include <sm/value_store/ValueStore.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
-#include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/tools/Interval.hpp>
+#include "../data/ObservationManagerI.h"
+#include "../model/Model.h"
+#include "../SensorId.hpp"
+#include "../tools/Interval.hpp"
 
 namespace sm {
   class MatrixArchive;
@@ -38,7 +39,7 @@ class CalibratorOptionsI {
   virtual bool getAcceptConstantErrorTerms() const = 0;
 };
 
-class CalibratorI {
+class CalibratorI : public ObservationManagerI {
  public:
   virtual ~CalibratorI(){}
 
@@ -50,20 +51,11 @@ class CalibratorI {
   virtual void addToArchive(sm::MatrixArchive & ma, bool append = false) const = 0;
   virtual void loadFromArchive(sm::MatrixArchive & ma, int index = -1) = 0;
 
-  virtual void setLowestTimestamp(Timestamp lowestTimeStamp) = 0;
-
   virtual const CalibratorOptionsI & getOptions() const = 0;
 
   //TODO C sort functions into other interfaces, such as calibrator state
 
-  virtual void addMeasurementTimestamp(Timestamp t, const Sensor & sensor) = 0;
-
   virtual std::shared_ptr<PredictionFunctorWriter> createPredictionCollector(const std::string & name) = 0; //TODO make private again and only expose via special interface available during addMeasurements ..
-
-  virtual double secsSinceStart(Timestamp timestamp) const = 0;
-  virtual std::string secsSinceStart(const Interval & interval) const = 0;
-
-  virtual const Interval& getCurrentEffectiveBatchInterval() const = 0;
 
   template <typename Time>
   ModelAtTime getModelAt(Time time, int maximalDerivativeOrder, const ModelSimplification & simplification) const{

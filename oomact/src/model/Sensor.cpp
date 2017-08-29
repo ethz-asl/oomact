@@ -1,4 +1,4 @@
-#include <aslam/calibration/model/Sensor.hpp>
+#include "aslam/calibration/model/Sensor.hpp"
 
 #include <ostream>
 
@@ -7,10 +7,10 @@
 
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/CalibratorI.hpp> //TODO A remove this and use frames instead!
+#include <aslam/calibration/calibrator/CalibratorI.hpp> //TODO A remove this and use frames instead!
+#include <aslam/calibration/SensorId.hpp>
 #include <aslam/calibration/tools/tools.h>
 #include <aslam/calibration/tools/Typename.h>
 

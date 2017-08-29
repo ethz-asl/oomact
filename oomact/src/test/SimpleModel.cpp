@@ -1,4 +1,4 @@
-#include "../test_tools/SimpleModel.hpp"
+#include <aslam/calibration/test/SimpleModel.hpp>
 
 #include <cmath>
 
@@ -10,16 +10,10 @@
 
 namespace aslam {
 namespace calibration {
-namespace {
-
-class SimpleModelFrame : public Frame, public NamedMinimal {
-  using NamedMinimal::NamedMinimal;
-} global("Global"), lowerBody("LowerBody"), upperBody("UpperBody");
-
-}
+namespace test {
 
 SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver)
-  : Model(config, configPathResolver, {&global, &lowerBody, &upperBody}),
+  : Model(config, configPathResolver),
     config_(config),
     sensorsConfig_(config.getChild("sensors")),
     wheelOdometry_(*this, "WheelOdometry", sensorsConfig_)
@@ -27,5 +21,6 @@ SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolve
   add(wheelOdometry_);
 }
 
+}
 }
 }

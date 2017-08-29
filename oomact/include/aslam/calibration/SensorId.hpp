@@ -3,23 +3,10 @@
 
 #include <iosfwd>
 #include <functional>
-
-#include <aslam/backend/FixedPointNumber.hpp>
-#include <sm/timing/NsecTimeUtilities.hpp>
+#include <limits>
 
 namespace aslam {
-namespace backend {
-template <typename Integer_, std::uintmax_t Divider>
-class FixedPointNumber;
-
-}
-
 namespace calibration {
-  /// Time type
-  typedef aslam::backend::FixedPointNumber<sm::timing::NsecTime, std::uintmax_t(1e9)> Timestamp;
-  typedef Timestamp Duration;
-  inline constexpr Timestamp InvalidTimestamp() { return Timestamp::Numerator(-1); }
-
   struct SensorId{
     explicit constexpr SensorId(size_t id) : id(id) {};
     SensorId(const SensorId& other) = default;
@@ -49,7 +36,7 @@ struct hash < aslam::calibration::SensorId >{
 public :
     size_t operator()(const aslam::calibration::SensorId & sensorId) const;
 };
-}
 
+}
 
 #endif /* EUROPA_CALIBRATION_COMMON_TYPES_H_ */

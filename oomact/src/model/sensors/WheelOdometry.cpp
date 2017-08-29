@@ -8,13 +8,14 @@
 #include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
-#include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/tools/ErrorTermStatistics.h>
+
 #include <aslam/calibration/algo/PredictionWriter.h>
-#include <aslam/calibration/tools/Interval.hpp>
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include "aslam/calibration/data/WheelSpeedsMeasurement.h"
+#include <aslam/calibration/model/Model.h>
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
-#include "aslam/calibration/CalibratorI.hpp"
+#include <aslam/calibration/tools/ErrorTermStatistics.h>
+#include <aslam/calibration/tools/Interval.hpp>
 
 using aslam::backend::EuclideanExpression;
 using aslam::backend::RotationExpression;

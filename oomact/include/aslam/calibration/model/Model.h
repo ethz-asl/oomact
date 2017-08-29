@@ -4,13 +4,15 @@
 #include <vector>
 #include <functional>
 
-#include <aslam/calibration/CommonTypes.hpp>
+#include <sm/value_store/ValueStore.hpp>
+#include <aslam/backend/TransformationExpression.hpp>
+
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/tools/ConfigPathResolver.hpp>
-#include <aslam/backend/TransformationExpression.hpp>
 #include <aslam/calibration/model/fragments/Gravity.h>
-#include <sm/value_store/ValueStore.hpp>
+#include <aslam/calibration/SensorId.hpp>
+#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/tools/ConfigPathResolver.hpp>
 
 namespace aslam {
 namespace backend {
@@ -141,8 +143,9 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
   const Gravity& getGravity() const;
   Gravity& getGravity();
 
-  std::ostream & printCalibrationVariables(std::ostream& out) const;
+  const ValueStoreRef& getConfig() const;
 
+  std::ostream & printCalibrationVariables(std::ostream& out) const;
  protected:
   std::vector<boost::shared_ptr<CalibrationVariable>> calibrationVariables;
   virtual void registerModule(Module & m);
@@ -155,6 +158,8 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
   std::vector<std::unique_ptr<Named>> ownedNOs;
 
   const std::shared_ptr<ConfigPathResolver> configPathResolver;
+
+  ValueStoreRef config_;
 
   std::vector<std::reference_wrapper<Sensor>> sensors;
   std::map<SensorId, std::reference_wrapper<Sensor>> id2sensorMap;

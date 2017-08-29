@@ -4,77 +4,45 @@
 #include <glog/logging.h>
 
 #include <sm/boost/null_deleter.hpp>
-#include<eigen-checks/gtest.h>
+#include <eigen-checks/gtest.h>
 
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
-#include <aslam/calibration/CalibratorI.hpp>
 #include <aslam/calibration/model/FrameGraphModel.h>
+#include <aslam/calibration/test/MockMotionCaptureSource.h>
 
-#include "aslam/calibration/algo/MotionCaptureSource.hpp"
 
 using namespace aslam::calibration;
-class SimpleModelFrame : public Frame, public NamedMinimal {
-  using NamedMinimal::NamedMinimal;
-};
-SimpleModelFrame world("world");
-SimpleModelFrame body("body");
+using namespace aslam::calibration::test;
 
-class MockMotionCaptureSource : public MotionCaptureSource {
- public:
-  MockMotionCaptureSource(std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func) : func(func){}
-  virtual ~MockMotionCaptureSource() = default;
-  virtual std::vector<PoseStamped> getPoses(Timestamp from, Timestamp till) const override {
-    Timestamp inc(1e-2);
-    std::vector<PoseStamped> poses;
-    for(auto t = from; t <= till + inc; t += inc){
-      poses.resize(poses.size() + 1);
-      poses.back().time = t;
-      func(from, t, poses.back());
-    }
-    return poses;
-  }
-
- private:
-  std::function<void(Timestamp start, Timestamp now, PoseStamped & p)> func;
-};
-
-MockMotionCaptureSource mmcsStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  p.q = sm::kinematics::quatIdentity();
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
-});
-
-MockMotionCaptureSource mmcsRotatingStraightLine([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  p.q = sm::kinematics::axisAngle2quat({double(now - start), 0, 0});
-  p.p = Eigen::Vector3d::UnitX() * (now - start);
-});
-
-MockMotionCaptureSource mmcsHelix([](Timestamp start, Timestamp now, MotionCaptureSource::PoseStamped & p){
-  const auto angleX = double(now - start) * 3;
+MockMotionCaptureSource mmcsHelix([](Timestamp now, MotionCaptureSource::PoseStamped & p){
+  double deltaTimeSecs = now - MockMotionCaptureSource::StartTime;
+  const auto angleX = deltaTimeSecs * 3;
   p.q = sm::kinematics::axisAngle2quat({angleX, 0, 0});
   auto rotRQPlusQuaterRotation = sm::kinematics::axisAngle2R({angleX, 0, 0});
-  p.p = Eigen::Vector3d::UnitX() * (now - start) + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
+  p.p = Eigen::Vector3d::UnitX() * deltaTimeSecs + rotRQPlusQuaterRotation * Eigen::Vector3d::UnitY();
 });
+
 
 TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs, nullptr);
   PoseSensor mcSensorA(m, "a", vs);
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, traj);
 
   EXPECT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
-
-
 
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
@@ -85,10 +53,12 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
   auto c = createBatchCalibrator(vsCalib, std::shared_ptr<Model>(&m, sm::null_deleter()));
 
   const double startTime = 0, endTime = 1.0;
-  for (auto& p : mmcsStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+  for (auto& p : test::MmcsStraightLine.getPoses(startTime, endTime)) {
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
   }
+  EXPECT_EQ(1, c->getCurrentStorage().size());
+
   c->calibrate();
 
   EXPECT_NEAR(5.0, mcSensorA.getTranslationToParent()[1], 0.0001);
@@ -102,12 +72,13 @@ TEST(TestCalibration, testEstimatePoseSensorsInit) {
 TEST(TestCalibration, testEstimateTwoPoseSensors) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,targetFrame=world,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   PoseSensor mcSensorA(m, "a", vs);
   PoseSensor mcSensorB(m, "b", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -126,10 +97,10 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
 
   const double startTime = 0, endTime = 1.0;
 
-  for (auto& p : mmcsRotatingStraightLine.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+  for (auto& p : MmcsRotatingStraightLine.getPoses(startTime, endTime)) {
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time);
+    mcSensorB.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
   }
   c->calibrate();
 
@@ -141,12 +112,13 @@ TEST(TestCalibration, testEstimateTwoPoseSensors) {
 TEST(TestCalibration, testEstimateRelativePoseSensor) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "a{frame=body,targetFrame=world,absoluteMeasurements=true,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,targetFrame=world,absoluteMeasurements=false,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=30,rotSplineOrder=4,rotFittingLambda=0.0000001,transSplineOrder=4,transFittingLambda=0.00000001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   PoseSensor mcSensorA(m, "a", vs);
   PoseSensor mcSensorB(m, "b", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -167,9 +139,9 @@ TEST(TestCalibration, testEstimateRelativePoseSensor) {
   const double startTime = 0, endTime = 1.0;
 
   for (auto& p : mmcsHelix.getPoses(startTime, endTime)) {
-    mcSensorA.addMeasurement(p.q, p.p, p.time);
+    mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(p.q, p.p, p.time);
+    mcSensorB.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
   }
   c->calibrate();
 
@@ -181,12 +153,13 @@ TEST(TestCalibration, testEstimateRelativePoseSensor) {
 TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "o{frame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "a{frame=body,rotation/used=false,translation{used=true,estimate=false,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=10,rotSplineOrder=4,rotFittingLambda=0.000001,transSplineOrder=4,transFittingLambda=0.0000001}}"
     );
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   MotionCaptureSystem observer(m, "o", vs);
   MotionCaptureSensor mcSensorA(observer, "a", vs);
   PoseTrajectory traj(m, "traj", vs);
@@ -195,7 +168,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "verbose=true\n"
@@ -219,6 +192,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorInit) {
 TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
+      "frames=body:world,"
       "o{frame=world,rotation/used=false,translation/used=false,delay/used=false}"
       "a{frame=body,rotation/used=false,translation/used=false,delay/used=false}"
       "b{frame=body,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
@@ -227,7 +201,7 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   //TODO Support some validation!
   //TODO find C++ solution to validation
 
-  FrameGraphModel m(vs, nullptr, {&world, &body});
+  FrameGraphModel m(vs);
   MotionCaptureSystem observer(m, "o", vs);
   MotionCaptureSensor mcSensorA(observer, "a", vs);
   MotionCaptureSensor mcSensorB(observer, "b", vs);
@@ -237,8 +211,8 @@ TEST(TestCalibration, testEstimateMotionCaptureSensorPose) {
   ASSERT_EQ(1, m.getCalibrationVariables().size());
 
 
-  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
-  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&mmcsStraightLine, sm::null_deleter()));
+  mcSensorA.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
+  mcSensorB.setMotionCaptureSource(std::shared_ptr<MotionCaptureSource>(&MmcsStraightLine, sm::null_deleter()));
 
   auto vsCalib = ValueStoreRef::fromString(
       "acceptConstantErrorTerms=true\n"

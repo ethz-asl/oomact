@@ -4,7 +4,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-#include "../CommonTypes.hpp"
+#include "../Timestamp.hpp"
 
 namespace aslam {
 namespace calibration {
@@ -21,7 +21,7 @@ class MotionCaptureSource {
   virtual ~MotionCaptureSource(){}
 };
 
-}
-}
+} /* namespace calibration */
+} /* namespace aslam */
 
 #endif /* H7EB2DC92_140D_402E_B6E8_261C67313C3A */

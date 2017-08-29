@@ -5,7 +5,11 @@ find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
 # enable warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-deprecated-register")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unknown-pragmas")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  # deprecated-register warnings are cause by old Eigen versions
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
+endif()
 
 # enable C++11 support
 if(CMAKE_VERSION VERSION_LESS "3.1")
@@ -29,9 +33,15 @@ cs_add_library(${PROJECT_NAME}
   
   src/laser-scanner/laser3d.cpp
   
+  src/calibrator/BatchCalibrator.cpp
+  src/calibrator/AbstractCalibrator.cpp
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/algo/OdometryPath.cpp
+  src/data/ObservationManagerI.cpp
+  src/data/MapStorage.cpp
+  src/data/StorageI.cpp
+  src/input/InputProviderI.cpp
   src/model/Module.cpp
   src/model/ModuleList.cpp
   src/model/Model.cpp
@@ -60,22 +70,21 @@ cs_add_library(${PROJECT_NAME}
   src/plan/Driver.cpp
   src/plan/Logger.cpp
   src/plan/CalibrationServer.cpp
+  src/test/SimpleModel.cpp
+  src/test/Tools.cpp
+  src/test/MockMotionCaptureSource.cpp
+  src/tools/CheckNotNull.cpp
   src/tools/Interval.cpp
   src/tools/Typename.cpp
   src/tools/tools.cpp
   src/tools/Parallelizer.cpp
   src/tools/ErrorTermStatistics.cpp
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
-
-  src/BatchCalibrator.cpp
-  src/AbstractCalibrator.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
-  test/test_tools/Tools.cpp
-  test/test_tools/SimpleModel.cpp
   test/error-terms/ErrorTermAccelerometerTest.cpp
   test/error-terms/ErrorTermGyroscopeTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
@@ -83,8 +92,11 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/error-terms/ConditionalErrorTerm.cpp
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
+  test/input/InputProviderTest.cpp
   test/data/MeasurementsContainerTest.cpp
+  test/data/StorageTest.cpp
   test/acceptance/SimpleModelTest.cpp
+  test/acceptance/SimpleCalibratorTest.cpp
   test/model/ModelTest.cpp
   
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test

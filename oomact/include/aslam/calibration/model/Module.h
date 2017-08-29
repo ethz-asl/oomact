@@ -5,8 +5,11 @@
 #include <iosfwd>
 #include <string>
 
-#include <aslam/calibration/plan/Printable.h>
 #include <sm/value_store/ValueStore.hpp>
+
+#include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/tools/Printable.h>
+
 namespace boost {
   template<typename T> class shared_ptr;
 }
@@ -141,16 +144,29 @@ class IsA {
 
 std::string normalizeName(const char * parameter);
 
-class Module : public virtual Named, public virtual Used, public IsA<Module> {
+class Module;
+
+typedef StorageI<const Module*> ModuleStorage;
+
+class ModuleBase {
+ public:
+  virtual ~ModuleBase();
+  virtual const Module & getModule() const = 0;
+  Module & getModule();
+};
+
+class Module : public virtual ModuleBase, public virtual Named, public virtual Used, public IsA<Module> {
  public:
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
 
-  virtual bool initState(CalibratorI & calib);
   virtual void setCalibrationActive(const EstConf & ec);
+  virtual bool initState(CalibratorI & calib);
   virtual void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
-  virtual void clearMeasurements();
-  virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
+
+  virtual void clearMeasurements(ModuleStorage & storage);
+  virtual void clearMeasurements(); //TODO Deprecate in favor of clearMeasurements(ModuleStorage & storage); and make that one const. AND remove all the non storage compat functions.
+  virtual void addErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
   virtual void preProcessNewWindow(CalibratorI & calib);
 
   virtual void estimatesUpdated(CalibratorI & calib) const;
@@ -170,6 +186,8 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
   Model& getModel() {
     return model_;
   }
+
+  virtual const Module & getModule() const override;
 
   const std::string& getUid() const {
     return uid_;
@@ -217,6 +235,8 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
 
   void resolveLinks(ModuleRegistry & reg);
 
+  virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
+  virtual void addMeasurementErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
   virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
   void setUid(const std::string& uid) { uid_ = uid; }
 

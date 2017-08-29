@@ -1,4 +1,4 @@
-#include <aslam/calibration/AbstractCalibrator.h>
+#include "aslam/calibration/calibrator/AbstractCalibrator.h"
 
 #include <chrono>
 #include <functional>
@@ -31,7 +31,7 @@ aslam::calibration::ModelAtTime CalibratorI::getModelAt(const Sensor& sensor, Ti
 AbstractCalibratorOptions::AbstractCalibratorOptions(const sm::value_store::ValueStoreRef& config) :
     predictResults(config.getBool("predictResults", true)),
     verbose(config.getBool("verbose", false)),
-    acceptConstantErrorTerms(config.getBool("acceptConstantErrorTerms", false)),
+    acceptConstantErrorTerms(config.getBool("acceptConstantErrorTerms", true)),
     splineOutputSamplePeriod(config.getDouble("splineOutputSamplePeriod", 0.01))
 {
   if(acceptConstantErrorTerms){
@@ -61,9 +61,6 @@ bool AbstractCalibrator::initStates(){
   }
   return true;
 }
-
-
-
 
 void AbstractCalibrator::setUpdateHandler(StatusUpdateHandler statusUpdateHandler, CalibrationUpdateHandler calibrationUpdateHandler) {
   _statusUpdateHandler = statusUpdateHandler;
@@ -186,7 +183,7 @@ void AbstractCalibrator::addMeasurementTimestamp(Timestamp t, const Sensor & sen
 void AbstractCalibrator::addFactors(const EstConf& estimationConfig, ErrorTermReceiver & problem, std::function<void()> statusCallback) {
   for(Module & m : getModel().getModules()){
     LOG(INFO) << "Adding module " << m.getName() << "'s error terms.";
-    m.addErrorTerms(*this, estimationConfig, problem);
+    m.addErrorTerms(*this, getCurrentStorage(), estimationConfig, problem);
     statusCallback();
   }
 }

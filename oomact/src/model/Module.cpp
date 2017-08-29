@@ -7,6 +7,7 @@
 #include <sm/assert_macros.hpp>
 
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/data/StorageI.h>
 
 namespace aslam {
 namespace calibration {
@@ -17,7 +18,7 @@ std::string normalizeName(const char * parameter){
 }
 
 Module::Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault) :
-    myConfig(config.getChild(name)),
+    myConfig((config.isEmpty() ? model.getConfig() : config).getChild(name)),
     model_(model),
     name_(name),
     used_(myConfig.getBool("used", isUsedByDefault))
@@ -48,6 +49,11 @@ void Module::registerWithModel() {
   isRegistered_ = true;
 }
 
+void Module::clearMeasurements(ModuleStorage& storage) {
+  storage.remove(this);
+  clearMeasurements();
+}
+
 void Module::clearMeasurements() {
 }
 
@@ -58,14 +64,22 @@ bool Module::shouldObserveOnly(const EstConf& ec) const {
   return observeOnly || errorTermsInactive;
 }
 
-void Module::addErrorTerms(CalibratorI& calib, const EstConf & ec, ErrorTermReceiver & problem) const {
+
+void Module::addErrorTerms(CalibratorI& /*calib*/, const EstConf& /*ec*/, ErrorTermReceiver& /*errorTermReceiver*/) const {
+}
+
+void Module::addErrorTerms(CalibratorI& calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & problem) const {
   if(isUsed()){
+    addErrorTerms(calib, ec, problem);
     const bool observeOnly = shouldObserveOnly(ec);
     LOG(INFO) << "Adding measurement" << (observeOnly ? " observer" : "") << " error terms for module " << getName() << ".";
+    addMeasurementErrorTerms(calib, storage, ec, problem, observeOnly);
     addMeasurementErrorTerms(calib, ec, problem, observeOnly);
   }
 }
 
+void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const ModuleStorage & /*storage*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
+}
 void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }
 
@@ -164,6 +178,17 @@ bool Module::hasTooFewMeasurements() const {
 }
 
 void Module::estimatesUpdated(CalibratorI& /*calib*/) const {
+}
+
+ModuleBase::~ModuleBase() {
+}
+
+Module& ModuleBase::getModule() {
+  return const_cast<Module&>(static_cast<const ModuleBase*>(this)->getModule());
+}
+
+const Module& Module::getModule() const {
+  return *this;
 }
 
 } /* namespace calibration */

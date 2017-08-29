@@ -1,9 +1,10 @@
 #ifndef H461FA092_A14D_432E_BACF_DFCC10B95EB5
 #define H461FA092_A14D_432E_BACF_DFCC10B95EB5
 
-#include "../CommonTypes.hpp"
-#include <aslam/backend/FixedPointNumber.hpp>
 #include <aslam/backend/GenericScalarExpression.hpp>
+
+#include "../model/fragments/DelayCv.h"
+#include "../Timestamp.hpp"
 
 namespace aslam {
 

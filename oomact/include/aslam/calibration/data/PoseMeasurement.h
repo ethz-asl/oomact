@@ -41,15 +41,9 @@ namespace aslam {
         */
       /// Relative position of the reference frame w.r. to the mapping frame
       Eigen::Vector3d t_m_mf;
-      /// Covariance matrix for m_r_mr
-      Eigen::Matrix3d sigma2_t_m_mf;
 
-      // Quaternions?
-      /// Relative orientation of the reference frame w.r. to the mapping frame
       // Quaternions in JPL convention
-      Eigen::Vector4d q_m_f; // [quaternion]
-      /// Covariance matrix for m_R_r
-      Eigen::Matrix3d sigma2_q_m_f;
+      Eigen::Vector4d q_m_f; //TODO B move to quaternion class
       /** @}
         */
 

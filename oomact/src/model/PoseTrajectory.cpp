@@ -3,28 +3,25 @@
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
-#include <sm/timing/NsecTimeUtilities.hpp>
-#include <sm/kinematics/quaternion_algebra.hpp>
-#include <bsplines/NsecTimePolicy.hpp>
-
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
+#include <bsplines/NsecTimePolicy.hpp>
+#include <sm/kinematics/quaternion_algebra.hpp>
+#include <sm/kinematics/Transformation.hpp>
 
-#include <aslam/calibration/CalibratorI.hpp>
+#include "aslam/calibration/algo/OdometryPath.h"
+#include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include <aslam/calibration/DesignVariableReceiver.hpp>
+#include "aslam/calibration/data/PoseMeasurement.h"
+#include <aslam/calibration/error-terms/ErrorTermTangency.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
 #include <aslam/calibration/model/sensors/PoseSensorI.hpp>
-#include "aslam/calibration/data/PoseMeasurement.h"
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
-
-#include <aslam/calibration/error-terms/ErrorTermTangency.h>
-#include <sm/kinematics/Transformation.hpp>
-
-#include "aslam/calibration/algo/OdometryPath.h"
+#include <aslam/calibration/tools/MeasurementContainerTools.h>
 
 using bsplines::NsecTimePolicy;
 using sm::kinematics::Transformation;
@@ -89,12 +86,13 @@ void PoseTrajectory::writeConfig(std::ostream& out) const {
 }
 
 bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSensorI& poseSensor, const Frame & referenceFrame) {
-  if(!poseSensor.hasMeasurements()){
+  auto & storage = calib.getCurrentStorage();
+  if (!poseSensor.hasMeasurements(storage)) {
     LOG(WARNING) << "Pose sensor " << poseSensor.getSensor() << " has no measurements! Cannot initialize based on it!";
     return false;
   }
 
-  const PoseMeasurements & measurements = poseSensor.getAllMeasurements();
+  const PoseMeasurements & measurements = poseSensor.getAllMeasurements(storage);
 
   const Interval & effectiveBatchInterval = calib.getCurrentEffectiveBatchInterval();
   SM_ASSERT_TRUE(Exception, effectiveBatchInterval, "effectiveBatchInterval must be set");
@@ -152,11 +150,12 @@ PoseMeasurement getFirstPoseMeasurement(CalibratorI & calib, Timestamp & startTi
   SM_ASSERT_TRUE(std::runtime_error, sensor.isA<PoseSensorI>(), "")
 
   auto & poseSensor = sensor.as<PoseSensorI>();
+  auto & storage = calib.getCurrentStorage();
+  CHECK(poseSensor.hasMeasurements(storage));
 
-  auto ps = poseSensor.getMeasurements(startTime, (startTime + Timestamp(1.0)));
-  if(ps.empty()){
-    throw std::runtime_error("Did not get any pose measurement!"); //TODO B implement
-  }
+  auto ps = getMeasurementsSlice(poseSensor.getAllMeasurements(storage), startTime, (startTime + Timestamp(1.0)));
+  CHECK(!ps.empty()) << "Did not get any pose measurement!"; //TODO B implement nicer solution
+
   startTime = ps[0].first;
 
   PoseMeasurement & pose = ps[0].second;

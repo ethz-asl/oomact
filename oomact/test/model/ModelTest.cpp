@@ -3,10 +3,11 @@
 #include <gtest/gtest.h>
 #include <sstream>
 
-#include "../test_tools/SimpleModel.hpp"
-#include "../test_tools/Tools.hpp"
+#include <aslam/calibration/test/SimpleModel.hpp>
+#include <aslam/calibration/test/Tools.hpp>
 
 using namespace aslam::calibration;
+using namespace aslam::calibration::test;
 
 class MockModule : public Module {
   using Module::Module;
@@ -33,7 +34,6 @@ TEST(Module, modelUid) {
   m.add(mm2);
   ASSERT_EQ(mm2.getUid(), "A1");
 }
-
 
 TEST(Module, getSensors) {
 

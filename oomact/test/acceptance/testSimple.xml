@@ -218,6 +218,7 @@ logger:
     </estimator>
   </calibrator>
   <model>
+    <frames>Global,LowerBody,UpperBody</frames>
     <splines>
       <splineKnotsPerSecond>5</splineKnotsPerSecond>
     </splines>

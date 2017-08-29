@@ -8,8 +8,8 @@
 #include <bsplines/UnitQuaternionBSpline.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>
 
-#include <aslam/calibration/CommonTypes.hpp>
-#include <aslam/calibration/tools/Interval.hpp>
+#include "../../SensorId.hpp"
+#include "../../tools/Interval.hpp"
 
 namespace aslam {
 namespace backend {
