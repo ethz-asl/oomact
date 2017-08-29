@@ -10,7 +10,7 @@ namespace calibration {
 
 class PoseSensor : public AbstractPoseSensor, public InputReceiverIT<PoseMeasurement> {
  public:
-  PoseSensor(Model & model, std::string name, sm::value_store::ValueStoreRef config);
+  PoseSensor(Model & model, std::string name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
 
   virtual ~PoseSensor();
 

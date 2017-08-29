@@ -19,6 +19,27 @@
 namespace aslam {
 namespace calibration {
 
+PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
+  AbstractPoseSensor(model, name, config),
+  covPosition_(getMyConfig().getChild("covPosition"), 3),
+  covOrientation_(getMyConfig().getChild("covOrientation"), 3),
+  targetFrame_(getModel().getFrame(getMyConfig().getString("targetFrame"))),
+  absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
+{
+  if(isUsed()) {
+    LOG(INFO)
+      << getName() << ":covPosition=\n" << covPosition_.getValueSqrt() << std::endl
+      << "covPosition\n" << covOrientation_.getValueSqrt();
+  }
+}
+void PoseSensor::writeConfig(std::ostream& out) const {
+  Sensor::writeConfig(out);
+  MODULE_WRITE_PARAMETER(targetFrame_);
+  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
+}
+
+PoseSensor::~PoseSensor() {
+}
 
 void PoseSensor::addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStorage& storage) const {
   addMeasurement(t, pose, storage);
@@ -34,29 +55,6 @@ void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, 
 void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const
 {
   getAllMeasurements(storage).push_back({t, pose});
-}
-
-void PoseSensor::writeConfig(std::ostream& out) const {
-  Sensor::writeConfig(out);
-  MODULE_WRITE_PARAMETER(targetFrame_);
-  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
-}
-
-PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
-  AbstractPoseSensor(model, name, config),
-  covPosition_(getMyConfig().getChild("covPosition"), 3),
-  covOrientation_(getMyConfig().getChild("covOrientation"), 3),
-  targetFrame_(getModel().getFrame(getMyConfig().getString("targetFrame"))),
-  absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
-{
-  if(isUsed()) {
-    LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition_.getValueSqrt() << std::endl
-      << "covPosition\n" << covOrientation_.getValueSqrt();
-  }
-}
-
-PoseSensor::~PoseSensor() {
 }
 
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {

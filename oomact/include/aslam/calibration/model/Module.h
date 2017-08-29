@@ -148,7 +148,14 @@ class Module;
 
 typedef StorageI<const Module*> ModuleStorage;
 
-class Module : public virtual Named, public virtual Used, public IsA<Module> {
+class ModuleBase {
+ public:
+  virtual ~ModuleBase();
+  virtual const Module & getModule() const = 0;
+  Module & getModule();
+};
+
+class Module : public virtual ModuleBase, public virtual Named, public virtual Used, public IsA<Module> {
  public:
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
@@ -179,6 +186,8 @@ class Module : public virtual Named, public virtual Used, public IsA<Module> {
   Model& getModel() {
     return model_;
   }
+
+  virtual const Module & getModule() const override;
 
   const std::string& getUid() const {
     return uid_;

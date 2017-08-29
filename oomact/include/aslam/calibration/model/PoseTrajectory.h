@@ -15,7 +15,7 @@ class WheelOdometry;
 
 class PoseTrajectory : public Module, public StateCarrier, public Activatable, public So3R3TrajectoryCarrier {
  public:
-  PoseTrajectory(Model & model, const std::string & name, sm::value_store::ValueStoreRef config);
+  PoseTrajectory(Model & model, const std::string & name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
 
   bool initState(CalibratorI & calib) override;
   void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) override;

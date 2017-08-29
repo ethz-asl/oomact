@@ -56,7 +56,9 @@ class SimpleGravity : public Gravity, public Module, public CalibratableMinimal 
 };
 
 Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPathResolver, const std::vector<const Frame *> frames) :
-  configPathResolver(configPathResolver)
+  configPathResolver(configPathResolver),
+  config_(config)
+
 {
   for(auto f : frames){
     if(f) addFrame(*f);
@@ -273,6 +275,10 @@ const Gravity& Model::getGravity() const {
 Gravity& Model::getGravity() {
   CHECK(gravity);
   return *gravity;
+}
+
+const ValueStoreRef& Model::getConfig() const {
+  return config_;
 }
 
 ModelAtTime Model::getAtTime(Timestamp, int, const ModelSimplification&) const {

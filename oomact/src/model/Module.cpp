@@ -18,7 +18,7 @@ std::string normalizeName(const char * parameter){
 }
 
 Module::Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault) :
-    myConfig(config.getChild(name)),
+    myConfig((config.isEmpty() ? model.getConfig() : config).getChild(name)),
     model_(model),
     name_(name),
     used_(myConfig.getBool("used", isUsedByDefault))
@@ -180,6 +180,16 @@ bool Module::hasTooFewMeasurements() const {
 void Module::estimatesUpdated(CalibratorI& /*calib*/) const {
 }
 
+ModuleBase::~ModuleBase() {
+}
+
+Module& ModuleBase::getModule() {
+  return const_cast<Module&>(static_cast<const ModuleBase*>(this)->getModule());
+}
+
+const Module& Module::getModule() const {
+  return *this;
+}
+
 } /* namespace calibration */
 } /* namespace aslam */
-

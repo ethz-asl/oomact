@@ -3,7 +3,6 @@
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/Timestamp.hpp>
 
-
 namespace aslam {
 namespace calibration {
 
@@ -13,7 +12,7 @@ namespace calibration {
  */
 
 template <typename Input>
-class InputReceiverIT {
+class InputReceiverIT : public virtual ModuleBase {
  public:
   virtual ~InputReceiverIT() = default;
 
