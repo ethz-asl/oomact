@@ -6,7 +6,10 @@
 namespace aslam {
 namespace calibration {
 struct GyroscopeMeasurement {
+  /// Angular velocity vector [rad/s]
   Eigen::Vector3d w;
+  /// Covariance. Set (0,0) to -1 if not available.
+  Eigen::Matrix3d cov;
 };
 }
 }
