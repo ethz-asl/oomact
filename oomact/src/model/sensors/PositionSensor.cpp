@@ -69,9 +69,8 @@ void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf 
 
     auto & positionMeasurement = m.second;
 
-
     aslam::backend::TransformationExpression T_target_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
-    boost::shared_ptr<ErrorTermPosition> e_position(new ErrorTermPosition(T_target_s.inverse().toEuclideanExpression(), positionMeasurement, etgr));
+    boost::shared_ptr<ErrorTermPosition> e_position(new ErrorTermPosition(T_target_s.inverse().toEuclideanExpression(), positionMeasurement, covPosition.getValue(), etgr));
     if(uLow > timestamp || uUpp < timestamp){
       if(!hasDelay()){
         LOG(WARNING) << "Dropping out of bounds position measurement at " << calib.secsSinceStart(timestamp) << "!";

@@ -5,7 +5,7 @@
 
 #include <aslam/backend/TransformationExpression.hpp>
 
-#include "aslam/calibration/algo/MotionCaptureSource.hpp"
+#include "aslam/calibration/input/MotionCaptureSource.hpp"
 #include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include "aslam/calibration/data/MeasurementsContainer.h"
 #include "aslam/calibration/error-terms/ErrorTermPose.h"

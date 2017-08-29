@@ -117,7 +117,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   for (auto it = measurements.cbegin(); it != measurements.cend(); ++it) {
     Timestamp timestamp = it->first - currentDelay;
     if(effectiveBatchInterval.contains(timestamp)){
-      sm::kinematics::Transformation T_measured(it->second.q_m_f, it->second.t_m_mf);
+      sm::kinematics::Transformation T_measured(it->second.q, it->second.t);
       T_measured = T_measured * T_sens_traj;
 
       timestamps.push_back(timestamp.getNumerator());
@@ -160,14 +160,14 @@ PoseMeasurement getFirstPoseMeasurement(CalibratorI & calib, Timestamp & startTi
 
   PoseMeasurement & pose = ps[0].second;
   if(transformToFramePtr){
-    sm::kinematics::Transformation m_f(pose.q_m_f, pose.t_m_mf);
+    sm::kinematics::Transformation m_f(pose.q, pose.t);
 
     std::string poseToString(const sm::kinematics::Transformation & trafo);
 
     m_f = m_f * sm::kinematics::Transformation(sensor.getTransformationExpressionTo(calib.getModelAt(startTime, 0, {false, false}), *transformToFramePtr).toTransformationMatrix()).inverse();
 
-    pose.q_m_f = m_f.q();
-    pose.t_m_mf = m_f.t();
+    pose.q = m_f.q();
+    pose.t = m_f.t();
   }
   return pose;
 }
@@ -212,8 +212,8 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
     if(double(tmpStart - prevTimestamp) > 0.02){
       LOG(WARNING) << "Motion capture data is quite sparse or starts too late (searched for "<< calib.secsSinceStart(prevTimestamp) << " found " << calib.secsSinceStart(tmpStart) << "!";
     }
-    transPose = pose.t_m_mf;
-    rotPose = pose.q_m_f;
+    transPose = pose.t;
+    rotPose = pose.q;
   }
 
   std::string poseToString(const Eigen::Vector3d & trans, const Eigen::Vector4d & rot);

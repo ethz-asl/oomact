@@ -7,7 +7,7 @@
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include "aslam/calibration/calibrator/CalibratorI.hpp"
 
-#include "aslam/calibration/algo/MotionCaptureSource.hpp"
+#include "aslam/calibration/input/MotionCaptureSource.hpp"
 
 using namespace aslam::calibration;
 class SimpleModelFrame : public Frame, public NamedMinimal {

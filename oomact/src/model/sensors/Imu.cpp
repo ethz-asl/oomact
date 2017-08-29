@@ -65,8 +65,7 @@ void Imu::registerWithModel() {
     gyroBias.registerCalibrationVariables(getModel());
 }
 
-Imu::~Imu() {
-}
+Imu::~Imu() = default;
 
 typedef aslam::splines::OPTBSpline<typename bsplines::EuclideanBSpline<Eigen::Dynamic, 3, bsplines::NsecTimePolicy>::CONF>::BSpline BiasSpline;
 
@@ -255,7 +254,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
               getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse(),
               g_m,
               accBias.getBiasExpression(timestamp),
-              m.a_i_mi,
+              m.a,
               covarianceMatrix,
               etgr);
         },
@@ -277,7 +276,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
           return boost::make_shared<ErrorTermGyroscope>(
               getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse() * robot.getAngularVelocity(inertiaFrame, getParentFrame()),
               gyroBias.getBiasExpression(timestamp),
-              m.w_i_mi, covarianceMatrix,
+              m.w, covarianceMatrix,
               etgr
             );
         },

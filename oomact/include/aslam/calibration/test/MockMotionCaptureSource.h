@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-#include "../algo/MotionCaptureSource.hpp"
+#include "../input/MotionCaptureSource.hpp"
 
 namespace aslam {
 namespace calibration {

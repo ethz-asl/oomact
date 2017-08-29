@@ -55,7 +55,7 @@ namespace aslam {
 
 
     ErrorTermPose::ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement& pm, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r, ErrorTermGroupReference etgr) :
-      ErrorTermPose(T, pm.t_m_mf, pm.q_m_f, cov_t, cov_r, etgr) {
+      ErrorTermPose(T, pm.t, pm.q, cov_t, cov_r, etgr) {
     }
 
     sm::kinematics::RotationVector rotVec;
