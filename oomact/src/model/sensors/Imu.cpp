@@ -234,6 +234,11 @@ void addImuErrorTerms(CalibratorI & calib, const Imu & imu, std::string name, co
   statWPAP.printInto(LOG(INFO)) << " Between " << calib.secsSinceStart(minTime) << "s and " << calib.secsSinceStart(maxTime) << "s.";
 }
 
+template <typename T>
+bool isCovarianceAvailable(T&t){
+  return t.cov(0,0) >= 0.0;
+}
+
 void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & errorTermReceiver, bool observeOnly) const {
   if(useAcc_){
     const std::string accelerometerName = getName() + "Accelerometer";
@@ -255,7 +260,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
               g_m,
               accBias.getBiasExpression(timestamp),
               m.a,
-              covarianceMatrix,
+              isCovarianceAvailable(m) ? m.cov : covarianceMatrix,
               etgr);
         },
         errorTermReceiver,
@@ -276,7 +281,8 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
           return boost::make_shared<ErrorTermGyroscope>(
               getTransformationExpressionTo(robot, inertiaFrame).toRotationExpression().inverse() * robot.getAngularVelocity(inertiaFrame, getParentFrame()),
               gyroBias.getBiasExpression(timestamp),
-              m.w, covarianceMatrix,
+              m.w,
+              isCovarianceAvailable(m) ? m.cov : covarianceMatrix,
               etgr
             );
         },

@@ -6,7 +6,10 @@
 namespace aslam {
 namespace calibration {
 struct AccelerometerMeasurement {
+  /// Acceleration [m^2/s]
   Eigen::Vector3d a;
+  /// Covariance. Set (0,0) to -1 if not available.
+  Eigen::Matrix3d cov;
 };
 }
 }
