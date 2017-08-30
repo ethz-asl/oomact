@@ -25,7 +25,7 @@ const PoseMeasurements& AbstractPoseSensor::getAllMeasurements(const ModuleStora
   return storageConnector_.getDataFrom(storage);
 }
 
-PoseMeasurements& AbstractPoseSensor::getAllMeasurements(ModuleStorage & storage) const {
+PoseMeasurements& AbstractPoseSensor::getMeasurementsMutable(ModuleStorage & storage) const {
   return storageConnector_.getDataFrom(storage);
 }
 

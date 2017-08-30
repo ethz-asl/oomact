@@ -77,7 +77,7 @@ MotionCaptureSensor::~MotionCaptureSensor() {
 
 const PoseMeasurements & MotionCaptureSensor::fetchMeasurementsFromSourceInto(Timestamp from, Timestamp till, ModuleStorage & storage) const
 {
-  auto & poses = getAllMeasurements(storage);
+  auto & poses = getMeasurementsMutable(storage);
   if(getMotionCaptureSource()){
     auto posesFromSource = getMotionCaptureSource()->getPoses(from, till);
     poses.reserve(posesFromSource.size());
