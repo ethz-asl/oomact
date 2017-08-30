@@ -54,7 +54,7 @@ void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, 
 
 void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const
 {
-  getAllMeasurements(storage).push_back({t, pose});
+  getMeasurementsMutable(storage).push_back({t, pose});
 }
 
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {

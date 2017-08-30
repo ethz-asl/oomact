@@ -24,7 +24,7 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
   virtual const PoseMeasurements & getAllMeasurements(const ModuleStorage & storage) const override;
 
  protected:
-  PoseMeasurements & getAllMeasurements(ModuleStorage & storage) const;
+  PoseMeasurements & getMeasurementsMutable(ModuleStorage & storage) const;
  private:
   ModuleStorage::Connector<PoseMeasurements> storageConnector_;
 };
