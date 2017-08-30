@@ -19,11 +19,13 @@ else()
 endif()
 
 cs_add_library(oomact_ros
+  src/feeder/PoseSensorInputFeeder.cpp
+  src/feeder/ImuInputFeeder.cpp
   src/InputFeederFactoryI.cpp
   src/InputFeederFactoryRegistry.cpp
   src/InputFeederI.cpp
-  src/feeder/PoseSensorInputFeeder.cpp
   src/RosInputProvider.cpp
+  src/Tools.cpp
 )
 
 catkin_add_gtest(${PROJECT_NAME}_test

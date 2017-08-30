@@ -4,9 +4,14 @@
 #include <aslam/calibration/data/ObservationManagerI.h>
 #include <rosbag/message_instance.h>
 
+#include "internal/Tools.h"
 namespace aslam {
 namespace calibration {
+
+class Sensor;
+
 namespace ros {
+
 
 class InputFeederI {
  public:
@@ -23,7 +28,12 @@ class InputFeederImpl : public InputFeederI {
   virtual ~InputFeederImpl() = default;
 
   virtual void feed(const ::rosbag::MessageInstance & m, ObservationManagerI & obsManager) const override {
-    static_cast<const Derived*>(this)->feed(*m.instantiate<Msg>(), receiver_, obsManager);
+    const Timestamp t = static_cast<const Derived*>(this)->feed(*m.instantiate<Msg>(), receiver_, obsManager);
+    if(t != InvalidTimestamp()){
+      const Sensor & sensor = getSensorFromReceiver(receiver_);
+      VLOG(3) << "Feeding measurement to " << getNameFromSensor(sensor) << " at t=" << obsManager.secsSinceStart(t) << " secs.";
+      obsManager.addMeasurementTimestamp(t, sensor);
+    }
   }
  private:
   const Receiver & receiver_;
