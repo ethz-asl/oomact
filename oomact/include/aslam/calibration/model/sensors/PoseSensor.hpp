@@ -1,7 +1,7 @@
 #ifndef POSE_SENSOR_HPP_
 #define POSE_SENSOR_HPP_
 
-#include <aslam/calibration/input/InputRecieverI.h>
+#include <aslam/calibration/input/InputReceiverI.h>
 #include <aslam/calibration/model/sensors/AbstractPoseSensor.h>
 #include <aslam/calibration/tools/Interval.hpp>
 
