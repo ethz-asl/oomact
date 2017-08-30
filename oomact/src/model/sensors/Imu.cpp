@@ -236,7 +236,7 @@ void addImuErrorTerms(CalibratorI & calib, const Imu & imu, std::string name, co
 
 template <typename T>
 bool isCovarianceAvailable(T&t){
-  return t.cov(0,0) >= 0.0;
+  return t.cov(0,0) > 0.0;
 }
 
 void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & errorTermReceiver, bool observeOnly) const {
