@@ -12,13 +12,18 @@ class InputFeederFactoryRegistry {
 
   static InputFeederFactoryRegistry & getInstance();
 
-  template <typename SensorContainer, typename Func>
-  static void applyToMatching(const SensorContainer & sensors, Func func) {
-    for(auto & ff : getInstance().inputFeederFactories_){
-      for(auto s : sensors){
+  template <typename SensorContainer, typename Func, typename Sensor = typename std::remove_reference<decltype(SensorContainer().begin())>::type >
+  static void applyToMatching(const SensorContainer & sensors, Func func, std::vector<Sensor> * remainingSensors = nullptr) {
+    for(auto & s : sensors){
+      int c = 0;
+      for(auto & ff : getInstance().inputFeederFactories_){
         if(ff->matches(s)){
           func(s, ff->createFeeder(s));
+          c++;
         }
+      }
+      if(remainingSensors && !c){
+        remainingSensors->push_back(s);
       }
     }
   }
