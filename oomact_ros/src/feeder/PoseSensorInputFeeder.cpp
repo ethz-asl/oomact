@@ -5,6 +5,7 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TransformStamped.h>
 
 #include "aslam/calibration/ros/InputFeederFactoryRegistry.h"
 #include "aslam/calibration/ros/InputFeederFactoryI.h"
@@ -20,6 +21,12 @@ bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m)
   m.q = rosQuaternionToVector4dXYZW(msg.pose.orientation);
   return true;
 }
+/*
+bool msg2Measurement(const geometry_msgs::TransformStamped &msg, PoseMeasurement & m){
+  m.t = rosVector3dToEigenVector3(msg.transform.translation);
+  m.q = rosQuaternionToVector4dXYZW(msg.transform.rotation);
+  return true;
+}*/
 
 namespace {
 InputFeederFactoryRegistry::RegistryEntry regEntries[] = {
