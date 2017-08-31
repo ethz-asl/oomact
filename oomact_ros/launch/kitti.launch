@@ -4,7 +4,7 @@
    <node name="CalibrationNode" pkg="oomact_ros" type="CalibrationNode" output="screen">
     <param name="config_file" value="$(find oomact_ros)/cfg/kitti.info" />
     <param name="bag_file" value="$(arg bag_file)" />
-    <param name="num_pose_sensors" value="2" />
+    <param name="output_file" value="/home/z/Desktop/New Folder/out.info" />
   </node>
 
 </launch>
