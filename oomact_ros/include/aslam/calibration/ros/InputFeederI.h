@@ -28,11 +28,14 @@ class InputFeederImpl : public InputFeederI {
   virtual ~InputFeederImpl() = default;
 
   virtual void feed(const ::rosbag::MessageInstance & m, ObservationManagerI & obsManager) const override {
-    const Timestamp t = static_cast<const Derived*>(this)->feed(*m.instantiate<Msg>(), receiver_, obsManager);
-    if(t != InvalidTimestamp()){
-      const Sensor & sensor = getSensorFromReceiver(receiver_);
-      VLOG(3) << "Feeding measurement to " << getNameFromSensor(sensor) << " at t=" << obsManager.secsSinceStart(t) << " secs.";
-      obsManager.addMeasurementTimestamp(t, sensor);
+    auto mInst = m.instantiate<Msg>();
+    if(mInst){ //TODO O : gain efficiency by check out the type of a topic in a bag first and then don't even instantiate the other feeders
+      const Timestamp t = static_cast<const Derived*>(this)->feed(*mInst, receiver_, obsManager);
+      if(t != InvalidTimestamp()){
+        const Sensor & sensor = getSensorFromReceiver(receiver_);
+        VLOG(3) << "Feeding measurement to " << getNameFromSensor(sensor) << " at t=" << obsManager.secsSinceStart(t) << " secs.";
+        obsManager.addMeasurementTimestamp(t, sensor);
+      }
     }
   }
  private:

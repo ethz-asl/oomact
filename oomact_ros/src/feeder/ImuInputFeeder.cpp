@@ -16,7 +16,7 @@ namespace calibration {
 namespace ros {
 
 bool msg2Measurement(const sensor_msgs::Imu &msg, AccelerometerMeasurement & m){
-  if(msg.linear_acceleration_covariance[0] == 0.0){
+  if(msg.linear_acceleration_covariance[0] < 0.0){ // no measurement available (http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)
     return false;
   }
   m.a = rosVector3dToEigenVector3(msg.linear_acceleration);
@@ -25,7 +25,7 @@ bool msg2Measurement(const sensor_msgs::Imu &msg, AccelerometerMeasurement & m){
 }
 
 bool msg2Measurement(const sensor_msgs::Imu &msg, GyroscopeMeasurement & m){
-  if(msg.angular_velocity_covariance[0] == 0.0){
+  if(msg.angular_velocity_covariance[0] < 0.0){ // no measurement available (http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)
     return false;
   }
   m.w = rosVector3dToEigenVector3(msg.angular_velocity);

@@ -1,4 +1,3 @@
-#define CALIBRATOR_HIGH_LEVEL
 #include <aslam/calibration/model/Module.h>
 
 #include "aslam/calibration/tools/tools.h"

@@ -1,10 +1,7 @@
 #ifndef H657A8A48_567D_4372_A5E6_CA05BA2932B4
 #define H657A8A48_567D_4372_A5E6_CA05BA2932B4
 
-#ifndef CALIBRATOR_HIGH_LEVEL
 #include <aslam/calibration/data/MeasurementsContainer.h>
-#endif
-
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <aslam/calibration/model/Sensor.hpp>
@@ -50,9 +47,6 @@ class Bias : public StateCarrier, public NamedMinimal {
 
 class Imu : public Sensor, public StateCarrier {
  public:
-#ifdef CALIBRATOR_HIGH_LEVEL
-  class Measurements;
-#else
   struct Measurements {
     MeasurementsContainer<AccelerometerMeasurement> accelerometer;
     MeasurementsContainer<GyroscopeMeasurement> gyroscope;
@@ -71,7 +65,6 @@ class Imu : public Sensor, public StateCarrier {
     assert(measurements_);
     return measurements_->gyroscope;
   }
-#endif
 
   bool initState(CalibratorI & calib) override;
   void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) override;
