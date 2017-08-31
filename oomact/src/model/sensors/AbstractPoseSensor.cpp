@@ -3,6 +3,7 @@
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include <aslam/calibration/data/PoseMeasurement.h>
 #include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/sensors/PoseSensorI.hpp>
 
 namespace aslam {
@@ -10,8 +11,13 @@ namespace calibration {
 
 AbstractPoseSensor::AbstractPoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   Sensor(model, name, config),
-  storageConnector_(this)
+  storageConnector_(this),
+  invertInput_(getMyConfig().getBool("invertInput", false))
 {
+}
+
+void AbstractPoseSensor::writeConfig(std::ostream& out) const {
+  MODULE_WRITE_PARAMETER(invertInput_);
 }
 
 AbstractPoseSensor::~AbstractPoseSensor() {

@@ -23,10 +23,17 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
   virtual bool hasMeasurements(const ModuleStorage & storage) const override;
   virtual const PoseMeasurements & getAllMeasurements(const ModuleStorage & storage) const override;
 
+  bool isInvertInput() const {
+    return invertInput_;
+  }
+
  protected:
   PoseMeasurements & getMeasurementsMutable(ModuleStorage & storage) const;
+
+  void writeConfig(std::ostream & out) const override;
  private:
   ModuleStorage::Connector<PoseMeasurements> storageConnector_;
+  const bool invertInput_;
 };
 
 } /* namespace calibration */

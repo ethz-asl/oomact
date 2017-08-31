@@ -33,7 +33,7 @@ PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueSto
   }
 }
 void PoseSensor::writeConfig(std::ostream& out) const {
-  Sensor::writeConfig(out);
+  AbstractPoseSensor::writeConfig(out);
   MODULE_WRITE_PARAMETER(targetFrame_);
   MODULE_WRITE_PARAMETER(absoluteMeasurements_);
 }
@@ -47,14 +47,20 @@ void PoseSensor::addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStor
 
 void PoseSensor::addMeasurement(const Timestamp t, const Eigen::Vector4d& quat, const Eigen::Vector3d& trans, ModuleStorage & storage) const {
   PoseMeasurement p;
-  p.t = trans;
-  p.q = quat;
+  if(!isInvertInput()){
+    p.t = trans;
+    p.q = quat;
+  } else {
+    auto T = sm::kinematics::Transformation(quat, trans).inverse();
+    p.q = T.q();
+    p.t = T.t();
+  }
   addMeasurement(t, p, storage);
 }
 
 void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const
 {
-  getMeasurementsMutable(storage).push_back({t, pose});
+  getMeasurementsMutable(storage).emplace_back(t, pose);
 }
 
 void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
@@ -104,11 +110,11 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame_, true);
     Timestamp lowerTimestamp;
 
-    const auto sigma2_t_m_mf = getCovPosition().getValue();
-    const auto sigma2_q_m_f = getCovOrientation().getValue();
+    const auto sigma2_t = getCovPosition().getValue();
+    const auto sigma2_q = getCovOrientation().getValue();
 
     if(absoluteMeasurements_){
-      e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, sigma2_t_m_mf, sigma2_q_m_f, etgr));
+      e_pose.reset(new ErrorTermPose(T_m_s, poseMeasurement, sigma2_t, sigma2_q, etgr));
       lowerTimestamp = timestamp;
     } else {
       if(lastPoseMeasurement == nullptr){
@@ -121,7 +127,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
         sm::kinematics::Transformation deltaT
           = sm::kinematics::Transformation(lastPoseMeasurement->q, lastPoseMeasurement->t).inverse()
           * sm::kinematics::Transformation(poseMeasurement.q, poseMeasurement.t);
-        e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), sigma2_t_m_mf, sigma2_t_m_mf, etgr));
+        e_pose.reset(new ErrorTermPose(last_T_m_s.inverse() * T_m_s, deltaT.t(), deltaT.q(), sigma2_t, sigma2_t, etgr));
       }
       lastPoseMeasurement = &poseMeasurement;
       last_T_m_s = std::move(T_m_s);
