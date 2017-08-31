@@ -28,6 +28,11 @@ cs_add_library(oomact_ros
   src/Tools.cpp
 )
 
+cs_add_executable(CalibrationNode src/CalibrationNode.cpp)
+target_link_libraries(CalibrationNode
+  oomact_ros
+)
+
 catkin_add_gtest(${PROJECT_NAME}_test
   test/RosInputProviderTest.cpp
   test/bag_tools.cpp

@@ -1,0 +1,10 @@
+<launch>
+  <arg name="bag_file" default="/home/z/Datasets/KITTI/2011_09_26/2011_09_26_drive_0035_sync/data.bag"/>
+
+   <node name="CalibrationNode" pkg="oomact_ros" type="CalibrationNode" output="screen">
+    <param name="config_file" value="$(find oomact_ros)/cfg/kitti.info" />
+    <param name="bag_file" value="$(arg bag_file)" />
+    <param name="num_pose_sensors" value="2" />
+  </node>
+
+</launch>
