@@ -5,6 +5,7 @@
 #include <aslam/calibration/ros/RosInputProvider.h>
 #include <aslam/calibration/calibrator/CalibratorI.hpp>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
+#include <aslam/calibration/model/sensors/PositionSensor.hpp>
 
 #include <sm/BoostPropertyTree.hpp>
 #include <sm/value_store/PropertyTreeValueStore.hpp>
@@ -21,7 +22,9 @@ std::string getFilePathFromRosParam(const std::string& param_name,
   return file_path;
 }
 
-void loadSensorParameters(const cal::ValueStoreRef vs_sensors, std::shared_ptr<cal::FrameGraphModel> model, std::vector<std::unique_ptr<cal::Sensor>>* sensors){
+void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
+                          std::shared_ptr<cal::FrameGraphModel> model,
+                          std::vector<std::unique_ptr<cal::Sensor>>* sensors) {
   DCHECK(sensors != nullptr);
 
   std::vector<cal::KeyValueStorePair> vs_sensors_vector =
@@ -35,11 +38,9 @@ void loadSensorParameters(const cal::ValueStoreRef vs_sensors, std::shared_ptr<c
     ROS_INFO_STREAM("  loading " << sensor_type << " sensor: " << sensor_name << "...");
 
     if (sensor_type == std::string("pose")) {
-      sensors->emplace_back(
-          new cal::PoseSensor(*model, sensor_name, vs_sensors));
+      sensors->emplace_back(new cal::PoseSensor(*model, sensor_name, vs_sensors));
     } else if (sensor_type == std::string("position")) {
-      // sensors.emplace_back(new PositionSensor(*model, sensor_name,
-      // vs_sensors));
+      sensors->emplace_back(new cal::PositionSensor(*model, sensor_name, vs_sensors));
     } else if (sensor_type == std::string("imu")) {
       // sensors.emplace_back(new IMUSensor(*model, sensor_name, vs_sensors));
     } else {
@@ -75,8 +76,7 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Setting up model and trajectory...");
 
-  std::shared_ptr<cal::FrameGraphModel> model =
-      std::make_shared<cal::FrameGraphModel>(vs_model);
+  std::shared_ptr<cal::FrameGraphModel> model = std::make_shared<cal::FrameGraphModel>(vs_model);
   cal::PoseTrajectory traj(*model, "traj", vs_model);
   model->addModule(traj);
 
@@ -91,8 +91,7 @@ int main(int argc, char** argv) {
 
   model->init();
 
-  std::unique_ptr<cal::BatchCalibratorI> calibrator =
-      cal::createBatchCalibrator(vs.getChild("calibrator"), model);
+  std::unique_ptr<cal::BatchCalibratorI> calibrator = cal::createBatchCalibrator(vs.getChild("calibrator"), model);
 
   ROS_INFO("Loading data bag...");
 
@@ -104,18 +103,13 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Calibration done, generating results...");
 
-  // Output results
   for (const std::unique_ptr<cal::Sensor>& sensor : sensors) {
     ROS_INFO_STREAM("Sensor       : " << sensor->getName());
-    ROS_INFO_STREAM(
-        "  Translation: " << sensor->getTranslationToParent().transpose());
-    ROS_INFO_STREAM("  Rotation   : "
-                    << sensor->getRotationQuaternionToParent().transpose());
+    ROS_INFO_STREAM("  Translation: " << sensor->getTranslationToParent().transpose());
+    ROS_INFO_STREAM("  Rotation   : " << sensor->getRotationQuaternionToParent().transpose());
   }
 
-  // save calibration data
-  // dynamic_cast<sm::PropertyTree&>(vs.getValueStore())
-  //    .save(output_file);
+  //dynamic_cast<sm::PropertyTreeValueStore&>(vs.getValueStore()).save(output_file);
 
   ROS_INFO("Saving done, Exiting");
 
