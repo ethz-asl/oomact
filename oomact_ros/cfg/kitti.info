@@ -87,7 +87,6 @@ model {
 
 calibrator {
   verbose true
-  acceptConstantErrorTerms true
   timeBaseSensor pose1
   estimator {
     optimizer {

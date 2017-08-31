@@ -1,34 +1,12 @@
-#include <rosbag/bag.h>
 #include <ros/ros.h>
 
+#include <aslam/calibration/model/FrameGraphModel.h>
+#include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/ros/RosInputProvider.h>
 #include <aslam/calibration/calibrator/CalibratorI.hpp>
-#include <aslam/calibration/input/InputProviderI.h>
-#include <aslam/calibration/data/ObservationManagerI.h>
-#include <aslam/calibration/model/FrameGraphModel.h>
-#include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/PoseTrajectory.h>
-#include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
-#include <aslam/calibration/tools/SmartPointerTools.h>
 
-#include <sm/boost/null_deleter.hpp>
-#include <sm/BoostPropertyTree.hpp>
-#include <sm/value_store/LayeredValueStore.hpp>
-#include <sm/value_store/PrefixedValueStore.hpp>
-
-using namespace aslam;
 namespace cal = aslam::calibration;
-
-cal::ValueStoreRef valueStoreFromFile(std::string file_path,
-                                 sm::BoostPropertyTree *bpt_ptr = nullptr) {
-  sm::BoostPropertyTree bpt;
-  if (bpt_ptr) {
-    *bpt_ptr = bpt;
-  }
-  bpt.load(file_path);
-  return cal::ValueStoreRef(bpt);
-}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "CalibrationNode");
@@ -50,15 +28,13 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  sm::BoostPropertyTree bpt;
-  bpt.load(config_file);
-
-  cal::ValueStoreRef vs(bpt);
+  cal::ValueStoreRef vs = cal::ValueStoreRef::fromFile(config_file);
   cal::ValueStoreRef vs_model = vs.getChild("model");
 
   ROS_INFO("Setting up model and trajectory");
 
-  std::shared_ptr<cal::FrameGraphModel> model(new cal::FrameGraphModel(vs_model));
+  std::shared_ptr<cal::FrameGraphModel> model =
+      std::make_shared<cal::FrameGraphModel>(vs_model);
   cal::PoseTrajectory traj(*model, "traj", vs_model);
   model->add(traj);
 
@@ -66,15 +42,16 @@ int main(int argc, char **argv) {
 
   int num_pose_sensors;
   nh_private.param("num_pose_sensors", num_pose_sensors, 0);
-  if(num_pose_sensors < 0){
+  if (num_pose_sensors < 0) {
     ROS_ERROR("Number of pose sensors cannot be negative");
     num_pose_sensors = 0;
   }
 
   std::vector<cal::PoseSensor> pose_sensors;
   pose_sensors.reserve(num_pose_sensors);
-  for(size_t i = 0; i < num_pose_sensors; ++i){
-    pose_sensors.emplace_back(*model, std::string("pose") + std::to_string(i), vs_model);
+  for (size_t i = 0; i < num_pose_sensors; ++i) {
+    pose_sensors.emplace_back(*model, std::string("pose") + std::to_string(i),
+                              vs_model);
     model->add(pose_sensors.back());
   }
 
@@ -104,13 +81,17 @@ int main(int argc, char **argv) {
   ROS_INFO("Calibration done, generating results");
 
   // Output results
-  for(size_t i = 0; i < pose_sensors.size(); ++i){
-    ROS_INFO_STREAM("Pose sensor  : " << i); 
-    ROS_INFO_STREAM("  Translation: " << pose_sensors[i].getTranslationToParent().transpose()); 
-    ROS_INFO_STREAM("  Rotation   : " << pose_sensors[i].getRotationQuaternionToParent().transpose()); 
+  for (size_t i = 0; i < pose_sensors.size(); ++i) {
+    ROS_INFO_STREAM("Pose sensor  : " << i);
+    ROS_INFO_STREAM("  Translation: "
+                    << pose_sensors[i].getTranslationToParent().transpose());
+    ROS_INFO_STREAM(
+        "  Rotation   : "
+        << pose_sensors[i].getRotationQuaternionToParent().transpose());
   }
 
-  /*for (const boost::shared_ptr<aslam::calibration::CalibrationVariable>& calib_vals :
+  /*for (const boost::shared_ptr<aslam::calibration::CalibrationVariable>&
+  calib_vals :
        model->getCalibrationVariables()) {
     calib_vals->updateStore();
   }*/

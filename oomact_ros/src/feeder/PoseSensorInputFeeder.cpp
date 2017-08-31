@@ -21,12 +21,6 @@ bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m)
   m.q = rosQuaternionToVector4dXYZW(msg.pose.orientation);
   return true;
 }
-/*
-bool msg2Measurement(const geometry_msgs::TransformStamped &msg, PoseMeasurement & m){
-  m.t = rosVector3dToEigenVector3(msg.transform.translation);
-  m.q = rosQuaternionToVector4dXYZW(msg.transform.rotation);
-  return true;
-}*/
 
 namespace {
 InputFeederFactoryRegistry::RegistryEntry regEntries[] = {
