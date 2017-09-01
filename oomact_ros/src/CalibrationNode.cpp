@@ -41,7 +41,7 @@ void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
     } else if (sensor_type == "position") {
       sensors.emplace_back(new cal::PositionSensor(*model, sensor_name, vs_sensors));
     } else if (sensor_type == "imu") {
-      // sensors.emplace_back(new IMUSensor(*model, sensor_name, vs_sensors));
+      sensors.emplace_back(new IMUSensor(*model, sensor_name, vs_sensors));
     } else {
       ROS_ERROR("  loading failed, sensor type not supported.");
     }
