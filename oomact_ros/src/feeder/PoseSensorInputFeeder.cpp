@@ -30,9 +30,23 @@ bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m)
   return true;
 }
 
+bool msg2Measurement(const geometry_msgs::PoseWithCovarianceStamped &msg, PoseMeasurement & m){
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation);
+  return true;
+}
+
+bool msg2Measurement(const nav_msgs::Odometry &msg, PoseMeasurement & m){
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation);
+  return true;
+}
+
 namespace {
 InputFeederFactoryRegistry::RegistryEntry regEntries[] = {
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseStamped, PoseMeasurement>,
+    new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseWithCovarianceStamped, PoseMeasurement>,
+    new InputFeederFactoryForMessageWithHeader<geometry_msgs::Odometry, PoseMeasurement>,
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::TransformStamped, PoseMeasurement>,
 };
 }
