@@ -24,30 +24,29 @@ std::string getFilePathFromRosParam(const std::string& param_name,
 
 void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
                           std::shared_ptr<cal::FrameGraphModel> model,
-                          std::vector<std::unique_ptr<cal::Sensor>>* sensors) {
-  DCHECK(sensors != nullptr);
+                          std::vector<std::unique_ptr<cal::Sensor>>& sensors) {
 
   std::vector<cal::KeyValueStorePair> vs_sensors_vector =
       vs_sensors.getChildren();
 
-  sensors->clear();
-  sensors->reserve(vs_sensors_vector.size());
+  sensors.clear();
+  sensors.reserve(vs_sensors_vector.size());
   for (cal::KeyValueStorePair vs_sensor : vs_sensors_vector) {
     const std::string sensor_name = vs_sensor.getKey();
     const std::string sensor_type = vs_sensor.getString("type");
     ROS_INFO_STREAM("  loading " << sensor_type << " sensor: " << sensor_name << "...");
 
-    if (sensor_type == std::string("pose")) {
-      sensors->emplace_back(new cal::PoseSensor(*model, sensor_name, vs_sensors));
-    } else if (sensor_type == std::string("position")) {
-      sensors->emplace_back(new cal::PositionSensor(*model, sensor_name, vs_sensors));
-    } else if (sensor_type == std::string("imu")) {
+    if (sensor_type == "pose") {
+      sensors.emplace_back(new cal::PoseSensor(*model, sensor_name, vs_sensors));
+    } else if (sensor_type == "position") {
+      sensors.emplace_back(new cal::PositionSensor(*model, sensor_name, vs_sensors));
+    } else if (sensor_type == "imu") {
       // sensors.emplace_back(new IMUSensor(*model, sensor_name, vs_sensors));
     } else {
       ROS_ERROR("  loading failed, sensor type not supported.");
     }
 
-    model->add(*(sensors->back()));
+    model->add(*(sensors.back()));
   }
 }
 
@@ -83,7 +82,7 @@ int main(int argc, char** argv) {
   ROS_INFO("Loading sensor parameters...");
 
   std::vector<std::unique_ptr<cal::Sensor>> sensors;
-  loadSensorParameters(vs.getChild("sensors"), model, &sensors);
+  loadSensorParameters(vs.getChild("sensors"), model, sensors);
 
   ROS_INFO_STREAM("Loaded " << sensors.size() << " sensors.");
 
@@ -109,7 +108,10 @@ int main(int argc, char** argv) {
     ROS_INFO_STREAM("  Rotation   : " << sensor->getRotationQuaternionToParent().transpose());
   }
 
-  //dynamic_cast<sm::PropertyTreeValueStore&>(vs.getValueStore()).save(output_file);
+  for (const auto& calib_vals : model->getCalibrationVariables()) {
+    calib_vals->updateStore();
+  }
+  vs.saveTo(output_file);
 
   ROS_INFO("Saving done, Exiting");
 
