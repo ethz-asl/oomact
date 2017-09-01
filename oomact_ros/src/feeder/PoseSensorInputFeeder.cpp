@@ -6,6 +6,8 @@
 #include <rosbag/view.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <nav_msgs/Odometry.h>
 
 #include "aslam/calibration/ros/InputFeederFactoryRegistry.h"
 #include "aslam/calibration/ros/InputFeederFactoryI.h"
@@ -46,7 +48,7 @@ namespace {
 InputFeederFactoryRegistry::RegistryEntry regEntries[] = {
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseStamped, PoseMeasurement>,
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseWithCovarianceStamped, PoseMeasurement>,
-    new InputFeederFactoryForMessageWithHeader<geometry_msgs::Odometry, PoseMeasurement>,
+    new InputFeederFactoryForMessageWithHeader<nav_msgs::Odometry, PoseMeasurement>,
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::TransformStamped, PoseMeasurement>,
 };
 }
