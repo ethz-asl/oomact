@@ -6,6 +6,7 @@
 #include <aslam/calibration/calibrator/CalibratorI.hpp>
 #include <aslam/calibration/model/sensors/PoseSensor.hpp>
 #include <aslam/calibration/model/sensors/PositionSensor.hpp>
+#include <aslam/calibration/model/sensors/Imu.h>
 
 #include <sm/BoostPropertyTree.hpp>
 #include <sm/value_store/PropertyTreeValueStore.hpp>
@@ -41,7 +42,7 @@ void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
     } else if (sensor_type == "position") {
       sensors.emplace_back(new cal::PositionSensor(*model, sensor_name, vs_sensors));
     } else if (sensor_type == "imu") {
-      sensors.emplace_back(new IMUSensor(*model, sensor_name, vs_sensors));
+      sensors.emplace_back(new cal::Imu(*model, sensor_name, vs_sensors));
     } else {
       ROS_ERROR("  loading failed, sensor type not supported.");
     }
@@ -51,15 +52,17 @@ void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
 }
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "CalibrationNode");
 
+  ROS_INFO("Starting node...");
+
+  ros::init(argc, argv, "CalibrationNode");
   ros::NodeHandle nh, nh_private("~");
 
-  ROS_INFO("Started node.");
-
+  bool verbose;
+  nh_private.param("verbose", verbose, true);
   google::ParseCommandLineFlags(&argc, &argv, true);
   google::InitGoogleLogging(argv[0]);
-  google::SetStderrLogging(FLAGS_v > 0 ? google::INFO : google::WARNING);
+  google::SetStderrLogging(verbose ? google::INFO : google::WARNING);
   google::InstallFailureSignalHandler();
 
   ROS_INFO("Loading ros parameters...");
