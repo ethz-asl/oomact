@@ -11,8 +11,18 @@ namespace calibration {
 
 namespace ros {
 
+// ros topics sometimes have a leading "/", we add them here to make things more consistent
+std::string addLeadingSlashIfNeeded(const std::string& input_string){
+  if(input_string.front() != '/'){
+    return "/" + input_string;
+  }
+  else{
+    return input_string;
+  }
+}
+
 std::string getTopic(const Sensor & s) {
-  return s.getMyConfig().getString("topic");
+  return addLeadingSlashIfNeeded(s.getMyConfig().getString("topic"));
 }
 
 RosInputProvider::RosInputProvider(const std::shared_ptr<const Model> & model) : model_(model) {
@@ -37,7 +47,7 @@ RosInputProvider::~RosInputProvider() {
 }
 
 void RosInputProvider::feedMessage(const rosbag::MessageInstance& m, ObservationManagerI& obsManager) {
-  auto equal_range = topic2FeedersMap_.equal_range(m.getTopic());
+  auto equal_range = topic2FeedersMap_.equal_range(addLeadingSlashIfNeeded(m.getTopic()));
   if (equal_range.first != topic2FeedersMap_.end()) {
     for (auto it = equal_range.first; it != equal_range.second; it++) {
       it->second->feed(m, obsManager);
