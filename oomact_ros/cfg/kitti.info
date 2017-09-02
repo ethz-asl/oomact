@@ -46,9 +46,9 @@ sensors {
 
     rotation {
       used true
-      yaw 0.1
-      pitch 0.1
-      roll 0.1
+      yaw 1.8
+      pitch 0.0
+      roll 2.5
     }
     translation {
       used true

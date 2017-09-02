@@ -33,14 +33,14 @@ bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m)
 }
 
 bool msg2Measurement(const geometry_msgs::PoseWithCovarianceStamped &msg, PoseMeasurement & m){
-  m.t = rosVector3dToEigenVector3(msg.pose.pose.position, PoseMeasurement::USE_JPL_MULT);
-  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation);
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation, PoseMeasurement::USE_JPL_MULT);
   return true;
 }
 
 bool msg2Measurement(const nav_msgs::Odometry &msg, PoseMeasurement & m){
-  m.t = rosVector3dToEigenVector3(msg.pose.pose.position, PoseMeasurement::USE_JPL_MULT);
-  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation);
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation, PoseMeasurement::USE_JPL_MULT);
   return true;
 }
 
