@@ -18,13 +18,15 @@ namespace ros {
 
 bool msg2Measurement(const geometry_msgs::TransformStamped &msg, PoseMeasurement & m){
   m.t = rosVector3dToEigenVector3(msg.transform.translation);
-  m.q = rosQuaternionToVector4dXYZW(msg.transform.rotation);
+  static_assert(PoseMeasurement::USE_XYZW_ORDER, "");
+  m.q = rosQuaternionToVector4dXYZW(msg.transform.rotation, PoseMeasurement::USE_JPL_MULT);
   return true;
 }
 
 bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m){
   m.t = rosVector3dToEigenVector3(msg.pose.position);
-  m.q = rosQuaternionToVector4dXYZW(msg.pose.orientation);
+  static_assert(PoseMeasurement::USE_XYZW_ORDER, "");
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.orientation, PoseMeasurement::USE_JPL_MULT);
   return true;
 }
 

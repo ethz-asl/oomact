@@ -12,6 +12,8 @@ struct PoseMeasurement {
   /// Quaternions in JPL convention (XYZW)
   Eigen::Vector4d q;
   //TODO B switch to quaternion class
+  static constexpr bool USE_XYZW_ORDER = true;  // TODO B Switch Quaternion convention.
+  static constexpr bool USE_JPL_MULT = true;  // TODO B Switch Quaternion convention.
 };
 
 }
