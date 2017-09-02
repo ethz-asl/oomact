@@ -25,8 +25,8 @@ Eigen::Vector3d rosVector3dToEigenVector3(Input & v){
 }
 
 template <typename Input>
-Eigen::Vector4d rosQuaternionToVector4dXYZW(Input & v){
-  return Eigen::Vector4d(v.x, v.y, v.z, v.w);
+Eigen::Vector4d rosQuaternionToVector4dXYZW(Input & v, bool conjugate){
+  return conjugate ? Eigen::Vector4d(-v.x, -v.y, -v.z, v.w) : Eigen::Vector4d(v.x, v.y, v.z, v.w);
 }
 
 const Sensor & getSensorFromModule(const Module & m);
