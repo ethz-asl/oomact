@@ -17,7 +17,7 @@ AbstractPoseSensor::AbstractPoseSensor(Model& model, std::string name, sm::value
 }
 
 void AbstractPoseSensor::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAMETER(invertInput_);
+  MODULE_WRITE_FLAG(invertInput_);
 }
 
 AbstractPoseSensor::~AbstractPoseSensor() {
