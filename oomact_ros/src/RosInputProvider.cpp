@@ -21,7 +21,9 @@ RosInputProvider::RosInputProvider(const std::shared_ptr<const Model> & model) :
   LOG(INFO) << "Creating feeders from " << sensors.size() << " sensors.";
   std::vector<std::reference_wrapper<Sensor>> remaining;
   InputFeederFactoryRegistry::applyToMatching(sensors, [this](const Sensor & s, std::unique_ptr<InputFeederI> feeder){
-    topic2FeedersMap_.emplace(getTopic(s), std::move(feeder));
+    std::string topic = getTopic(s);
+    LOG(INFO) << "Feeding topic " << topic << " with " << *feeder;
+    topic2FeedersMap_.emplace(topic, std::move(feeder));
   }, &remaining);
   LOG(INFO) << "Created " << topic2FeedersMap_.size() << " feeders from " << sensors.size() << " sensors.";
   for(Sensor & s : remaining){

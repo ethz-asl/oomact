@@ -67,6 +67,10 @@ class InputFeederForMeassagesWithHeader : public InputFeederImpl<Msg, InputRecei
     receiver.addInputTo(t, measurement, obsManager.getCurrentStorage());
     return t;
   }
+
+  virtual void print(std::ostream & o) const {
+    o << "RosInputFeeder(" << typeid(Msg).name() << " -> "<< this->getReceiver().getModule().getName() << "." << typeid(Measurement).name() << ")";
+  }
 };
 
 template <typename Msg, typename Measurement>

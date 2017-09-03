@@ -13,7 +13,7 @@ class Sensor;
 namespace ros {
 
 
-class InputFeederI {
+class InputFeederI : public Printable {
  public:
   InputFeederI();
   virtual ~InputFeederI();
