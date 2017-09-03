@@ -7,6 +7,7 @@
 
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/tools/TypeName.h>
 
 namespace aslam {
 namespace calibration {
@@ -123,9 +124,8 @@ CalibratableMinimal::CalibratableMinimal(const Module * module) :
 }
 
 std::string getUnnamedObjectName(const void* o) {
-  return std::string(typeid(o).name()) + "@" + size_t(&o);
+  return TypeName(typeid(o)).toString() + "@" + size_t(&o);
 }
-
 
 class AllActiveActivatorImpl : public Activator{
   virtual bool isActive(const Activatable & ) const {
