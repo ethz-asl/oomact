@@ -63,7 +63,6 @@ cs_add_library(${PROJECT_NAME}
   src/model/fragments/PoseCv.cpp
   src/model/priors/CrossPoseCvPrior.cpp
   src/model/fragments/DelayCv.cpp
-  src/plan/Printable.cpp
   src/plan/Plan.cpp
   src/plan/PlanFragment.cpp
   src/plan/Executor.cpp
@@ -75,6 +74,7 @@ cs_add_library(${PROJECT_NAME}
   src/test/MockMotionCaptureSource.cpp
   src/tools/CheckNotNull.cpp
   src/tools/Interval.cpp
+  src/tools/Printable.cpp
   src/tools/TypeName.cpp
   src/tools/tools.cpp
   src/tools/Parallelizer.cpp
