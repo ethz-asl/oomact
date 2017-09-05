@@ -97,6 +97,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/model/ModelTest.cpp
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
+  test/tools/ParallelizerTest.cpp
   test/test_main.cpp
 
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test
