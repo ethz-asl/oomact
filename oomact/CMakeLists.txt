@@ -30,9 +30,9 @@ cs_add_library(${PROJECT_NAME}
   src/error-terms/ErrorTermPosition.cpp
   src/error-terms/ErrorTermTangency.cpp
   src/error-terms/ErrorTermGroup.cpp
-  
+
   src/laser-scanner/laser3d.cpp
-  
+
   src/calibrator/BatchCalibrator.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/algo/PredictionWriter.cpp
@@ -84,21 +84,21 @@ cs_add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/error-terms/ErrorTermAccelerometerTest.cpp
-  test/error-terms/ErrorTermGyroscopeTest.cpp
-  test/error-terms/ErrorTermWheelTest.cpp
-  test/error-terms/ErrorTermPoseTest.cpp
-  test/error-terms/ConditionalErrorTermTest.cpp
-  test/plan/PlanTest.cpp
-  test/tools/TreeTest.cpp
-  test/input/InputProviderTest.cpp
-  test/data/MeasurementsContainerTest.cpp
-  test/data/StorageTest.cpp
   test/acceptance/SimpleModelTest.cpp
   test/acceptance/SimpleCalibratorTest.cpp
+  test/data/MeasurementsContainerTest.cpp
+  test/data/StorageTest.cpp
+  test/error-terms/ConditionalErrorTermTest.cpp
+  test/error-terms/ErrorTermAccelerometerTest.cpp
+  test/error-terms/ErrorTermGyroscopeTest.cpp
+  test/error-terms/ErrorTermPoseTest.cpp
+  test/error-terms/ErrorTermWheelTest.cpp
+  test/input/InputProviderTest.cpp
   test/model/ModelTest.cpp
-  
+  test/plan/PlanTest.cpp
+  test/tools/TreeTest.cpp
+  test/test_main.cpp
+
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test
 )
 
