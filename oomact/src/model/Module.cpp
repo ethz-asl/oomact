@@ -190,5 +190,8 @@ const Module& Module::getModule() const {
   return *this;
 }
 
+void Module::writeSnapshot(const EstConf & /*ec*/, bool /*stateWasUpdatedSinceLastTime*/) const {
+}
+
 } /* namespace calibration */
 } /* namespace aslam */

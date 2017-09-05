@@ -73,7 +73,7 @@ Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPat
   if(config.hasKey("Gravity")){
     aslam::calibration::SimpleGravity* simpleGravity = new SimpleGravity(*this, config);
     gravity.reset(simpleGravity);
-    add(*simpleGravity);
+    addModule(*simpleGravity);
   }
 }
 
@@ -290,15 +290,11 @@ ModelAtTime Model::getAtTime(const BoundedTimeExpression&, int, const ModelSimpl
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
 }
 
-void Model::add(Module& module) {
+void Model::addModule(Module& module) {
   if(module.isUsed()){
     registerModule(module);
     CHECK(module.isRegistered_) << module.getName() << " did not register itself!";
   }
-}
-
-void Model::addModulesAndInit() {
-  init();
 }
 
 }

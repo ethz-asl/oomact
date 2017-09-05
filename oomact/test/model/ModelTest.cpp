@@ -29,9 +29,9 @@ TEST(Module, modelUid) {
   MockModule mm1(m, "A", config);
   MockModule mm2(m, "A", config);
 
-  m.add(mm1);
+  m.addModule(mm1);
   ASSERT_EQ(mm1.getUid(), "A");
-  m.add(mm2);
+  m.addModule(mm2);
   ASSERT_EQ(mm2.getUid(), "A1");
 }
 
@@ -48,9 +48,9 @@ TEST(Module, getSensors) {
   MockSensor s1(m, "S1", config);
   MockSensor2 s2(m, "S2", config);
 
-  m.add(mm1);
-  m.add(s1);
-  m.add(s2);
+  m.addModule(mm1);
+  m.addModule(s1);
+  m.addModule(s2);
 
   EXPECT_EQ(2, m.getSensors().size());
   EXPECT_EQ(2, m.getSensors<MockSensor>().size());
