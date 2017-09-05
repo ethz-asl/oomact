@@ -74,6 +74,7 @@ cs_add_library(${PROJECT_NAME}
   src/test/MockMotionCaptureSource.cpp
   src/tools/CheckNotNull.cpp
   src/tools/Interval.cpp
+  src/tools/MeasurementContainerTools.cpp
   src/tools/Printable.cpp
   src/tools/TypeName.cpp
   src/tools/tools.cpp
