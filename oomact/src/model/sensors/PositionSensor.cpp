@@ -18,9 +18,13 @@
 namespace aslam {
 namespace calibration {
 
-void PositionSensor::addMeasurement(const PositionMeasurement& position, const Timestamp t)
+void PositionSensor::addMeasurement(const Timestamp t, const PositionMeasurement& position)
 {
   measurements->push_back({t, position});
+}
+
+void PositionSensor::addMeasurement(const Timestamp t, const Eigen::Vector3d& p) {
+  addMeasurement(t, PositionMeasurement{p});
 }
 
 void PositionSensor::writeConfig(std::ostream& out) const {

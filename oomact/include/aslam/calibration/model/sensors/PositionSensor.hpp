@@ -23,7 +23,12 @@ class PositionSensor : public Sensor {
 
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
-  void addMeasurement(const PositionMeasurement& Position, const Timestamp t);
+  void addMeasurement(Timestamp t, const PositionMeasurement& position);
+  void addMeasurement(Timestamp t, const Eigen::Vector3d & p);
+
+  void addMeasurement(const PositionMeasurement& position, Timestamp t){ // TODO B introduce formal deprecation and deprecated this function
+    addMeasurement(t, position);
+  }
 
  private:
   std::shared_ptr<PositionMeasurements> measurements;
