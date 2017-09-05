@@ -89,7 +89,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/error-terms/ErrorTermGyroscopeTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
   test/error-terms/ErrorTermPoseTest.cpp
-  test/error-terms/ConditionalErrorTerm.cpp
+  test/error-terms/ConditionalErrorTermTest.cpp
   test/plan/PlanTest.cpp
   test/tools/TreeTest.cpp
   test/input/InputProviderTest.cpp
