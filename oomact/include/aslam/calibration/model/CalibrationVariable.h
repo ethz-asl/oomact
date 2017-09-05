@@ -68,7 +68,6 @@ class CalibrationVariable {
   virtual bool isActivated() const = 0;
   static int const NameWidth;
  private:
-  void printBasisInto(std::ostream& out, const Eigen::MatrixXd& mat) const;
   int _index = -1;
 };
 
