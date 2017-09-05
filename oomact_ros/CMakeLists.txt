@@ -18,7 +18,7 @@ else()
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
-cs_add_library(oomact_ros
+cs_add_library(${PROJECT_NAME}
   src/feeder/PoseSensorInputFeeder.cpp
   src/feeder/ImuInputFeeder.cpp
   src/InputFeederFactoryI.cpp
