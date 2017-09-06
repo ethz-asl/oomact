@@ -17,12 +17,12 @@ namespace calibration {
 namespace ros {
 
 bool msg2Measurement(const geometry_msgs::PointStamped &msg, PositionMeasurement & m){
-  m.t = rosVector3dToEigenVector3(msg.point);
+  m.p = rosVector3dToEigenVector3(msg.point);
   return true;
 }
 
 bool msg2Measurement(const geometry_msgs::Vector3Stamped &msg, PositionMeasurement & m){
-  m.t = rosVector3dToEigenVector3(msg.vector);
+  m.p = rosVector3dToEigenVector3(msg.vector);
   return true;
 }
 
