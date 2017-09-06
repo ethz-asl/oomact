@@ -7,13 +7,11 @@
 #include <glog/logging.h>
 
 #include <aslam/calibration/model/PoseTrajectory.h>
+#include <aslam/calibration/model/fragments/PoseCv.h>
 #include <aslam/calibration/tools/Tree.hpp>
 
 namespace aslam {
 namespace calibration {
-
-class FrameGraph: public Tree<const Frame*, PoseTrajectory*> {
-};
 
 constexpr int getVariability(BoundedTimeExpression*){
   return 1;
@@ -33,7 +31,7 @@ template <typename A>
 aslam::backend::CoordinateFrame computeTrajectoryFrame(boost::shared_ptr<const CoordinateFrame> parent, A expressionFactories, bool needGlobalPosition, int maximalDerivativeOrder){
   return CoordinateFrame(
         parent,
-        //TODO O The adapter is a big waste of time there are more direct ways (UnitQuaternion expressions ..)
+        //TODO O The adapter is a big waste of time. There are more direct ways (UnitQuaternion expressions ..)
         Vector2RotationQuaternionExpressionAdapter::adapt(expressionFactories.rot.getValueExpression()),
         needGlobalPosition ? expressionFactories.trans.getValueExpression(0) : EuclideanExpression(),
         maximalDerivativeOrder >= 1 ? -EuclideanExpression(expressionFactories.rot.getAngularVelocityExpression()) : EuclideanExpression(),
@@ -43,9 +41,30 @@ aslam::backend::CoordinateFrame computeTrajectoryFrame(boost::shared_ptr<const C
       );
 }
 
+struct FrameLink {
+  union Ptr {
+    const PoseCv* sensor;
+    PoseTrajectory* poseTraj;
+
+    Ptr(const PoseCv* sensor) : sensor(sensor) {}
+    Ptr(PoseTrajectory* poseTraj) : poseTraj(poseTraj) {}
+  } ptr;
+  enum class Type {
+    PoseCv, Trajectory
+  } type;
+
+  FrameLink(const PoseCv* sensor) : ptr(sensor), type(Type::PoseCv) {}
+  FrameLink(PoseTrajectory* traj) : ptr(traj), type(Type::Trajectory) {}
+};
+
+class FrameGraph: public Tree<const Frame*, FrameLink> {
+};
+
+
 template <typename Time>
 class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
  public:
+
   FrameGraphModelAtTimeImpl(const FrameGraphModel & fgModel, Time timestamp, int maximalDerivativeOrder, const ModelSimplification& simplification) :
    maximalDerivativeOrder_(maximalDerivativeOrder),
    fgModel_(fgModel),
@@ -55,12 +74,34 @@ class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
   }
 
   template <int maximalDerivativeOrder>
-  aslam::backend::CoordinateFrame getCoordinateFrame(const Frame & to, const Frame & from, size_t originalMaximalDerivativeOrder) const {
-    boost::shared_ptr<aslam::backend::CoordinateFrame> f, fInv;
-    fgModel_.frameGraph_->walkPath(&to , &from, [&](PoseTrajectory* trajPtr, bool inverse){
+  CoordinateFrame getCoordinateFrame(const Frame & to, const Frame & from, const size_t originalMaximalDerivativeOrder) const {
+    boost::shared_ptr<CoordinateFrame> f, fInv;
+    fgModel_.frameGraph_->walkPath(&to , &from, [&](const FrameLink & frameLink, bool inverse){
       CHECK(!inverse) << "to=" << to << ", from=" << from;
-      CHECK_NOTNULL(trajPtr);
-      f = boost::make_shared<CoordinateFrame>(computeTrajectoryFrame(f, trajPtr->getCurrentTrajectory().getExpressionFactoryPair<maximalDerivativeOrder>(timestamp_), simplification_.needGlobalPosition, originalMaximalDerivativeOrder));
+      switch(frameLink.type){
+        case FrameLink::Type::PoseCv:
+          {
+            const PoseCv & poseCv = *frameLink.ptr.sensor;
+            f = boost::make_shared<CoordinateFrame>(
+                    f,
+                    poseCv.getRotationToParentExpression(),
+                    poseCv.getTranslationToParentExpression()
+                  );
+          }
+          break;
+        case FrameLink::Type::Trajectory:
+          f = boost::make_shared<CoordinateFrame>(
+                  computeTrajectoryFrame(
+                      f,
+                      frameLink.ptr.poseTraj->getCurrentTrajectory().getExpressionFactoryPair<maximalDerivativeOrder>(timestamp_),
+                      simplification_.needGlobalPosition, originalMaximalDerivativeOrder
+                    )
+               );
+          break;
+        default:
+          CHECK(false);
+      }
+
     });
     return std::move(*f);
   }
@@ -89,19 +130,20 @@ class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
     return aslam::backend::TransformationExpression(toCFrame.getR_G_L(), toCFrame.getPG()).inverse() * aslam::backend::TransformationExpression(fromCFrame.getR_G_L(), fromCFrame.getPG());
   }
 
-  aslam::backend::EuclideanExpression getAcceleration(const Frame & to, const Frame & from) const override {
-    return getCoordinateFrame(to, from).getAG();
+  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & frame) const override {
+    return getCoordinateFrame(of, frame).getAG();
   }
 
-  aslam::backend::EuclideanExpression getVelocity(const Frame & to, const Frame & from) const override {
-    return getCoordinateFrame(to, from).getVG();
+  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & frame) const override {
+    return getCoordinateFrame(of, frame).getVG();
   }
 
-  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & to, const Frame & from) const override {
-    return getCoordinateFrame(to, from).getOmegaG();
+  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & frame) const override {
+    return getCoordinateFrame(of, frame).getOmegaG();
   }
-  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & to, const Frame & from) const override {
-    return getCoordinateFrame(to, from).getAlphaG();
+
+  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & frame) const override {
+    return getCoordinateFrame(of, frame).getAlphaG();
   }
  private:
   int maximalDerivativeOrder_;
@@ -130,7 +172,9 @@ ModelAtTime FrameGraphModel::getAtTime(const BoundedTimeExpression& boundedTimeE
 void FrameGraphModel::registerModule(Module& m) {
   Model::registerModule(m);
   if(auto trajPtr = m.ptrAs<PoseTrajectory>()){
-    frameGraph_->add(&trajPtr->getFrame(), &trajPtr->getReferenceFrame(), trajPtr);
+    frameGraph_->add(&trajPtr->getFrame(), &trajPtr->getReferenceFrame(), FrameLink{trajPtr});
+  } else if (auto sensorPtr = m.ptrAs<PoseCv>()){
+    frameGraph_->add(&sensorPtr->getFrame(), &sensorPtr->getParentFrame(), FrameLink{sensorPtr});
   }
 }
 

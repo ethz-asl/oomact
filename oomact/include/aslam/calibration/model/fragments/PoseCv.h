@@ -31,7 +31,7 @@ typedef boost::shared_ptr<RotationQuaternionCv> RotationQuaternionCvSp;
 
 class PoseCv {
  public:
-  PoseCv(const Module * module, boost::optional<std::string> defaultFrameName = boost::optional<std::string>());
+  PoseCv(Module * module, boost::optional<std::string> defaultFrameName = boost::optional<std::string>());
 
   const Eigen::Vector3d & getTranslationToParent() const { if(translationVariable) return translationVariable->getValue(); else return NoTranslation; }
   const Eigen::Vector4d & getRotationQuaternionToParent() const { if(rotationVariable) return rotationVariable->getQuaternion(); else return NoRotation; }
@@ -73,15 +73,18 @@ class PoseCv {
   }
 
   const Frame& getParentFrame() const {
-    return frame;
+    return parentFrame_;
   }
 
+  const Frame& getFrame() const {
+    return frame_;
+  }
  protected:
   void setActive(bool active) {
     if(rotationVariable) rotationVariable->setActive(active && rotationVariable->isToBeEstimated());
     if(translationVariable) translationVariable->setActive(active && translationVariable->isToBeEstimated());
   }
-  const Frame & frame;
+  const Frame & parentFrame_, & frame_;
 
   RotationQuaternionCvSp rotationVariable;
   EuclideanPointCvSp translationVariable;

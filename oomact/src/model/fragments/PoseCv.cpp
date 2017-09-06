@@ -7,8 +7,9 @@
 namespace aslam {
 namespace calibration {
 
-PoseCv::PoseCv(const Module* module, boost::optional<std::string> defaultFrameName):
-        frame(module->getModel().getFrame(module->getMyConfig().getString("frame", defaultFrameName))),
+PoseCv::PoseCv(Module* module, boost::optional<std::string> defaultFrameName):
+        parentFrame_(module->getModel().getFrame(module->getMyConfig().getString("frame", defaultFrameName))),
+        frame_(module->getModel().getOrCreateFrame(module->getName())), //TODO D make sure there is only one PoseCv in a module
         rotationVariable(module->createCVIfUsed<RotationQuaternionCv>("rotation", "R")),
         translationVariable(module->createCVIfUsed<EuclideanPointCv>("translation", "T")),
         transExp(translationVariable),
