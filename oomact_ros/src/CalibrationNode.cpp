@@ -8,6 +8,8 @@
 #include <aslam/calibration/model/sensors/PositionSensor.hpp>
 #include <aslam/calibration/model/sensors/Imu.h>
 
+#include <sm/MatrixArchive.hpp>
+
 namespace cal = aslam::calibration;
 
 std::string getFilePathFromRosParam(const std::string& param_name,
@@ -98,7 +100,12 @@ int main(int argc, char** argv) {
 
   ROS_INFO("Starting calibration...");
 
+  sm::MatrixArchive calibOutputArchive;
+  calibrator->addToArchive(calibOutputArchive, false);
+
   calibrator->calibrate();
+
+  calibrator->addToArchive(calibOutputArchive, true);
 
   ROS_INFO("Calibration done, generating results...");
 
@@ -112,6 +119,8 @@ int main(int argc, char** argv) {
     calib_vals->updateStore();
   }
   vs.saveTo(output_file);
+
+  calibOutputArchive.save(output_file + ".ma");
 
   ROS_INFO("Saving done, Exiting");
 
