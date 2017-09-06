@@ -10,6 +10,10 @@ struct AccelerometerMeasurement {
   Eigen::Vector3d a;
   /// Covariance. Set (0,0) to 0.0 if not available.
   Eigen::Matrix3d cov;
+
+  AccelerometerMeasurement() = default;
+  AccelerometerMeasurement(const Eigen::Vector3d & a, const Eigen::Matrix3d & cov = Eigen::Matrix3d::Zero()) :
+    a(a), cov(cov) {}
 };
 }
 }

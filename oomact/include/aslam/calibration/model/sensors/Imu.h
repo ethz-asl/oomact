@@ -2,6 +2,7 @@
 #define H657A8A48_567D_4372_A5E6_CA05BA2932B4
 
 #include <aslam/calibration/data/MeasurementsContainer.h>
+#include <aslam/calibration/input/InputReceiverI.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <aslam/calibration/model/Sensor.hpp>
@@ -23,7 +24,7 @@ class Bias : public StateCarrier, public NamedMinimal {
  public:
   Bias(Module & m, const std::string & name, sm::value_store::ValueStoreRef config);
 
-  bool isUsingSpline() const { return !biasVector; }
+  bool isUsingSpline() const { return mode_ == Mode::Spline; }
 
   aslam::backend::EuclideanExpression getBiasExpression(Timestamp t) const;
 
@@ -33,6 +34,10 @@ class Bias : public StateCarrier, public NamedMinimal {
     }
   }
 
+  enum class Mode {
+    None, Vector, Spline
+  };
+
   void initState(CalibratorI & calib);
   void addToBatch(bool stateActive, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
   void registerCalibrationVariables(Model & model);
@@ -41,11 +46,12 @@ class Bias : public StateCarrier, public NamedMinimal {
   aslam::backend::EuclideanExpression biasVectorExpression;
   std::shared_ptr<TrajectoryCarrier> biasSplineCarrier;
   std::shared_ptr<BiasBatchState> state_;
+  Mode mode_ = Mode::None;
   friend Imu;
 };
 
 
-class Imu : public Sensor, public StateCarrier {
+class Imu : public Sensor, public StateCarrier, public InputReceiverIT<AccelerometerMeasurement>, public InputReceiverIT<GyroscopeMeasurement> {
  public:
   struct Measurements {
     MeasurementsContainer<AccelerometerMeasurement> accelerometer;
@@ -69,11 +75,16 @@ class Imu : public Sensor, public StateCarrier {
   bool initState(CalibratorI & calib) override;
   void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) override;
 
-  Imu(Model & model, const std::string & name, sm::value_store::ValueStoreRef config);
+  Imu(Model & model, const std::string & name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
 
   void clearMeasurements() override;
   void addAccelerometerMeasurement(CalibratorI & calib, const AccelerometerMeasurement& data, Timestamp timestamp) const;
+
   void addGyroscopeMeasurement(CalibratorI & calib, const GyroscopeMeasurement& data, Timestamp timestamp) const;
+
+  void addInputTo(Timestamp t, const AccelerometerMeasurement & input, ModuleStorage & s) const override;
+  void addInputTo(Timestamp t, const GyroscopeMeasurement & input, ModuleStorage & s) const override;
+
   bool hasTooFewMeasurements() const override;
 
   void addPriorFactors(CalibratorI & calib, backend::ErrorTermReceiver & errorTermReceiver, double priorFactor) const;
@@ -84,6 +95,7 @@ class Imu : public Sensor, public StateCarrier {
  protected:
   void registerWithModel() override;
   void setActive(bool spatial, bool temporal) override;
+  void writeConfig(std::ostream & out) const override;
 
  private:
   void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, backend::ErrorTermReceiver & errorTermReceiver, bool observeOnly) const override;
@@ -107,6 +119,11 @@ class Imu : public Sensor, public StateCarrier {
   double gyroZVariance;
   /// Statistical random walk value for the accelerometer
   double gyroRandomWalk;
+
+  /// Ignore covariance provided with AccelerometerMeasurement
+  bool enforceAccCovariance_;
+  /// Ignore covariance provided with GyroscopeMeasurement
+  bool enforceGyroCovariance_;
 
   Bias accBias, gyroBias;
 

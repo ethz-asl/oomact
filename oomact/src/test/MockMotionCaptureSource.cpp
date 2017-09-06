@@ -35,8 +35,15 @@ MockMotionCaptureSource MmcsStraightLine([](Timestamp now, MotionCaptureSource::
 
 MockMotionCaptureSource MmcsRotatingStraightLine([](Timestamp now, MotionCaptureSource::PoseStamped & p){
   const double deltaTime = now - MockMotionCaptureSource::StartTime;
-  p.q = sm::kinematics::axisAngle2quat({deltaTime, 0, 0});
+  p.q = sm::kinematics::axisAngle2quat({-deltaTime, 0, 0}); // to passive quaternion yielding a positive rotation
   p.p = Eigen::Vector3d::UnitX() * deltaTime;
+});
+
+MockMotionCaptureSource MmcsCircle([](Timestamp now, MotionCaptureSource::PoseStamped & p){
+  const double deltaTime = now - MockMotionCaptureSource::StartTime;
+  const double angleRad = deltaTime;
+  p.q = sm::kinematics::axisAngle2quat({0, 0, -(angleRad + M_PI / 2)}); // to passive quaternion yielding a positive rotation
+  p.p = Eigen::Vector3d::UnitX() * cos(angleRad) + Eigen::Vector3d::UnitY() * sin(angleRad);
 });
 
 } /* namespace test */
