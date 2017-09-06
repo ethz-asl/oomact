@@ -47,7 +47,7 @@ void loadSensorParameters(const cal::ValueStoreRef vs_sensors,
       ROS_ERROR("  loading failed, sensor type not supported.");
     }
 
-    model->add(*(sensors.back()));
+    model->addModule(*(sensors.back()));
   }
 }
 
