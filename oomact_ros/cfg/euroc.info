@@ -1,0 +1,190 @@
+sensors {  
+  vicon {
+    type pose
+
+    frame body
+    targetFrame world
+    invertInput false
+    
+    topic "vicon/firefly_sbx/firefly_sbx"
+
+    covPosition { sigma "0.01" }
+    covOrientation { sigma "0.01" }
+
+    absoluteMeasurements true
+
+    rotation { used false }
+    translation { used false }
+    delay { used false }
+
+    mestimator
+    {
+      name "Cauchy"
+      cauchySigma2 "10"
+    }
+  }
+  flight_controller_imu {
+    type imu
+
+    used true
+
+    frame body
+    inertiaFrame world
+
+    topic "/fcu/imu"
+
+    acc {
+      used true
+      hasBias true
+      biasVector {
+        x 0
+        y 0
+        z 0
+      }
+      noise {
+        accXVariance 0.01
+        accYVariance 0.01
+        accZVariance 0.01
+        accRandomWalk 4e-3
+      }
+    }
+    gyro {
+      used true
+      hasBias true
+      biasVector {
+        x 0
+        y 0
+        z 0
+      }
+      noise {
+        gyroXVariance 0.01
+        gyroYVariance 0.01
+        gyroZVariance 0.01
+        gyroRandomWalk 4e-3
+      }
+    }
+
+    rotation {
+      roll 0.0
+      pitch 0.0
+      yaw 0.0
+    }
+    translation {
+      x 0
+      y 0
+      z 0
+    }
+    delay 0.0
+    {
+      used true
+      relativeBounds true
+      upperBound 0.1
+      lowerBound -0.1
+    }
+
+    mestimator
+    {
+      name "Cauchy"
+      cauchySigma2 "10"
+    }
+  }
+  vi_sensor_imu {
+    type imu
+
+    used true
+
+    frame body
+    inertiaFrame world
+
+    topic "/imu0"
+
+    acc {
+      used true
+      hasBias true
+      biasVector {
+        x 0
+        y 0
+        z 0
+      }
+      noise {
+        accXVariance 0.01
+        accYVariance 0.01
+        accZVariance 0.01
+        accRandomWalk 4e-3
+      }
+    }
+    gyro {
+      used true
+      hasBias true
+      biasVector {
+        x 0
+        y 0
+        z 0
+      }
+      noise {
+        gyroXVariance 0.01
+        gyroYVariance 0.01
+        gyroZVariance 0.01
+        gyroRandomWalk 4e-3
+      }
+    }
+
+    rotation {
+      roll -2.6
+      pitch 0.0
+      yaw -1.8
+    }
+    translation {
+      x 0
+      y 0
+      z 0
+    }
+    delay 0.0
+    {
+      used true
+      relativeBounds true
+      upperBound 0.1
+      lowerBound -0.1
+    }
+
+    mestimator
+    {
+      name "Cauchy"
+      cauchySigma2 "10"
+    }
+  }
+}
+
+model {
+  Gravity { 
+    used true
+    magnitude 9.81 
+  }
+  frames "body,world"
+
+  traj {
+    frame body
+    referenceFrame world
+    initWithPoseMeasurements true
+    McSensor vicon
+    splines {
+      knotsPerSecond 40
+      rotSplineOrder 4
+      rotFittingLambda 0.0000001
+      transSplineOrder 4
+      transFittingLambda 0.0000001
+    }
+  }
+}
+
+calibrator {
+  verbose true
+  timeBaseSensor vicon
+  estimator {
+    optimizer {
+      maxIterations 150
+      convergenceDeltaError 1e-6
+      convergenceDeltaX 1e-6
+    }
+  }
+}
