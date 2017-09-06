@@ -56,6 +56,9 @@ class BatchEstConf : public EstConf {
     o << "BatchEstimationConfig()";
   }
 
+  bool shouldSensorsBeRegistered(const Sensor & /*from*/, const Sensor & /*to*/) const override {
+    return true; //TODO B make registration configurable
+  }
  private:
   bool useCalibPriors_ = false;
 };

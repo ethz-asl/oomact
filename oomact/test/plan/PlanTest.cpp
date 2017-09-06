@@ -21,12 +21,12 @@ TEST(AslamCalibrationPlan, testLoad) {
   EXPECT_EQ("ID2", p.getId());
   EXPECT_FALSE(p.isFinished());
 
-  EXPECT_EQ("test1", toString(p.getCurrentFragment()));
+  EXPECT_EQ("Test(val=test1)", toString(p.getCurrentFragment()));
 
   p.step();
   EXPECT_FALSE(p.isFinished());
 
-  EXPECT_EQ("test2", toString(p.getCurrentFragment()));
+  EXPECT_EQ("Test(val=test2)", toString(p.getCurrentFragment()));
 
   p.step();
   EXPECT_TRUE(p.isFinished());

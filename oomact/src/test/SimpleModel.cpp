@@ -18,7 +18,7 @@ SimpleModel::SimpleModel(ValueStoreRef config, std::shared_ptr<ConfigPathResolve
     sensorsConfig_(config.getChild("sensors")),
     wheelOdometry_(*this, "WheelOdometry", sensorsConfig_)
 {
-  add(wheelOdometry_);
+  addModule(wheelOdometry_);
 }
 
 }

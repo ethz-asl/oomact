@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   std::shared_ptr<cal::FrameGraphModel> model =
       std::make_shared<cal::FrameGraphModel>(vs_model);
   cal::PoseTrajectory traj(*model, "traj", vs_model);
-  model->add(traj);
+  model->addModule(traj);
 
   ROS_INFO("Loading pose sensor parameters");
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
   for (size_t i = 0; i < num_pose_sensors; ++i) {
     pose_sensors.emplace_back(*model, std::string("pose") + std::to_string(i),
                               vs_model);
-    model->add(pose_sensors.back());
+    model->addModule(pose_sensors.back());
   }
 
   ROS_INFO_STREAM("Loaded " << pose_sensors.size() << " pose sensors");

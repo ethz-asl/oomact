@@ -36,6 +36,12 @@ class Plan : public Printable {
   std::vector<std::shared_ptr<PlanFragment> > fragments;
 };
 
+void sleep(double seconds);
+
+extern ModuleList staticPointSensors;
+extern ModuleList dynamicPointSensors;
+extern ModuleList motionSensors;
+
 } /* namespace plan */
 } /* namespace calibration */
 } /* namespace aslam */

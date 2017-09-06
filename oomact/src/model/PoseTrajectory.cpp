@@ -33,10 +33,11 @@ namespace calibration {
 
 Eigen::Vector4d negateQuatIfThatBringsItCloser(const Eigen::Vector4d& pquat, const
     Eigen::Vector4d& cquat) {
-  if ((pquat + cquat).norm() < (pquat - cquat).norm())
+  if ((pquat + cquat).norm() < (pquat - cquat).norm()) {
     return -cquat;
-  else
+  } else {
     return cquat;
+  }
 }
 
 class BaseTrajectoryBatchState : public BatchState, public So3R3Trajectory {
@@ -109,10 +110,10 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   std::vector<Eigen::Vector4d> rotPoses;
   rotPoses.reserve(numMeasurements);
 
-  auto & trajectoryFrame = trajectory.getCarrier().getFrame();
-  auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
+  const auto & trajectoryFrame = trajectory.getCarrier().getFrame();
+  const auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
 
-  Timestamp currentDelay = poseSensor.getSensor().hasDelay() ? poseSensor.getSensor().getDelay() : Timestamp::Zero();
+  const Timestamp currentDelay = poseSensor.getSensor().getDelay();
 
   for (auto it = measurements.cbegin(); it != measurements.cend(); ++it) {
     Timestamp timestamp = it->first - currentDelay;
@@ -139,39 +140,6 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   assert(effectiveBatchInterval.end == Timestamp(endTimestamp));
   return true;
 }
-
-
-PoseMeasurement getFirstPoseMeasurement(CalibratorI & calib, Timestamp & startTime, const Sensor & sensor, bool respectDelayLowerBound, const Frame * transformToFramePtr) {
-  if(respectDelayLowerBound && sensor.hasDelay()){
-    if(startTime - sensor.getDelayUpperBound() < Timestamp(calib.getCurrentEffectiveBatchInterval().start)){
-      startTime = Timestamp(calib.getCurrentEffectiveBatchInterval().start) + sensor.getDelayUpperBound(); //TODO C use Timestamp everywhere
-    }
-  }
-  SM_ASSERT_TRUE(std::runtime_error, sensor.isA<PoseSensorI>(), "")
-
-  auto & poseSensor = sensor.as<PoseSensorI>();
-  auto & storage = calib.getCurrentStorage();
-  CHECK(poseSensor.hasMeasurements(storage));
-
-  auto ps = getMeasurementsSlice(poseSensor.getAllMeasurements(storage), startTime, (startTime + Timestamp(1.0)));
-  CHECK(!ps.empty()) << "Did not get any pose measurement!"; //TODO B implement nicer solution
-
-  startTime = ps[0].first;
-
-  PoseMeasurement & pose = ps[0].second;
-  if(transformToFramePtr){
-    sm::kinematics::Transformation m_f(pose.q, pose.t);
-
-    std::string poseToString(const sm::kinematics::Transformation & trafo);
-
-    m_f = m_f * sm::kinematics::Transformation(sensor.getTransformationExpressionTo(calib.getModelAt(startTime, 0, {false, false}), *transformToFramePtr).toTransformationMatrix()).inverse();
-
-    pose.q = m_f.q();
-    pose.t = m_f.t();
-  }
-  return pose;
-}
-
 
 bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelOdometry & wheelOdometry, const ModuleLink<PoseSensorI>& poseSensor) {
   if(!wheelOdometry.isUsed()){

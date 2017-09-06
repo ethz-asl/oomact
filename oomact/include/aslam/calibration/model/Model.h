@@ -101,6 +101,8 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
   const std::vector<std::reference_wrapper<Sensor>> & getSensors() const { return sensors; }
   template <typename Sensor_>
   std::vector<std::reference_wrapper<const Sensor_> > getSensors() const;
+  template <typename Sensor_>
+  std::vector<std::reference_wrapper<Sensor_> > getSensors();
 
   const std::vector<std::reference_wrapper<Joint>> & getJoints() const { return joints; }
   const std::vector<std::reference_wrapper<Module>> & getModules() const { return modules; }
@@ -115,11 +117,16 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 
   const std::string& getSensorName(SensorId id) const;
 
-  void add(Module & module);
+  void addModule(Module & module);
   template <typename Module_, typename ... Modules_>
-  void addModulesAndInit(Module_ & module, Modules_ & ... modules){
-    add(static_cast<Module&>(module));
-    addModulesAndInit(modules...);
+  void addModules(Module_ & module, Modules_ & ... modules){
+    addModule(static_cast<Module&>(module));
+    addModules(modules...);
+  }
+  template <typename ... Modules_>
+  void addModulesAndInit(Modules_ & ... modules){
+    addModules(modules...);
+    init();
   }
 
   void addCalibrationVariables(std::initializer_list<boost::shared_ptr<CalibrationVariable>> cvs);
@@ -153,7 +160,7 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
   void registerSensor(Sensor& s);
   void registerJoint(Joint & j);
 
-  void addModulesAndInit();
+  void addModules() {}
 
   std::vector<std::unique_ptr<Named>> ownedNOs;
 
@@ -176,16 +183,21 @@ class Model : public ModuleRegistry, public Printable, public IsA<Model> {
 };
 
 template<typename Sensor_>
-inline std::vector<std::reference_wrapper<const Sensor_>> Model::getSensors() const
+inline std::vector<std::reference_wrapper<Sensor_>> Model::getSensors()
 {
   static_assert(std::is_base_of<Sensor, Sensor_>::value, "Only sensors may be given as type parameter for getSensors<>()!");
-  std::vector<std::reference_wrapper<const Sensor_> > ret;
-  for (const Module& s: getModules()) {
+  std::vector<std::reference_wrapper<Sensor_> > ret;
+  for (Module& s: getModules()) {
     if (auto p = s.ptrAs<Sensor_>()) {
       ret.emplace_back(*p);
     }
   }
   return ret;
+}
+template<typename Sensor_>
+inline std::vector<std::reference_wrapper<const Sensor_>> Model::getSensors() const
+{
+  return const_cast<Model*>(this)->getSensors<const Sensor_>();
 }
 
 }

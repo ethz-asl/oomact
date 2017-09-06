@@ -20,6 +20,14 @@ endif()
 
 
 cs_add_library(${PROJECT_NAME}
+  src/algo/PredictionWriter.cpp
+  src/algo/splinesToFile.cpp
+  src/algo/OdometryPath.cpp
+  src/calibrator/BatchCalibrator.cpp
+  src/calibrator/AbstractCalibrator.cpp
+  src/data/ObservationManagerI.cpp
+  src/data/MapStorage.cpp
+  src/data/StorageI.cpp
   src/error-terms/ErrorTermWheel.cpp
   src/error-terms/ErrorTermWheelsZ.cpp
   src/error-terms/ErrorTermLinearVelocity.cpp
@@ -30,9 +38,6 @@ cs_add_library(${PROJECT_NAME}
   src/error-terms/ErrorTermPosition.cpp
   src/error-terms/ErrorTermTangency.cpp
   src/error-terms/ErrorTermGroup.cpp
-  
-  src/laser-scanner/laser3d.cpp
-  
   src/calibrator/BatchCalibrator.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/algo/PredictionWriter.cpp
@@ -42,6 +47,7 @@ cs_add_library(${PROJECT_NAME}
   src/data/MapStorage.cpp
   src/data/StorageI.cpp
   src/input/InputProviderI.cpp
+  src/model/CalibrationVariable.cpp
   src/model/Module.cpp
   src/model/ModuleList.cpp
   src/model/Model.cpp
@@ -49,56 +55,59 @@ cs_add_library(${PROJECT_NAME}
   src/model/Sensor.cpp
   src/model/SetActivator.cpp
   src/model/Joint.cpp
-  src/model/CalibrationVariable.cpp
   src/model/sensors/AbstractPoseSensor.cpp
+  src/model/sensors/Imu.cpp
   src/model/sensors/MotionCaptureSensor.cpp
   src/model/sensors/PoseSensor.cpp
   src/model/sensors/PositionSensor.cpp
-  src/model/sensors/Imu.cpp
   src/model/sensors/WheelOdometry.cpp
-  src/model/StateCarrier.cpp
   src/model/PoseTrajectory.cpp
+  src/model/StateCarrier.cpp
   src/model/fragments/TrajectoryCarrier.cpp
   src/model/fragments/So3R3Trajectory.cpp
   src/model/fragments/PoseCv.cpp
-  src/model/priors/CrossPoseCvPrior.cpp
   src/model/fragments/DelayCv.cpp
-  src/plan/Printable.cpp
+  src/model/priors/CrossPoseCvPrior.cpp
+  src/plan/CalibrationServer.cpp
+  src/plan/Driver.cpp
+  src/plan/Executor.cpp
+  src/plan/HomingDriver.cpp
+  src/plan/Logger.cpp
   src/plan/Plan.cpp
   src/plan/PlanFragment.cpp
-  src/plan/Executor.cpp
-  src/plan/Driver.cpp
-  src/plan/Logger.cpp
-  src/plan/CalibrationServer.cpp
+  src/plan/SmartDriver.cpp
   src/test/SimpleModel.cpp
   src/test/Tools.cpp
   src/test/MockMotionCaptureSource.cpp
   src/tools/CheckNotNull.cpp
-  src/tools/Interval.cpp
-  src/tools/Typename.cpp
-  src/tools/tools.cpp
-  src/tools/Parallelizer.cpp
   src/tools/ErrorTermStatistics.cpp
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
+  src/tools/Interval.cpp
+  src/tools/MeasurementContainerTools.cpp
+  src/tools/Parallelizer.cpp
+  src/tools/Printable.cpp
+  src/tools/tools.cpp
+  src/tools/TypeName.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/error-terms/ErrorTermAccelerometerTest.cpp
-  test/error-terms/ErrorTermGyroscopeTest.cpp
-  test/error-terms/ErrorTermWheelTest.cpp
-  test/error-terms/ErrorTermPoseTest.cpp
-  test/error-terms/ConditionalErrorTerm.cpp
-  test/plan/PlanTest.cpp
-  test/tools/TreeTest.cpp
-  test/input/InputProviderTest.cpp
-  test/data/MeasurementsContainerTest.cpp
-  test/data/StorageTest.cpp
   test/acceptance/SimpleModelTest.cpp
   test/acceptance/SimpleCalibratorTest.cpp
+  test/data/MeasurementsContainerTest.cpp
+  test/data/StorageTest.cpp
+  test/error-terms/ConditionalErrorTermTest.cpp
+  test/error-terms/ErrorTermAccelerometerTest.cpp
+  test/error-terms/ErrorTermGyroscopeTest.cpp
+  test/error-terms/ErrorTermPoseTest.cpp
+  test/error-terms/ErrorTermWheelTest.cpp
+  test/input/InputProviderTest.cpp
   test/model/ModelTest.cpp
-  
+  test/plan/PlanTest.cpp
+  test/tools/TreeTest.cpp
+  test/tools/ParallelizerTest.cpp
+  test/test_main.cpp
+
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test
 )
 

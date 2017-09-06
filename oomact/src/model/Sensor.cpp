@@ -12,7 +12,7 @@
 #include <aslam/calibration/calibrator/CalibratorI.hpp> //TODO A remove this and use frames instead!
 #include <aslam/calibration/SensorId.hpp>
 #include <aslam/calibration/tools/tools.h>
-#include <aslam/calibration/tools/Typename.h>
+#include <aslam/calibration/tools/TypeName.h>
 
 size_t std::hash < aslam::calibration::SensorId >::operator()(const aslam::calibration::SensorId & sensorId) const
 {
@@ -39,7 +39,7 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
 }
 
 void Sensor::writeConfig(std::ostream& out) const {
-  out << ", id=" << id << ", type=" << Typename(*this) << ", parentFrame=" << getParentFrame();
+  out << ", id=" << id << ", type=" << TypeName(*this) << ", parentFrame=" << getParentFrame();
   if(maximalExpectedGap > 0){
     MODULE_WRITE_PARAMETER(maximalExpectedGap);
   }
@@ -109,7 +109,7 @@ sm::kinematics::Transformation Sensor::getTransformationTo(const CalibratorI & c
 }
 
 Interval Sensor::getCurrentMeasurementTimestampRange(const CalibratorI & /*calib*/) const {
-  throw std::runtime_error("getCurrentMeasurementTimestampRange not implemented for " + getName() + " (" + typeid(*this).name() + ")");
+  throw std::runtime_error("getCurrentMeasurementTimestampRange not implemented for " + getName() + " (" + TypeName(*this) + ")");
 }
 
 }

@@ -102,6 +102,8 @@ class EstConf : virtual public Printable {
 
   virtual std::string getOutputFolder(size_t segmentIndex = 0) const = 0;
 
+  virtual bool shouldSensorsBeRegistered(const Sensor & from, const Sensor & to) const = 0;
+
   virtual bool getUseCalibPriors() const = 0;
 
   virtual ~EstConf(){}
@@ -168,6 +170,7 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
   virtual void clearMeasurements(); //TODO Deprecate in favor of clearMeasurements(ModuleStorage & storage); and make that one const. AND remove all the non storage compat functions.
   virtual void addErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
   virtual void preProcessNewWindow(CalibratorI & calib);
+  virtual void writeSnapshot(const EstConf & ec, bool stateWasUpdatedSinceLastTime) const;
 
   virtual void estimatesUpdated(CalibratorI & calib) const;
 

@@ -16,6 +16,7 @@
 #include <aslam/calibration/model/Sensor.hpp>
 #include <aslam/calibration/SensorId.hpp>
 #include <aslam/calibration/tools/tools.h>
+#include <aslam/calibration/tools/TypeName.h>
 
 using aslam::calibration::OptimizationProblem;
 
@@ -72,7 +73,7 @@ Model::Model(ValueStoreRef config, std::shared_ptr<ConfigPathResolver> configPat
   if(config.hasKey("Gravity")){
     aslam::calibration::SimpleGravity* simpleGravity = new SimpleGravity(*this, config);
     gravity.reset(simpleGravity);
-    add(*simpleGravity);
+    addModule(*simpleGravity);
   }
 }
 
@@ -84,7 +85,7 @@ std::ostream & Model::printCalibrationVariables(std::ostream& out) const {
 }
 
 void Model::print(std::ostream& out) const {
-  out << typeid(*this).name() << ":" << std::endl;
+  out << TypeName(*this) << ":" << std::endl;
   for(Module & m : getModules()){
     m.writeInfo(out );
     out << std::endl;
@@ -101,7 +102,7 @@ void Model::init() {
 
 void Model::registerModule(Module & m){
   CHECK_EQ(&m.getModel(), this) << " : Module " << m.getName() << " was created with a different model!";
-  CHECK(!m.getName().empty()) << "Module names must not be empty but there is a " << typeid(m).name() << " instance with an empty name.";
+  CHECK(!m.getName().empty()) << "Module names must not be empty but there is a " << typeid(m) << " instance with an empty name.";
 
   std::string uidCandidate = m.getName();
   int i = 0;
@@ -289,15 +290,11 @@ ModelAtTime Model::getAtTime(const BoundedTimeExpression&, int, const ModelSimpl
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
 }
 
-void Model::add(Module& module) {
+void Model::addModule(Module& module) {
   if(module.isUsed()){
     registerModule(module);
     CHECK(module.isRegistered_) << module.getName() << " did not register itself!";
   }
-}
-
-void Model::addModulesAndInit() {
-  init();
 }
 
 }

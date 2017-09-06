@@ -13,14 +13,10 @@ class Model;
 
 class ModuleList {
  public:
-
-  ModuleList(std::initializer_list<std::reference_wrapper<Module>> modules) {
-    for(const Module & m : modules){
-      moduleIds.emplace_back(m.getUid());
-    }
-  }
-  ModuleList(std::initializer_list<std::string> moduleIds) : moduleIds(moduleIds) {} //TODO B early check names!
-  ModuleList(const std::vector<std::string> & moduleIds) : moduleIds(moduleIds) {}
+  ModuleList() = default;
+  ModuleList(std::initializer_list<std::reference_wrapper<Module> > modules);
+  ModuleList(std::initializer_list<std::string> moduleIds);
+  ModuleList(const std::vector<std::string>& moduleIds);
 
   std::vector<std::reference_wrapper<Module> > resolveModuleList(Model& model) const;
 

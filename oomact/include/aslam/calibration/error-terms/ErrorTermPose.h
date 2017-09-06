@@ -7,92 +7,37 @@
 
 #include "aslam/calibration/data/PoseMeasurement.h"
 namespace aslam {
-  namespace calibration {
+namespace calibration {
+class ErrorTermPose : public aslam::backend::ErrorTermFs<6>, public ErrorTermGroupMember {
+ public:
+  // Required by Eigen for fixed-size matrices members
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    /** The class ErrorTermPose implements an error term for a pose sensor such
-        as an Applanix.
-        \brief Pose error term
-      */
-    class ErrorTermPose :
-      public aslam::backend::ErrorTermFs<6>, public ErrorTermGroupMember {
-    public:
-      // Required by Eigen for fixed-size matrices members
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  typedef Eigen::Matrix<double, 6, 6> Covariance;
 
-      /** \name Types definitions
-        @{
-        */
-      /// Covariance type
-      typedef Eigen::Matrix<double, 6, 6> Covariance;
-      /** @}
-        */
+  ErrorTermPose(const aslam::backend::TransformationExpression& T, const Eigen::Vector3d & t, const Eigen::Vector4d & q, const Covariance& cov, ErrorTermGroupReference etgr);
 
-      /** \name Constructors/destructor
-        @{
-        */
-      /** 
-       * Constructs the error term from input data and design variables
-       * \brief Constructs the error term
-       * 
-       * @param T pose to compare with
-       * @param Tm pose measurement (\f$[x,y,z,\theta_z,\theta_y,\theta_x]\f$)
-       * @param sigma2 Covariance matrix of the pose measurement
-       */
-      ErrorTermPose(
-          const aslam::backend::TransformationExpression& T,
-          const Eigen::Vector3d & t,
-          const Eigen::Vector4d & q,
-          const Covariance& cov,
-          ErrorTermGroupReference etgr);
+  ErrorTermPose(const aslam::backend::TransformationExpression& T, const Eigen::Vector3d & t, const Eigen::Vector4d & q, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_q, ErrorTermGroupReference etgr);
 
-      ErrorTermPose(
-          const aslam::backend::TransformationExpression& T,
-          const Eigen::Vector3d & t,
-          const Eigen::Vector4d & q,
-          const Eigen::Matrix3d & cov_t,
-          const Eigen::Matrix3d & cov_q,
-          ErrorTermGroupReference etgr);
+  ErrorTermPose(const aslam::backend::TransformationExpression& T, const PoseMeasurement & pm, const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r, ErrorTermGroupReference etgr);
 
-      ErrorTermPose(
-          const aslam::backend::TransformationExpression& T, const PoseMeasurement & pm,
-          const Eigen::Matrix3d & cov_t, const Eigen::Matrix3d & cov_r,
-          ErrorTermGroupReference etgr
-          );
+  virtual ~ErrorTermPose() = default;
 
-      virtual Eigen::VectorXd getPrediction() const;
-      Eigen::VectorXd getMeasurement() const;
+  virtual Eigen::VectorXd getPrediction() const;
+  virtual Eigen::VectorXd getMeasurement() const;
 
-      virtual ~ErrorTermPose() = default;
-      /** @}
-        */
-    protected:
-      /** \name Protected methods
-        @{
-        */
-      /// Evaluate the error term and return the weighted squared error
-      virtual double evaluateErrorImplementation();
-      /// Evaluate the Jacobians
-      virtual void evaluateJacobiansImplementation(
-        aslam::backend::JacobianContainer& _jacobians);
-      /** @}
-        */
+ protected:
+  double evaluateErrorImplementation() override;
+  void evaluateJacobiansImplementation(aslam::backend::JacobianContainer& jacobians) override;
 
-      /** \name Protected members
-        @{
-        */
-      Eigen::Vector4d _q;
-      Eigen::Matrix3d _C;
+  Eigen::Vector4d _q;
+  Eigen::Matrix3d _C;
+  Eigen::Vector3d _t;
 
-      Eigen::Vector3d _t;
+  aslam::backend::TransformationExpression _T;
+};
 
-      /// Pose design variable
-      aslam::backend::TransformationExpression _T;
-      /** @}
-        */
-
-    };
-
-  }
+}
 }
 
 #endif // ASLAM_CALIBRATION_CAR_ERROR_TERM_POSE_H

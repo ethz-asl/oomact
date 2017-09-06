@@ -51,6 +51,15 @@ class MotionCaptureSensor : public AbstractPoseSensor {
   const Frame& getTargetFrame() const override {
     return motionCaptureSystem.getParentFrame();
   }
+
+  const Covariance& getCovOrientation() const {
+    return covOrientation;
+  }
+
+  const Covariance& getCovPosition() const {
+    return covPosition;
+  }
+
  private:
   MotionCaptureSystem & motionCaptureSystem;
   std::shared_ptr<MotionCaptureSource> motionCaptureSource;

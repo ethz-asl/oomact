@@ -1,24 +1,24 @@
 #include <aslam/calibration/plan/Plan.h>
-#include <sm/value_store/ValueStore.hpp>
-#include <sm/value_store/PropertyTreeValueStore.hpp>
-#include <sm/BoostPropertyTree.hpp>
 
-#include <memory>
-#include <sstream>
-#include <exception>
-#include <unordered_map>
-#include <thread>
-#include <mutex>
-#include <mutex>
 #include <atomic>
-
 #include <chrono>
+#include <exception>
+#include <fstream>
+#include <future>
+#include <memory>
+#include <mutex>
+#include <sstream>
+#include <thread>
+#include <unordered_map>
+#include <aslam/calibration/plan/HomingDriver.h>
 
 #include <glog/logging.h>
-#include <future>
+#include <sm/BoostPropertyTree.hpp>
+#include <sm/value_store/PropertyTreeValueStore.hpp>
+#include <sm/value_store/ValueStore.hpp>
 
+#include <aslam/calibration/plan/PlanFragmentRegistry.h>
 #include "aslam/calibration/tools/tools.h"
-#include <fstream>
 
 namespace aslam {
 namespace calibration {
@@ -27,181 +27,12 @@ namespace plan {
 Plan::Plan() {}
 
 void sleep(double seconds){
-  std::this_thread::sleep_for(std::chrono::milliseconds((size_t)(seconds * 1e3)));
+  std::this_thread::sleep_for(std::chrono::microseconds((size_t)(seconds * 1e6)));
 }
 
-namespace fragment {
-
-struct Test : public PlanFragment {
-  Test(const sm::value_store::ValueStoreRef & vs) {
-    val = vs.getString("");
-  }
-  void execute(CalibrationServer &, Driver &, Logger &) const override { }
-
-  void print(std::ostream & into) const override {
-    into << val;
-  }
-
-  std::string val;
-};
-
-struct SmartDriver {
-  SmartDriver(Driver & d) :
-    closing(false),
-    dontRepeatLastVelocity(false),
-    d(d)
-  {
-    stop();
-    repeatCommandThread = std::thread([this](){
-      while(!closing){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        {
-          if(!dontRepeatLastVelocity){
-            std::lock_guard<std::mutex> m(velocitesMutex);
-            if(lastTv || lastRv){
-              this->d.setVelocity(lastTv, lastRv);
-            }
-          }
-        }
-      }
-    });
-  }
-
-  ~SmartDriver(){
-    closing = true;
-    repeatCommandThread.join();
-  }
-
-  void stop() {
-    d.stop();
-    lastTv = 0;
-    lastRv = 0;
-    sleep(0.1);
-  }
-
-  void markHome() {
-    d.markHome();
-  }
-
-  template <typename F>
-  void dontRepeatLastVelocityWhile(F f) {
-    if(lastTv || lastRv){
-      LOG(WARNING) << "Requested to not repeat nonzero velocity!";
-    }
-    dontRepeatLastVelocity = true;
-    struct guard{
-      decltype(dontRepeatLastVelocity) & myDontRepeatLastVelocity;
-      ~guard(){
-        myDontRepeatLastVelocity = false;
-      }
-    } g{dontRepeatLastVelocity};
-    f();
-  }
-
-  void goHome() {
-    dontRepeatLastVelocityWhile([&](){d.goHome();});
-  }
-
-  template <typename F>
-  void goHomeAndDo(F f) {
-    auto future = std::async(std::launch::async, f);
-    goHome();
-    future.get();
-  }
-
-  void goHomeAndStopLogging(Logger & l){
-    goHomeAndDo([&](){sleep(0.1); l.stop();});
-  }
-
-  void setVelocity(double tv, double rv){
-    std::lock_guard<std::mutex> m(velocitesMutex);
-    d.setVelocity(lastTv = tv, lastRv = rv);
-    VLOG(1) << "New tv = " << tv << ", rv = " << rv;
-  }
-
-  double logisticZeroOne(double t){
-    return 1.0 / ( 1 + exp(-(t * 12 - 6)));
-  }
-
-  double interpol(double start, double end, double zeroOnePos){
-    return (end - start) * zeroOnePos + start;
-  }
-
-  double addSocket(double current, double goal){
-    if(fabs(current) < 0.1 && fabs(goal) > 0.2 && ((current >= 0) == (goal == 0))){
-      current = goal >= 0 ? 0.1 : -0.1;
-    }
-    return current;
-  }
-  void rampTo(double tvGoal, double rvGoal, double duration, const double step = 0.05) {
-    const double startTv = addSocket(lastTv, tvGoal);
-    const double startRv = addSocket(lastRv, rvGoal);
-
-    const int steps = duration / step;
-    assert(steps > 1);
-    const double orgDuration = duration;
-    duration = steps * step;
-
-    if(fabs(duration - orgDuration) > 0.001){
-      LOG(WARNING) << "Truncating duration from " << orgDuration << " to " << duration;
-    }
-
-    sleep(step);
-
-    for(double i = 1; i < steps; i++){
-      const double v = logisticZeroOne((double) i / steps);
-      setVelocity(interpol(startTv, tvGoal, v), interpol(startRv, rvGoal, v));
-      sleep(step);
-    }
-
-    setVelocity(tvGoal, rvGoal);
-    sleep(step);
-  }
-
-  void turn(double deltaAngle, double vel = .8)
-  {
-    LOG(INFO) << "Turning (deltaAngle=" << deltaAngle << ", vel=" << vel << ")";
-    assert(vel >= 0.3);
-    if(deltaAngle < 0){
-      vel *= -1.0;
-    }
-    const double duration = (2 * M_PI * deltaAngle) / vel;
-    rampTo(0.1, vel, 0.5);
-    sleep(duration);
-    rampTo(0, 0, 0.5);
-    sleep(0.1);
-  }
-
-  void turnTo(double yaw){
-    LOG(INFO) << "Turning to " << yaw;
-    dontRepeatLastVelocityWhile([&](){d.turnTo(yaw);});
-  }
-
-  void forward(double deltaDistance, double vel = .4)
-  {
-    LOG(INFO) << "Moving forward (deltaDistance=" << deltaDistance << ", vel=" << vel << ")";
-
-    assert(vel >= 0.3);
-    if(deltaDistance < 0){
-      vel *= -1.0;
-    }
-
-    const double duration = deltaDistance / vel;
-    rampTo(vel, 0, 0.4);
-    sleep(duration);
-    rampTo(0, 0, 0.4);
-    sleep(0.1);
-  }
- private:
-  std::thread repeatCommandThread;
-  std::atomic<bool> closing, dontRepeatLastVelocity;
-  std::mutex velocitesMutex;
-
-  double lastTv = 0;
-  double lastRv = 0;
-
-  Driver & d;
-};
+ModuleList staticPointSensors;
+ModuleList dynamicPointSensors;
+ModuleList motionSensors;
 
 void startLogging(const PlanFragment & frag, Logger& l) {
   std::string fragString = frag.toString();
@@ -210,87 +41,26 @@ void startLogging(const PlanFragment & frag, Logger& l) {
   std::replace(fragString.begin(), fragString.end(), ')', '_');
   l.start(fragString);
   if (!l.waitForLoggerToBecomeReady(1000)) {
-    throw std::runtime_error("EuLogger timed out!");
+    throw std::runtime_error("Logger timed out!");
   }
 }
+namespace fragment {
 
-struct PlanFragmentWithHome : public PlanFragment{
-  std::string homeFileName;
-  std::string home;
-  std::string name;
-  PlanFragmentWithHome(const sm::value_store::ValueStoreRef &vs, std::string name) : name(name) {
-    homeFileName = vs.getString("homeFile", std::string());
-    if(homeFileName.empty()){
-      homeFileName = getName() + ".home";
-    }
-    LOG(INFO) << "Using home file " << homeFileName << ".";
+struct Test : public PlanFragment {
+  static constexpr const char * Name = "Test";
 
-    std::ifstream homeFile(homeFileName);
-    if(homeFile.is_open()){
-      std::getline(homeFile, home);
-      homeFile.close();
-      LOG(INFO) << "Read home " << home << " from " << homeFileName;
-    } else {
-      LOG(INFO) << "Could not read home file (" << homeFileName << ")! Going to mark home instead.";
-    }
+  Test(const sm::value_store::ValueStoreRef & vs) : PlanFragment(Name) {
+    val = vs.getString("");
   }
-
-  virtual std::string getName() const {
-    return name;
-  }
-
-  bool hasHome() const
-  {
-    return !home.empty();
-  }
-
-  const std::string& getHome() const
-  {
-    return home;
-  }
+  void execute(CalibrationServer &, Driver &, Logger &) const override { }
 
   void print(std::ostream & into) const override {
-    into << getName();
+    PlanFragment::print(into);
+    into << "(val=" << val << ")";
   }
+
+  std::string val;
 };
-
-struct HomingDriver : public SmartDriver {
-  HomingDriver(const HomingDriver&) = delete;
-
-  explicit HomingDriver(const PlanFragmentWithHome & planFrag, Driver & d, bool useHome = true) : HomingDriver(planFrag, nullptr, d, nullptr, useHome) {}
-  explicit HomingDriver(const PlanFragmentWithHome & planFrag, CalibrationServer &cs, Driver & d, Logger & l, bool useHome = true) : HomingDriver(planFrag, &cs, d, &l, useHome) {}
-  explicit HomingDriver(const PlanFragmentWithHome & planFrag, CalibrationServer * cs, Driver & d, Logger * l = nullptr, bool useHome = true) : SmartDriver(d), l(l), cs(cs), useHome(useHome) {
-    if(useHome && planFrag.hasHome()){
-      d.setHome(planFrag.getHome());
-      goHome();
-    } else {
-      d.markHome();
-    }
-    if(l) startLogging(planFrag, *l);
-  }
-  ~HomingDriver(){
-    stop();
-    if(cs) cs->startCalibration();
-    sleep(0.1);
-    if(useHome){
-      LOG(INFO) << "Going home";
-      if(l) goHomeAndStopLogging(*l);
-      else goHome();
-    } else {
-      if(l) l->stop();
-    }
-    if(cs) cs->waitForCalibration();
-  }
- private:
-  Logger * l;
-  CalibrationServer * cs;
-  bool useHome = true;
-};
-
-ModuleList velodyneSensors ({"Velodyne"});
-ModuleList staticPointSensors ({"Velodyne", "BumbleBee", "LMS_FRONT", "LMS_REAR"});
-ModuleList dynamicPointSensors ({"Velodyne", "LMS_DOWN", "UTM_FRONT", "dynamixel", "LMS_FRONT", "LMS_REAR"});
-ModuleList motionSensors{"imu", "WheelOdometry", "ControlInput"};
 
 void takeStaticPointClouds(CalibrationServer &cs, SmartDriver & d) {
   d.stop();
@@ -316,42 +86,10 @@ void takeDynamicPointClouds(CalibrationServer &cs, SmartDriver & d) {
   d.stop();
 }
 
-struct Exp1 : public PlanFragment {
-  Exp1(const sm::value_store::ValueStoreRef &) {}
-
-  void execute(CalibrationServer &cs, Driver &du, Logger & l) const override {
-    SmartDriver d(du);
-
-    startLogging(*this, l);
-
-    cs.startDataCollection(motionSensors);
-
-    sleep(1);
-    d.turn(0.25);
-    sleep(1);
-    d.turn(-0.25);
-    sleep(1);
-
-    d.stop();
-
-    cs.endDataCollection(motionSensors);
-
-    cs.startCalibration();
-
-    sleep(1);
-
-    l.stop();
-
-    cs.waitForCalibration();
-  }
-
-  void print(std::ostream & into) const override {
-    into << "Exp1";
-  }
-};
-
 struct HomeTest : public PlanFragmentWithHome {
-  HomeTest(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, "HomeTest")  {}
+  static constexpr const char * Name = "Test";
+
+  HomeTest(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, Name)  {}
 
   void execute(CalibrationServer &cs, Driver &du, Logger & l) const override {
     HomingDriver d(*this, cs, du, l);
@@ -361,7 +99,9 @@ struct HomeTest : public PlanFragmentWithHome {
 };
 
 struct GoHome : public PlanFragmentWithHome {
-  GoHome(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, "GoHome")  {}
+  static constexpr const char * Name = "GoHome";
+
+  GoHome(const sm::value_store::ValueStoreRef &vs) : PlanFragmentWithHome(vs, Name)  {}
 
   void execute(CalibrationServer &, Driver &du, Logger &) const override {
     if(getHome().empty()){
@@ -374,7 +114,7 @@ struct GoHome : public PlanFragmentWithHome {
 
 struct GetHome : public PlanFragment {
   std::string targetName;
-  GetHome(const sm::value_store::ValueStoreRef &vs) {
+  GetHome(const sm::value_store::ValueStoreRef &vs) : PlanFragment("GetHome") {
     targetName = vs.getString("name");
     if(targetName.empty()){
       SM_THROW(std::runtime_error, "Target name empty!");
@@ -395,10 +135,10 @@ struct GetHome : public PlanFragment {
   }
 
   void print(std::ostream & into) const override {
-    into << "GetHome(targetName=" << targetName << ")";
+    PlanFragment::print(into);
+    into << "(targetName=" << targetName << ")";
   }
 };
-
 
 struct PointCloudTaker : public PlanFragmentWithHome {
   double forwardDist = 0.2;
@@ -450,7 +190,8 @@ struct PointCloudTaker : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << " (angle=" << turnAngle << ", turnModulo="<< turnModulo << ", dist=" << forwardDist << ", rep=" << repetitions << ")";
+    PlanFragment::print(into);
+    into << "(angle=" << turnAngle << ", turnModulo="<< turnModulo << ", dist=" << forwardDist << ", rep=" << repetitions << ")";
   }
 
   virtual void takePointCloud(CalibrationServer& cs, HomingDriver& d, double currentYaw) const = 0;
@@ -500,7 +241,8 @@ struct Straight : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(dist=" << forwardDist << ", rep=" << repetitions << ")";
+    PlanFragment::print(into);
+    into << "(dist=" << forwardDist << ", rep=" << repetitions << ")";
   }
 };
 
@@ -542,7 +284,8 @@ struct TurningStatic : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(yawInc=" << yawInc << ", duration=" << duration << ", rep=" << rep << ")";
+    PlanFragment::print(into);
+    into << "(yawInc=" << yawInc << ", duration=" << duration << ", rep=" << rep << ")";
   }
 };
 
@@ -577,7 +320,8 @@ struct ForwardStatic : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(dist=" << dist << ", duration=" << duration << ", rep=" << rep << ")";
+    PlanFragment::print(into);
+    into << "(dist=" << dist << ", duration=" << duration << ", rep=" << rep << ")";
   }
 };
 
@@ -611,7 +355,8 @@ struct Imu : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(duration=" << duration << ", rep=" << repetitions << ")";
+    PlanFragment::print(into);
+    into << "(duration=" << duration << ", rep=" << repetitions << ")";
   }
 };
 
@@ -686,52 +431,46 @@ struct Odom : public PlanFragmentWithHome {
   }
 
   void print(std::ostream & into) const override {
-    into << getName() << "(durationR=" << durationR << ", rep=" << repetitions << ", tV=" << tV << ", rV=" << rV << ", durationT=" << durationT << ")";
+    PlanFragment::print(into);
+    into << "(durationR=" << durationR << ", rep=" << repetitions << ", tV=" << tV << ", rV=" << rV << ", durationT=" << durationT << ")";
   }
 };
-
-
 }
 
-#define AddFragment(X) factories[#X] = [](const sm::value_store::ValueStoreRef & vs){ return new fragment::X(vs); };
-template <typename FragmentT>
-struct Registry {
+PlanFragmentRegistry::PlanFragmentRegistry(){
+  using namespace fragment;
 
-  struct IllegalFragmentName : public std::runtime_error {
-    using std::runtime_error::runtime_error;
-  };
+  registerFragment<Test>();
+  registerFragment<GoHome>();
 
-  std::unordered_map<std::string, std::function<FragmentT*(const sm::value_store::ValueStoreRef & vs)>> factories;
+#define AddFragment(X) registerFragment<X>(#X)
+  AddFragment(Static);
+  AddFragment(Dynamic);
+  AddFragment(Straight);
+  AddFragment(HomeTest);
+  AddFragment(GetHome);
+  AddFragment(Imu);
+  AddFragment(ImuManual);
+  AddFragment(Odom);
+  AddFragment(TurningStatic);
+  AddFragment(ForwardStatic);
+#undef AddFragment
+}
 
-  Registry(){
-    using namespace fragment;
-    AddFragment(Test);
-    AddFragment(Exp1);
-    AddFragment(Static);
-    AddFragment(Dynamic);
-    AddFragment(Straight);
-    AddFragment(HomeTest);
-    AddFragment(GetHome);
-    AddFragment(GoHome);
-    AddFragment(Imu);
-    AddFragment(ImuManual);
-    AddFragment(Odom);
-    AddFragment(TurningStatic);
-    AddFragment(ForwardStatic);
+std::shared_ptr<PlanFragment> PlanFragmentRegistry::createFragment(const std::string key, const sm::value_store::ValueStoreRef& vs) {
+  auto f = factories.find(key);
+  if (f != factories.end()) {
+    return std::shared_ptr<PlanFragment>(f->second(vs));
+  } else {
+    throw IllegalFragmentName("Illegal fragment name " + key);
   }
+}
 
-  std::shared_ptr<FragmentT> createFragment(const std::string key, const sm::value_store::ValueStoreRef & vs){
-    auto f = factories.find(key);
 
-    if(f != factories.end()){
-      return std::shared_ptr<FragmentT>(f->second(vs));
-    } else {
-      throw IllegalFragmentName("Illegal fragment name " + key);
-    }
-  }
-};
-
-Registry<PlanFragment> registry;
+PlanFragmentRegistry & PlanFragmentRegistry::getInstance() {
+  static PlanFragmentRegistry instance;
+  return instance;
+}
 
 
 void Plan::loadFromString(std::string content) {
@@ -754,7 +493,7 @@ void Plan::load(sm::value_store::ValueStoreRef in) {
 
   for(auto & child : planNode.getChildren()){
     if(child.getKey() != "id"){
-      fragments.push_back(registry.createFragment(child.getKey(), child));
+      fragments.push_back(PlanFragmentRegistry::getInstance().createFragment(child.getKey(), child));
     }
   }
 }

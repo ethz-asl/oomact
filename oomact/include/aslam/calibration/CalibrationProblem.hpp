@@ -6,6 +6,7 @@
 
 namespace aslam {
 namespace calibration {
+class CalibrationVariable;
 
 class CalibrationProblem : public backend::ErrorTermReceiver {
  public:

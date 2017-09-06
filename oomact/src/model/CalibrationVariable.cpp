@@ -41,11 +41,6 @@ void getPTVector(const std::vector<const char*>& componentNames, std::vector<Val
 CalibrationVariable::~CalibrationVariable(){
 }
 
-void CalibrationVariable::printBasisInto(std::ostream& out, const Eigen::MatrixXd& mat) const {
-  if(mat.rows())
-    printFunctorInto(out, [&](int i){ out << mat.row(i).norm();}, mat.rows());
-}
-
 const int CalibrationVariable::NameWidth = 20;
 
 const char* getActivityPrefix(const CalibrationVariable& cv) {
