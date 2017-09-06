@@ -8,9 +8,6 @@
 #include <aslam/calibration/model/sensors/PositionSensor.hpp>
 #include <aslam/calibration/model/sensors/Imu.h>
 
-#include <sm/BoostPropertyTree.hpp>
-#include <sm/value_store/PropertyTreeValueStore.hpp>
-
 namespace cal = aslam::calibration;
 
 std::string getFilePathFromRosParam(const std::string& param_name,
