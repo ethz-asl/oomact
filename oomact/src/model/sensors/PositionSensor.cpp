@@ -18,13 +18,19 @@
 namespace aslam {
 namespace calibration {
 
+//TODO B convert PositionSensor to external storage based
+
 void PositionSensor::addMeasurement(const Timestamp t, const PositionMeasurement& position)
 {
-  measurements->push_back({t, position});
+  measurements->emplace_back(t, position);
 }
 
 void PositionSensor::addMeasurement(const Timestamp t, const Eigen::Vector3d& p) {
   addMeasurement(t, PositionMeasurement{p});
+}
+
+void PositionSensor::addInputTo(Timestamp t, const PositionMeasurement& position, ModuleStorage& /*s*/) const {
+  measurements->emplace_back(t, position);
 }
 
 void PositionSensor::writeConfig(std::ostream& out) const {
