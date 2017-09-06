@@ -92,6 +92,7 @@ cs_add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
 
 catkin_add_gtest(${PROJECT_NAME}_test
+  test/acceptance/ImuCalibrationTest.cpp
   test/acceptance/SimpleModelTest.cpp
   test/acceptance/SimpleCalibratorTest.cpp
   test/data/MeasurementsContainerTest.cpp
