@@ -40,7 +40,7 @@ namespace aslam {
     }
 
     ErrorTermPosition::ErrorTermPosition(const aslam::backend::EuclideanExpression& p, const PositionMeasurement& pm, const Covariance& sigma2, ErrorTermGroupReference etgr) :
-      ErrorTermPosition(p, pm.t, sigma2, etgr) {
+      ErrorTermPosition(p, pm.p, sigma2, etgr) {
     }
 
     double ErrorTermPosition::evaluateErrorImplementation() {

@@ -8,7 +8,7 @@ namespace calibration {
 
 struct PoseMeasurement {
   /// Translation
-  Eigen::Vector3d t;
+  Eigen::Vector3d t; //TODO B rename to p
   /// Quaternions in JPL convention (XYZW)
   Eigen::Vector4d q;
   //TODO B switch to quaternion class

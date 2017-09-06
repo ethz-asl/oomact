@@ -6,7 +6,7 @@
 namespace aslam {
 namespace calibration {
 struct PositionMeasurement {
-  Eigen::Vector3d t;
+  Eigen::Vector3d p;
 };
 }
 }
