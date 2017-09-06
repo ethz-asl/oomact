@@ -118,6 +118,9 @@ int main(int argc, char** argv) {
   for (const auto& calib_vals : model->getCalibrationVariables()) {
     calib_vals->updateStore();
   }
+
+  ROS_INFO_STREAM("Saving to " << output_file);
+
   vs.saveTo(output_file);
 
   calibOutputArchive.save(output_file + ".ma");
