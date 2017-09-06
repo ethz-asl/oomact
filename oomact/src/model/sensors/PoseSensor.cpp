@@ -95,7 +95,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     Timestamp timestamp = m.first;
     auto & poseMeasurement = m.second;
     if(certainLowerBound > timestamp || certainUpperBound < timestamp){
-      LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
+      LOG(WARNING) << "Dropping out of bounds measurement for " << getName() << " at " << calib.secsSinceStart(timestamp) << "!";
       lastPoseMeasurement = nullptr;
       continue;
     }
@@ -138,7 +138,7 @@ void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*
     if(e_pose){
       if(conditionalLowerBound > lowerTimestamp || conditionalUpperBound < timestamp){
         if(!hasDelay()){
-          LOG(WARNING) << "Dropping out of bounds pose measurement at " << calib.secsSinceStart(timestamp) << "!";
+          LOG(WARNING) << "Dropping out of bounds measurement for " << getName() << " at " << calib.secsSinceStart(timestamp) << "!";
           continue;
         }
         LOG(INFO) << "Adding conditional PoseErrorTerm for pose measurement at " << calib.secsSinceStart(timestamp) << " because it could go out of bounds!";

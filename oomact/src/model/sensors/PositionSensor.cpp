@@ -65,8 +65,10 @@ void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf 
 
   auto interval = calib.getCurrentEffectiveBatchInterval();
 
-  auto uLow = interval.start + getDelayUpperBound();
-  auto uUpp = interval.end + getDelayLowerBound();
+  auto conditionalLowerBound = interval.start + getDelayUpperBound();
+  auto conditionalUpperBound = interval.end + getDelayLowerBound();
+  auto certainLowerBound = interval.start + getDelayLowerBound();
+  auto certainUpperBound = interval.end + getDelayUpperBound();
 
   auto & delay = getDelayExpression();
   Timestamp currentDelay = delay.evaluate();
@@ -76,21 +78,26 @@ void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf 
 
   for (auto & m : *measurements) {
     Timestamp timestamp = m.first;
+    if(certainLowerBound > timestamp || certainUpperBound < timestamp){
+      LOG(WARNING) << "Dropping out of bounds measurement for " << getName() << " at " << calib.secsSinceStart(timestamp) << "!";
+      continue;
+    }
 
     auto & positionMeasurement = m.second;
 
     aslam::backend::TransformationExpression T_target_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, targetFrame, true);
     boost::shared_ptr<ErrorTermPosition> e_position(new ErrorTermPosition(T_target_s.inverse().toEuclideanExpression(), positionMeasurement, covPosition.getValue(), etgr));
-    if(uLow > timestamp || uUpp < timestamp){
+
+    if(conditionalLowerBound > timestamp || conditionalUpperBound < timestamp){
       if(!hasDelay()){
-        LOG(WARNING) << "Dropping out of bounds position measurement at " << calib.secsSinceStart(timestamp) << "!";
+        LOG(WARNING) << "Dropping out of bounds measurement for " << getName() << " at " << calib.secsSinceStart(timestamp) << "!";
         continue;
       }
       LOG(INFO) << "Adding conditional PositionErrorTerm for position measurement at " << calib.secsSinceStart(timestamp) << " because it could go out of bounds!";
-      if(uLow > timestamp){
+      if(conditionalLowerBound > timestamp){
         e_position = addConditionShared<ErrorTermPosition>(*e_position, [=](){ return timestamp - delay.evaluate() >= interval.start; });
       }
-      if(uUpp < timestamp){
+      if(conditionalUpperBound < timestamp){
         e_position = addConditionShared<ErrorTermPosition>(*e_position, [=](){ return timestamp - delay.evaluate() <= interval.end; });
       }
     }
