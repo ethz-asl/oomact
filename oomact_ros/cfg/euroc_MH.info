@@ -9,6 +9,7 @@ sensors {
     topic "/leica/position"
 
     covPosition { sigma "0.01" }
+    covOrientation { sigma "0.01" }
 
     absoluteMeasurements true
 
@@ -20,7 +21,7 @@ sensors {
     }
     translation {
       used true
-      x 0.5
+      x 0.0
       y 0.0
       z 0.0
     }
@@ -42,15 +43,25 @@ sensors {
 
     absoluteMeasurements true
 
-    rotation { used false }
-    translation { used false }
+    rotation {
+      used false
+      roll 0.0
+      pitch 0.0
+      yaw 0.0
+    }
+    translation {
+      used false
+      x 0.0
+      y 0.0
+      z 0.0
+    }
     delay { used false }
   }
 }
 
 model {
   Gravity { 
-    used true
+    used false
     magnitude 9.81 
   }
   frames "body,world"
