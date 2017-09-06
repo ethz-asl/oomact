@@ -4,6 +4,7 @@
 #include <future>
 #include <mutex>
 #include <thread>
+#include <math.h>
 
 #include <glog/logging.h>
 
