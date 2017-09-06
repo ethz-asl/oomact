@@ -1,0 +1,113 @@
+model {
+	Gravity {
+		used true
+		magnitude 9.81
+	}
+	frames "body,world"
+
+	pose {
+		frame body
+		targetFrame world
+		invertInput false
+
+		topic "/firefly/vi_sensor/ground_truth/transform"
+//		topic "/firefly/odometry_sensor1/transform"
+
+		covPosition { sigma 0.001 }
+		covOrientation { sigma 0.001 }
+
+		absoluteMeasurements true
+
+		rotation { used false }
+		translation { used false }
+		delay { used false }
+
+		mestimator
+		{
+			name "Cauchy"
+			cauchySigma2 "1"
+		}
+	}
+	imu {
+		used true
+
+		frame body
+		inertiaFrame world
+		topic "/firefly/vi_sensor/imu"
+//		topic "/firefly/imu"
+
+		acc {
+			used true
+			hasBias true
+			biasVector {
+				x 0
+				y 0
+				z 0
+			}
+			noise {
+				cov { sigma 0.01 }
+				biasRandomWalk 4e-3
+			}
+			enforceCovariance true
+		}
+		gyro {
+			used true
+			hasBias true
+			biasVector {
+				x 0
+				y 0
+				z 0
+			}
+			noise {
+				cov { sigma 0.001 }
+				biasRandomWalk 4e-3
+			}
+
+			enforceCovariance true
+		}
+
+		rotation {
+			yaw 0
+			pitch 0
+			roll 0
+		}
+		translation {
+			x 0
+			y 0
+			z 0
+		}
+		delay 0.005
+		{
+			used true
+			relativeBounds true
+			upperBound 0.1
+			lowerBound -0.1
+		}
+	}
+
+	traj {
+		frame body
+		referenceFrame world
+		initWithPoseMeasurements true
+		McSensor pose
+		splines {
+			knotsPerSecond 100
+			rotSplineOrder 4
+			rotFittingLambda 0.0000001
+			transSplineOrder 4
+			transFittingLambda 0.000000001
+		}
+	}
+}
+
+calibrator {
+	verbose true
+	timeBaseSensor pose
+	estimator {
+		optimizer {
+			maxIterations 150
+			convergenceDeltaError 1e-6
+			convergenceDeltaX 1e-6
+		}
+	}
+}
