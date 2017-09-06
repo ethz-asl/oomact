@@ -71,9 +71,11 @@ cs_add_library(${PROJECT_NAME}
   src/plan/CalibrationServer.cpp
   src/plan/Driver.cpp
   src/plan/Executor.cpp
+  src/plan/HomingDriver.cpp
   src/plan/Logger.cpp
   src/plan/Plan.cpp
   src/plan/PlanFragment.cpp
+  src/plan/SmartDriver.cpp
   src/test/SimpleModel.cpp
   src/test/Tools.cpp
   src/test/MockMotionCaptureSource.cpp
