@@ -57,17 +57,17 @@ class ModelAtTime {
   aslam::backend::TransformationExpression getTransformationToFrom(const Frame & to, const Frame & from) const {
     return impl_->getTransformationToFrom(to, from);
   }
-  aslam::backend::EuclideanExpression getAcceleration(const Frame & to, const Frame & frame) const {
-    return impl_->getAcceleration(to, frame);
+  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & frame) const {
+    return impl_->getAcceleration(of, frame);
   }
-  aslam::backend::EuclideanExpression getVelocity(const Frame & to, const Frame & frame) const {
-    return impl_->getVelocity(to, frame);
+  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & frame) const {
+    return impl_->getVelocity(of, frame);
   }
-  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & to, const Frame & frame) const {
-    return impl_->getAngularAcceleration(to, frame);
+  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & frame) const {
+    return impl_->getAngularAcceleration(of, frame);
   }
-  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & to, const Frame & frame) const {
-    return impl_->getAngularVelocity(to, frame);
+  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & frame) const {
+    return impl_->getAngularVelocity(of, frame);
   }
 
   template <typename T> T & as() { assert(impl_); return impl_->as<T>(); };
