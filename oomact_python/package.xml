@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package format="2">
+  <name>oomact_python</name>
+  <version>0.0.1</version>
+  <description>Plotting tools for oomact</description>
+  <maintainer email="sommerh@ethz.ch">Hannes Sommer</maintainer>
+  <author>Hannes Sommer</author>
+  <license>BSD-3-Clause</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>.
+
+  <build_depend>sm_python</build_depend>
+
+  <test_depend>unittest</test_depend>
+</package>
