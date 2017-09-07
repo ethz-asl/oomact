@@ -144,7 +144,7 @@ class IsA {
   }
 };
 
-std::string normalizeName(const char * parameter);
+std::string normalizeParamName(const char * parameter);
 
 class Module;
 

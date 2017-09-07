@@ -27,6 +27,13 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
     return invertInput_;
   }
 
+  const Covariance& getCovOrientation() const {
+    return covOrientation_;
+  }
+
+  const Covariance& getCovPosition() const {
+    return covPosition_;
+  }
  protected:
   PoseMeasurements & getMeasurementsMutable(ModuleStorage & storage) const;
 
@@ -34,6 +41,7 @@ class AbstractPoseSensor : public PoseSensorI, public Sensor {
  private:
   ModuleStorage::Connector<PoseMeasurements> storageConnector_;
   const bool invertInput_;
+  Covariance covPosition_, covOrientation_; // One noise model for all measurements that do not provide individual noise model
 };
 
 } /* namespace calibration */

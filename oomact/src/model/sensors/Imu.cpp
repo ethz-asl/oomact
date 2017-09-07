@@ -32,6 +32,8 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
     measurements_(std::make_shared<Measurements>()),
     useAcc_(getMyConfig().getBool("acc/used", true)),
     useGyro_(getMyConfig().getBool("gyro/used", true)),
+    covAcc_{getMyConfig().getChild("acc/noise/cov"), 3, useAcc_},
+    covGyro_{getMyConfig().getChild("gyro/noise/cov"), 3, useGyro_},
     enforceAccCovariance_(getMyConfig().getBool("acc/enforceCovariance", false)),
     enforceGyroCovariance_(getMyConfig().getBool("gyro/enforceCovariance", false)),
     accBias(*this, "accBias", getMyConfig().getChild("acc")),
@@ -41,19 +43,11 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
 {
   if(isUsed()){
     SM_ASSERT_GE(std::runtime_error, minimalMeasurementsPerBatch, 0, "");
-
     if(useAcc_){
-      accXVariance = getMyConfig().getDouble("acc/noise/accXVariance");
-      accYVariance = getMyConfig().getDouble("acc/noise/accYVariance");
-      accZVariance = getMyConfig().getDouble("acc/noise/accZVariance");
-      accRandomWalk = getMyConfig().getDouble("acc/noise/accRandomWalk");
+      accRandomWalk = getMyConfig().getDouble("acc/noise/biasRandomWalk");
     }
-
     if(useGyro_){
-      gyroXVariance = getMyConfig().getDouble("gyro/noise/gyroXVariance");
-      gyroYVariance = getMyConfig().getDouble("gyro/noise/gyroYVariance");
-      gyroZVariance = getMyConfig().getDouble("gyro/noise/gyroZVariance");
-      gyroRandomWalk = getMyConfig().getDouble("gyro/noise/gyroRandomWalk");
+      gyroRandomWalk = getMyConfig().getDouble("gyro/noise/biasRandomWalk");
     }
   }
 
@@ -61,32 +55,30 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
 }
 
 void Imu::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAMETER(inertiaFrame);
+  Sensor::writeConfig(out);
+
+  MODULE_WRITE_PARAM(inertiaFrame);
 
   //TODO D write bias mode
 
-  MODULE_WRITE_FLAG(useAcc_);
+  MODULE_WRITE_PARAM(useAcc_);
   if(useAcc_){
-    MODULE_WRITE_PARAMETER(accXVariance);
-    MODULE_WRITE_PARAMETER(accYVariance);
-    MODULE_WRITE_PARAMETER(accZVariance);
-    MODULE_WRITE_FLAG(enforceAccCovariance_);
-    if(accBias.isUsingSpline()){
-      MODULE_WRITE_PARAMETER(accRandomWalk);
+    MODULE_WRITE_PARAM(covAcc_);
+    MODULE_WRITE_PARAM(enforceAccCovariance_);
+    if(accBias.isUsed()){
+      MODULE_WRITE_PARAM(accRandomWalk);
     }
   }
-  MODULE_WRITE_FLAG(useGyro_);
+  MODULE_WRITE_PARAM(useGyro_);
   if(useGyro_){
-    MODULE_WRITE_PARAMETER(gyroXVariance);
-    MODULE_WRITE_PARAMETER(gyroYVariance);
-    MODULE_WRITE_PARAMETER(gyroZVariance);
-    MODULE_WRITE_FLAG(enforceGyroCovariance_);
-    if(accBias.isUsingSpline()){
-      MODULE_WRITE_PARAMETER(gyroRandomWalk);
+    MODULE_WRITE_PARAM(covGyro_);
+    MODULE_WRITE_PARAM(enforceGyroCovariance_);
+    if(accBias.isUsed()){
+      MODULE_WRITE_PARAM(gyroRandomWalk);
     }
   }
 
-  MODULE_WRITE_PARAMETER(minimalMeasurementsPerBatch);
+  MODULE_WRITE_PARAM(minimalMeasurementsPerBatch);
 }
 
 void Imu::registerWithModel() {
@@ -295,7 +287,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
 
     //TODO C solve gravity vector problem. Each model has a gravity vector?
     auto g_m = calib.getModel().getGravity().getVectorExpression();
-    Eigen::Matrix3d covarianceMatrix = Eigen::Vector3d(accXVariance, accYVariance, accZVariance).asDiagonal();
+    Eigen::Matrix3d covarianceMatrix = covAcc_.getValue();
     ErrorTermGroupReference etgr(getName() + "Acc");
     addImuErrorTerms(
         calib, *this, accelerometerName, measurements_->accelerometer,
@@ -319,7 +311,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, 
     if(gyroBias.isUsingSpline()){
       addBiasModelErrorTerms(calib, gyroscopeName, errorTermReceiver, gyroBias.state_->biasSpline, Eigen::Matrix3d::Identity() / gyroRandomWalk, observeOnly);
     }
-    Eigen::Matrix3d covarianceMatrix = Eigen::Vector3d(gyroXVariance, gyroYVariance, gyroZVariance).asDiagonal();
+    Eigen::Matrix3d covarianceMatrix = covGyro_.getValue();
     ErrorTermGroupReference etgr(getName() + "Gyro");
     addImuErrorTerms(
         calib, *this, gyroscopeName, measurements_->gyroscope,
@@ -365,8 +357,8 @@ aslam::backend::EuclideanExpression Bias::getBiasExpression(Timestamp t) const {
 void Imu::addPriorFactors(CalibratorI & calib, ErrorTermReceiver & errorTermReceiver, double priorFactor) const {
   const double invSigma = 1e-2 * priorFactor;
   Timestamp startTime = calib.getCurrentEffectiveBatchInterval().start;
-  if(accBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(accBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity()*invSigma));
-  if(gyroBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(gyroBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity()*invSigma));
+  if(accBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(accBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity() * invSigma));
+  if(gyroBias.isUsingSpline()) errorTermReceiver.addErrorTerm(backend::toErrorTerm(gyroBias.getBiasExpression(startTime), Eigen::Matrix3d::Identity() * invSigma));
 }
 
 } /* namespace calibration */

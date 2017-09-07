@@ -12,12 +12,17 @@ namespace calibration {
 AbstractPoseSensor::AbstractPoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   Sensor(model, name, config),
   storageConnector_(this),
-  invertInput_(getMyConfig().getBool("invertInput", false))
+  invertInput_(getMyConfig().getBool("invertInput", false)),
+  covPosition_(getMyConfig().getChild("covPosition"), 3),
+  covOrientation_(getMyConfig().getChild("covOrientation"), 3)
 {
 }
 
 void AbstractPoseSensor::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_FLAG(invertInput_);
+  Sensor::writeConfig(out);
+  MODULE_WRITE_PARAM(invertInput_);
+  MODULE_WRITE_PARAM(covPosition_);
+  MODULE_WRITE_PARAM(covOrientation_);
 }
 
 AbstractPoseSensor::~AbstractPoseSensor() {

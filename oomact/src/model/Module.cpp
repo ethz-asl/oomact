@@ -2,18 +2,48 @@
 
 #include "aslam/calibration/tools/tools.h"
 #include <glog/logging.h>
-
 #include <sm/assert_macros.hpp>
 
-#include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/tools/TypeName.h>
 
 namespace aslam {
 namespace calibration {
 
-std::string normalizeName(const char * parameter){
+std::string normalizeParamName(const char * parameter){
+  static const std::string IgnorePrefixCandiates [] {
+      "_", "get", "is"
+  };
+
   std::string p(parameter);
+
+  const auto dotPos = p.rfind(".");
+  const auto arrowPos = p.rfind("->");
+  const bool hasDot = dotPos != p.npos;
+  const bool hasArrow = arrowPos != p.npos;
+  if (hasDot || hasArrow) {
+    auto pos = hasDot ? dotPos + 1 : arrowPos + 2;
+    if (hasDot && hasArrow) {
+      pos = std::max(dotPos + 1, arrowPos + 2);
+    }
+    p = p.substr(pos);
+  }
+  for(const auto & prefix : IgnorePrefixCandiates){
+    if(p.compare(0, prefix.size(), prefix) == 0){
+      if(p.size() > prefix.size()){
+        if(!isalpha(*prefix.rbegin()) || isupper(p[prefix.size()])) {
+          p = p.substr(prefix.size());
+          p[0] = tolower(p[0]);
+        }
+      }
+    }
+  }
+  const auto poseCall = p.find("(");
+  if(poseCall != p.npos){
+    p = p.substr(0, poseCall);
+  }
   return (p.empty() || p.back() != '_') ? p : p.substr(0, p.size() - 1);
 }
 
@@ -84,9 +114,10 @@ void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const EstConf & /*
 }
 
 void Module::writeInfo(std::ostream& out) const {
-  out << getName() << "(uid=" << getUid() << ", used=" << isUsed();
-  if(auto p = ptrAs<Observer>()){ out << ", observeOnly=" << p->isObserveOnly();}
-  if(auto p = ptrAs<Calibratable>()){ out << ", toBeCalibrated=" << p->isToBeCalibrated();}
+  out << getName() << "(uid=" << getUid();
+  MODULE_WRITE_PARAM(used_);
+  if(auto p = ptrAs<Observer>()){ MODULE_WRITE_PARAM(p->isObserveOnly());}
+  if(auto p = ptrAs<Calibratable>()){MODULE_WRITE_PARAM(p->isToBeCalibrated());}
   writeConfig(out);
   out << ")";
 }

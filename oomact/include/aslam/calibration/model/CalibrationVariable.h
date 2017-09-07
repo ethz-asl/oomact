@@ -25,7 +25,7 @@ using namespace ::sm::value_store;
 
 class Covariance {
  public:
-  Covariance(ValueStoreRef valueStore, int dim);
+  Covariance(ValueStoreRef valueStore, int dim, bool load = true);
 
   const Eigen::MatrixXd & getValueSqrt() const{
     return covarianceSqrt;
@@ -33,6 +33,8 @@ class Covariance {
   Eigen::MatrixXd getValue() const{
     return covarianceSqrt.transpose() * covarianceSqrt;
   }
+
+  friend std::ostream & operator << (std::ostream & o, const Covariance &);
  private:
   Eigen::MatrixXd covarianceSqrt;
 };
