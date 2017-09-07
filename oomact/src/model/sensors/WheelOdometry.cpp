@@ -13,6 +13,7 @@
 #include "aslam/calibration/calibrator/CalibratorI.hpp"
 #include "aslam/calibration/data/WheelSpeedsMeasurement.h"
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/tools/Interval.hpp>
@@ -66,11 +67,10 @@ void WheelOdometry::setActive(bool spatial, bool temporal){
 }
 
 void WheelOdometry::writeConfig(std::ostream& out) const {
-  out
-    << ", assumedWheelBase=" << assumedWheelBase
-    << ", assumedWheelRadiusLeft=" << assumedWheelRadiusLeft
-    << ", assumedWheelRadiusRight=" << assumedWheelRadiusRight
-    ;
+  Sensor::writeConfig(out);
+  MODULE_WRITE_PARAM(assumedWheelBase);
+  MODULE_WRITE_PARAM(assumedWheelRadiusLeft);
+  MODULE_WRITE_PARAM(assumedWheelRadiusRight);
 }
 
 void WheelOdometry::addMeasurement(CalibratorI & calib, const Timestamp t, const WheelSpeedsMeasurement& data) const {

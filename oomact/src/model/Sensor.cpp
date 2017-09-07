@@ -39,19 +39,14 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
 }
 
 void Sensor::writeConfig(std::ostream& out) const {
-  out << ", id=" << id << ", type=" << TypeName(*this) << ", parentFrame=" << getParentFrame();
+  out << ", id=" << id << ", type=" << TypeName(*this);
+  MODULE_WRITE_PARAM(getParentFrame());
   if(maximalExpectedGap > 0){
-    MODULE_WRITE_PARAMETER(maximalExpectedGap);
+    MODULE_WRITE_PARAM(maximalExpectedGap);
   }
-  if(hasTranslation()){
-    out << ", hasTrans";
-  }
-  if(hasRotation()){
-    out << ", hasRot";
-  }
-  if(hasDelay()){
-    out << ", hasDelay";
-  }
+  MODULE_WRITE_PARAM(hasTranslation());
+  MODULE_WRITE_PARAM(hasRotation());
+  MODULE_WRITE_PARAM(hasDelay());
 }
 
 void Sensor::registerWithModel() {

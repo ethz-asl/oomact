@@ -13,6 +13,7 @@
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/Sensor.hpp>
 
 namespace aslam {
@@ -35,6 +36,7 @@ void PositionSensor::addInputTo(Timestamp t, const PositionMeasurement& position
 
 void PositionSensor::writeConfig(std::ostream& out) const {
   Sensor::writeConfig(out);
+  MODULE_WRITE_PARAM(covPosition);
 }
 
 PositionSensor::PositionSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
@@ -44,8 +46,6 @@ PositionSensor::PositionSensor(Model& model, std::string name, sm::value_store::
 {
   if(isUsed()) {
     measurements = std::make_shared<PositionMeasurements>();
-    LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition.getValueSqrt() << std::endl;
   }
 }
 

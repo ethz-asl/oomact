@@ -74,15 +74,15 @@ PoseTrajectory::PoseTrajectory(Model& model, const std::string& name, sm::value_
 }
 
 void PoseTrajectory::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAMETER(estimate);
-  MODULE_WRITE_PARAMETER(assumeStatic);
-  MODULE_WRITE_PARAMETER(initWithPoseMeasurements);
-  MODULE_WRITE_PARAMETER(poseSensor);
-  MODULE_WRITE_PARAMETER(odometrySensor);
-  MODULE_WRITE_PARAMETER(referenceFrame_);
+  MODULE_WRITE_PARAM(estimate);
+  MODULE_WRITE_PARAM(assumeStatic);
+  MODULE_WRITE_PARAM(initWithPoseMeasurements);
+  MODULE_WRITE_PARAM(poseSensor);
+  MODULE_WRITE_PARAM(odometrySensor);
+  MODULE_WRITE_PARAM(referenceFrame_);
   So3R3TrajectoryCarrier::writeConfig(out);
   if(useTanConstraint){
-    MODULE_WRITE_PARAMETER(tanConstraintVariance);
+    MODULE_WRITE_PARAM(tanConstraintVariance);
   }
 }
 

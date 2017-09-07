@@ -10,6 +10,7 @@
 #include "aslam/calibration/data/MeasurementsContainer.h"
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
 #include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/Sensor.hpp>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
@@ -32,15 +33,9 @@ MotionCaptureSystem::MotionCaptureSystem(Model& model, std::string name, sm::val
 
 
 void MotionCaptureSystem::writeConfig(std::ostream& out) const {
-  if(hasTranslation()){ //TODO C deduplicate with sensor
-    out << ", hasTrans";
-  }
-  if(hasRotation()){
-    out << ", hasRot";
-  }
-  if(hasDelay()){
-    out << ", hasDelay";
-  }
+  MODULE_WRITE_PARAM(hasTranslation());
+  MODULE_WRITE_PARAM(hasRotation());
+  MODULE_WRITE_PARAM(hasDelay());
 }
 
 void MotionCaptureSystem::registerWithModel() {
@@ -57,18 +52,12 @@ void MotionCaptureSystem::setActive(bool spatial, bool temporal) {
 
 MotionCaptureSensor::MotionCaptureSensor(MotionCaptureSystem& motionCaptureSystem, std::string name, sm::value_store::ValueStoreRef config) :
   AbstractPoseSensor(motionCaptureSystem.getModel(), name, config),
-  motionCaptureSystem(motionCaptureSystem),
-  covPosition(getMyConfig().getChild("covPosition"), 3),
-  covOrientation(getMyConfig().getChild("covOrientation"), 3)
+  motionCaptureSystem(motionCaptureSystem)
 {
   if(isUsed()) {
     if(!hasDelay()){
       DelayCv::operator=(motionCaptureSystem);
     }
-
-    LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition.getValueSqrt() << std::endl
-      << "covPosition\n" << covOrientation.getValueSqrt();
   }
 }
 
@@ -138,8 +127,8 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Est
     throw std::runtime_error("Delay already out of bounds!");
   }
 
-  const Eigen::Matrix3d cov_t = covPosition.getValue();
-  const Eigen::Matrix3d cov_r = covOrientation.getValue();
+  const Eigen::Matrix3d cov_t = getCovPosition().getValue();
+  const Eigen::Matrix3d cov_r = getCovOrientation().getValue();
 
   for (auto & m : getAllMeasurements(storage)) {
     const Timestamp timestamp = m.first;

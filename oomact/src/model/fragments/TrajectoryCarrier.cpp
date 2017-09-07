@@ -20,12 +20,12 @@ So3R3TrajectoryCarrier::So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef co
 }
 
 void So3R3TrajectoryCarrier::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAMETER(frame);
-  MODULE_WRITE_PARAMETER(knotsPerSecond);
-  MODULE_WRITE_PARAMETER(rotSplineOrder);
-  MODULE_WRITE_PARAMETER(rotFittingLambda);
-  MODULE_WRITE_PARAMETER(transSplineOrder);
-  MODULE_WRITE_PARAMETER(transFittingLambda);
+  MODULE_WRITE_PARAM(frame);
+  MODULE_WRITE_PARAM(knotsPerSecond);
+  MODULE_WRITE_PARAM(rotSplineOrder);
+  MODULE_WRITE_PARAM(rotFittingLambda);
+  MODULE_WRITE_PARAM(transSplineOrder);
+  MODULE_WRITE_PARAM(transFittingLambda);
 }
 
 TrajectoryCarrier::TrajectoryCarrier(sm::value_store::ValueStoreRef config) :
@@ -37,9 +37,9 @@ TrajectoryCarrier::TrajectoryCarrier(sm::value_store::ValueStoreRef config) :
 void TrajectoryCarrier::writeConfig(std::ostream& out, const std::string & /* namePrefix */) const {
   //TODO C use prefix
 
-  MODULE_WRITE_PARAMETER(knotsPerSecond);
-  MODULE_WRITE_PARAMETER(splineOrder);
-  MODULE_WRITE_PARAMETER(fittingLambda);
+  MODULE_WRITE_PARAM(knotsPerSecond);
+  MODULE_WRITE_PARAM(splineOrder);
+  MODULE_WRITE_PARAM(fittingLambda);
 }
 
 } /* namespace calibration */

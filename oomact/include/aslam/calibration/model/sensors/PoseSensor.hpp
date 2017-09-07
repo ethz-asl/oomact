@@ -20,22 +20,12 @@ class PoseSensor : public AbstractPoseSensor, public InputReceiverIT<PoseMeasure
   void addMeasurement(Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const;
   void addMeasurement(Timestamp t, const Eigen::Vector4d & quat, const Eigen::Vector3d & trans, ModuleStorage & storage) const;
 
-  const Covariance& getCovOrientation() const {
-    return covOrientation_;
-  }
-
-  const Covariance& getCovPosition() const {
-    return covPosition_;
-  }
-
   const Frame& getTargetFrame() const override {
     return targetFrame_;
   }
 
   const static PoseMeasurement Outlier;
  private:
-  Covariance covPosition_, covOrientation_; // One noise model for all measurements
-
   const Frame& targetFrame_;
 
   bool absoluteMeasurements_;

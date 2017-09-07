@@ -61,32 +61,34 @@ Imu::Imu(Model& model, const std::string& name, sm::value_store::ValueStoreRef c
 }
 
 void Imu::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAMETER(inertiaFrame);
+  Sensor::writeConfig(out);
+
+  MODULE_WRITE_PARAM(inertiaFrame);
 
   //TODO D write bias mode
 
-  MODULE_WRITE_FLAG(useAcc_);
+  MODULE_WRITE_PARAM(useAcc_);
   if(useAcc_){
-    MODULE_WRITE_PARAMETER(accXVariance);
-    MODULE_WRITE_PARAMETER(accYVariance);
-    MODULE_WRITE_PARAMETER(accZVariance);
-    MODULE_WRITE_FLAG(enforceAccCovariance_);
+    MODULE_WRITE_PARAM(accXVariance);
+    MODULE_WRITE_PARAM(accYVariance);
+    MODULE_WRITE_PARAM(accZVariance);
+    MODULE_WRITE_PARAM(enforceAccCovariance_);
     if(accBias.isUsingSpline()){
-      MODULE_WRITE_PARAMETER(accRandomWalk);
+      MODULE_WRITE_PARAM(accRandomWalk);
     }
   }
-  MODULE_WRITE_FLAG(useGyro_);
+  MODULE_WRITE_PARAM(useGyro_);
   if(useGyro_){
-    MODULE_WRITE_PARAMETER(gyroXVariance);
-    MODULE_WRITE_PARAMETER(gyroYVariance);
-    MODULE_WRITE_PARAMETER(gyroZVariance);
-    MODULE_WRITE_FLAG(enforceGyroCovariance_);
+    MODULE_WRITE_PARAM(gyroXVariance);
+    MODULE_WRITE_PARAM(gyroYVariance);
+    MODULE_WRITE_PARAM(gyroZVariance);
+    MODULE_WRITE_PARAM(enforceGyroCovariance_);
     if(accBias.isUsingSpline()){
-      MODULE_WRITE_PARAMETER(gyroRandomWalk);
+      MODULE_WRITE_PARAM(gyroRandomWalk);
     }
   }
 
-  MODULE_WRITE_PARAMETER(minimalMeasurementsPerBatch);
+  MODULE_WRITE_PARAM(minimalMeasurementsPerBatch);
 }
 
 void Imu::registerWithModel() {

@@ -33,6 +33,8 @@ class Covariance {
   Eigen::MatrixXd getValue() const{
     return covarianceSqrt.transpose() * covarianceSqrt;
   }
+
+  friend std::ostream & operator << (std::ostream & o, const Covariance &);
  private:
   Eigen::MatrixXd covarianceSqrt;
 };

@@ -21,21 +21,14 @@ namespace calibration {
 
 PoseSensor::PoseSensor(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   AbstractPoseSensor(model, name, config),
-  covPosition_(getMyConfig().getChild("covPosition"), 3),
-  covOrientation_(getMyConfig().getChild("covOrientation"), 3),
   targetFrame_(getModel().getFrame(getMyConfig().getString("targetFrame"))),
   absoluteMeasurements_(getMyConfig().getBool("absoluteMeasurements", true))
 {
-  if(isUsed()) {
-    LOG(INFO)
-      << getName() << ":covPosition=\n" << covPosition_.getValueSqrt() << std::endl
-      << "covPosition\n" << covOrientation_.getValueSqrt();
-  }
 }
 void PoseSensor::writeConfig(std::ostream& out) const {
   AbstractPoseSensor::writeConfig(out);
-  MODULE_WRITE_PARAMETER(targetFrame_);
-  MODULE_WRITE_PARAMETER(absoluteMeasurements_);
+  MODULE_WRITE_PARAM(targetFrame_);
+  MODULE_WRITE_PARAM(absoluteMeasurements_);
 }
 
 PoseSensor::~PoseSensor() {
