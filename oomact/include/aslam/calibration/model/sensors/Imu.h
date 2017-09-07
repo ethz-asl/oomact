@@ -102,21 +102,13 @@ class Imu : public Sensor, public StateCarrier, public InputReceiverIT<Accelerom
   std::shared_ptr<Measurements> measurements_;
   const bool useAcc_, useGyro_;
 
-  /// Variance for Accelerometer X measurements
-  double accXVariance;
-  /// Variance for Accelerometer Y measurements
-  double accYVariance;
-  /// Variance for Accelerometer Z measurements
-  double accZVariance;
+  /// Covariance for Accelerometer measurements
+  Covariance covAcc_;
   /// Statistical random walk value for the accelerometer
   double accRandomWalk;
 
-  /// Variance for Gyroscope X measurements
-  double gyroXVariance;
-  /// Variance for Gyroscope Y measurements
-  double gyroYVariance;
-  /// Variance for Gyroscope Z measurements
-  double gyroZVariance;
+  /// Covariance for Gyroscope measurements
+  Covariance covGyro_;
   /// Statistical random walk value for the accelerometer
   double gyroRandomWalk;
 

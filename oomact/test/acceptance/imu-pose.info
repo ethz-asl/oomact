@@ -1,7 +1,7 @@
 model {
-	Gravity { 
+	Gravity {
 		used true
-		magnitude 9.81 
+		magnitude 9.81
 	}
 	frames "body,world"
 
@@ -9,11 +9,11 @@ model {
 		frame body
 		targetFrame world
 		invertInput false
-		
+
 		topic "/firefly/vi_sensor/ground_truth/transform"
 
-		covPosition { sigma "0.01" }
-		covOrientation { sigma "0.01" }
+		covPosition { sigma 0.01 }
+		covOrientation { sigma 0.01 }
 
 		absoluteMeasurements true
 
@@ -36,10 +36,8 @@ model {
 				z 0
 			}
 			noise {
-				accXVariance 1
-				accYVariance 1
-				accZVariance 1
-				accRandomWalk 4e-3
+				cov { sigma 1 }
+				biasRandomWalk 4e-3
 			}
 		}
 		gyro {
@@ -50,10 +48,8 @@ model {
 				z 0
 			}
 			noise {
-				gyroXVariance 1
-				gyroYVariance 1
-				gyroZVariance 1
-				gyroRandomWalk 4e-3
+				cov { sigma 1 }
+				biasRandomWalk 4e-3
 			}
 		}
 
@@ -67,12 +63,11 @@ model {
 			y 0
 			z 0
 		}
-		delay {
+		delay 0 {
 			used false
-//			d 0
 			relativeBounds true
 			upperBound 1
-			lowerBound -1 
+			lowerBound -1
 		}
 	}
 

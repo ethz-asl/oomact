@@ -3,7 +3,7 @@
   <calibrator>
     <windowDuration>10</windowDuration>
     <shortWindowDuration>5</shortWindowDuration>
-    
+
     <timeBaseSensor>imu</timeBaseSensor>
 
     <cloudPolicies>
@@ -46,7 +46,7 @@
     <writeDebugData>false</writeDebugData>
     <writeMeasurements>true</writeMeasurements>
     <printRegessionErrorStatistics></printRegessionErrorStatistics>
-    
+
     <cloudMatchers>
       <Any2GroundPlane>
 readingDataPointsFilters:
@@ -75,7 +75,7 @@ transformationCheckers:
   - DifferentialTransformationChecker:
       minDiffRotErr: 0.001
       minDiffTransErr: 0.01
-      smoothLength: 4   
+      smoothLength: 4
 
 inspector:
   NullInspector
@@ -116,7 +116,7 @@ transformationCheckers:
   - DifferentialTransformationChecker:
       minDiffRotErr: 0.001
       minDiffTransErr: 0.01
-      smoothLength: 4   
+      smoothLength: 4
 
 inspector:
   NullInspector
@@ -157,7 +157,7 @@ transformationCheckers:
   - DifferentialTransformationChecker:
       minDiffRotErr: 0.001
       minDiffTransErr: 0.01
-      smoothLength: 4   
+      smoothLength: 4
 
 inspector:
   NullInspector
@@ -170,13 +170,13 @@ logger:
     <usePose>false</usePose>
     <useVelocities>true</useVelocities>
     <useCalibrationPriors>false</useCalibrationPriors>
-        
+
     <initWithPoseMeasurements>false</initWithPoseMeasurements>
 
     <estimateWithCurrentCalibrationFirst>true</estimateWithCurrentCalibrationFirst>
     <estimateFirstStateWithVelodyne>false</estimateFirstStateWithVelodyne>
     <twoStageCalibration>false</twoStageCalibration>
-    
+
     <estimateOnly>false</estimateOnly>
     <maxNumCloudAssociations>15000</maxNumCloudAssociations>
     <predictResults>true</predictResults>
@@ -270,10 +270,8 @@ logger:
           <acc>
             <estimate>true</estimate>
             <noise>
-              <accXVariance>0.00032</accXVariance>
-              <accYVariance>0.00032</accYVariance>
-              <accZVariance>0.01</accZVariance>
-              <accRandomWalk>0.002</accRandomWalk>
+              <cov><sigma>0.00032, 0.00032, 0.01</sigma></cov>
+              <biasRandomWalk>0.002</biasRandomWalk>
             </noise>
             <biasVector>
               <used>false</used>
@@ -290,10 +288,8 @@ logger:
           <gyro>
             <estimate>true</estimate>
             <noise>
-              <gyroXVariance>0.15e-3</gyroXVariance>
-              <gyroYVariance>0.15e-3</gyroYVariance>
-              <gyroZVariance>2.4e-5</gyroZVariance>
-              <gyroRandomWalk>4e-3</gyroRandomWalk>
+              <cov><sigma>0.15e-3, 0.15e-3, 2.4e-5</sigma></cov>
+              <biasRandomWalk>4e-3</biasRandomWalk>
             </noise>
             <biasVector>
               <used>false</used>

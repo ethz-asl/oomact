@@ -25,7 +25,7 @@ using namespace ::sm::value_store;
 
 class Covariance {
  public:
-  Covariance(ValueStoreRef valueStore, int dim);
+  Covariance(ValueStoreRef valueStore, int dim, bool load = true);
 
   const Eigen::MatrixXd & getValueSqrt() const{
     return covarianceSqrt;

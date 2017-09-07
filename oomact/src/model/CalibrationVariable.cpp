@@ -242,7 +242,10 @@ boost::shared_ptr<backend::ErrorTerm> PriorErrorTermCreater<backend::RotationQua
 }
 }
 
-Covariance::Covariance(ValueStoreRef valueStore, int dim) {
+Covariance::Covariance(ValueStoreRef valueStore, int dim, bool load) {
+  if(!load){
+    return;
+  }
   std::string s = valueStore.getString("sigma", std::string());
   if(s.empty()){
     covarianceSqrt.setIdentity(dim, dim);
