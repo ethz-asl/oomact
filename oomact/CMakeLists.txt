@@ -91,7 +91,7 @@ cs_add_library(${PROJECT_NAME}
   src/tools/tools.cpp
   src/tools/TypeName.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${TBB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME})
 
 catkin_add_gtest(${PROJECT_NAME}_test
   test/acceptance/ImuCalibrationTest.cpp
