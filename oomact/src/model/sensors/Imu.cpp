@@ -65,7 +65,7 @@ void Imu::writeConfig(std::ostream& out) const {
   if(useAcc_){
     MODULE_WRITE_PARAM(covAcc_);
     MODULE_WRITE_PARAM(enforceAccCovariance_);
-    if(accBias.isUsingSpline()){
+    if(accBias.isUsed()){
       MODULE_WRITE_PARAM(accRandomWalk);
     }
   }
@@ -73,7 +73,7 @@ void Imu::writeConfig(std::ostream& out) const {
   if(useGyro_){
     MODULE_WRITE_PARAM(covGyro_);
     MODULE_WRITE_PARAM(enforceGyroCovariance_);
-    if(accBias.isUsingSpline()){
+    if(accBias.isUsed()){
       MODULE_WRITE_PARAM(gyroRandomWalk);
     }
   }

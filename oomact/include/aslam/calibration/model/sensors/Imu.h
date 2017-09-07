@@ -24,6 +24,7 @@ class Bias : public StateCarrier, public NamedMinimal {
  public:
   Bias(Module & m, const std::string & name, sm::value_store::ValueStoreRef config);
 
+  bool isUsed() const { return mode_ != Mode::None; }
   bool isUsingSpline() const { return mode_ == Mode::Spline; }
 
   aslam::backend::EuclideanExpression getBiasExpression(Timestamp t) const;
