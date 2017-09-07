@@ -4,6 +4,7 @@
 #include <aslam/calibration/input/InputReceiverI.h>
 #include <aslam/calibration/model/Sensor.hpp>
 #include <aslam/calibration/tools/Interval.hpp>
+#include <sm/deprecation.h>
 
 namespace aslam {
 namespace calibration {
@@ -22,7 +23,8 @@ class PositionSensor : public Sensor, public InputReceiverIT<PositionMeasurement
   void addMeasurement(Timestamp t, const PositionMeasurement& position);
   void addMeasurement(Timestamp t, const Eigen::Vector3d & p);
 
-  void addMeasurement(const PositionMeasurement& position, Timestamp t){ // TODO B introduce formal deprecation and deprecated this function
+  SM_DEPRECATED("Use the overload with swapped arguments instead.")
+  void addMeasurement(const PositionMeasurement& position, Timestamp t){
     addMeasurement(t, position);
   }
 
