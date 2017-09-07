@@ -13,7 +13,7 @@ namespace calibration {
 class TypeName {
  public:
   template <typename T>
-  TypeName(const T & o) : TypeName(typeid(o)) {
+  explicit TypeName(const T & o) : TypeName(typeid(o)) {
     static_assert(std::is_class<T>::value, "Only type names for classes are supported");
   }
 

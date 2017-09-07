@@ -52,7 +52,7 @@ PositionSensor::PositionSensor(Model& model, std::string name, sm::value_store::
 PositionSensor::~PositionSensor() {
 }
 
-void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
+void PositionSensor::addMeasurementErrorTerms(CalibratorI& calib, const CalibrationConfI & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Position";
   if(!measurements || measurements->empty()){
     LOG(WARNING) << "No measurements available for " << errorTermGroupName;

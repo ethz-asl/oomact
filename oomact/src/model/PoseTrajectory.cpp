@@ -6,6 +6,7 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
+#include <aslam/calibration/CalibrationConfI.h>
 #include <bsplines/NsecTimePolicy.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <sm/kinematics/Transformation.hpp>
@@ -290,7 +291,7 @@ void PoseTrajectory::addToBatch(const Activator & stateActivator, BatchStateRece
   batchStateReceiver.addBatchState(*this, state_);
 }
 
-void PoseTrajectory::addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem) const {
+void PoseTrajectory::addErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem) const {
   if(useTanConstraint && state_){
     LOG(INFO) << "Adding soft constraints error terms.";
 

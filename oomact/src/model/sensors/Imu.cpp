@@ -278,7 +278,7 @@ bool isCovarianceAvailable(T&t){
   return t.cov(0,0) > 0.0;
 }
 
-void Imu::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & errorTermReceiver, bool observeOnly) const {
+void Imu::addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & /*ec*/, ErrorTermReceiver & errorTermReceiver, bool observeOnly) const {
   if(useAcc_){
     const std::string accelerometerName = getName() + "Accelerometer";
     if(accBias.isUsingSpline()){

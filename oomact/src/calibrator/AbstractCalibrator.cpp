@@ -8,6 +8,7 @@
 #include <sm/MatrixArchive.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
+#include <aslam/calibration/CalibrationConfI.h>
 
 #include <aslam/calibration/CalibrationProblem.hpp>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
@@ -112,7 +113,7 @@ void AbstractCalibrator::loadFromArchive(sm::MatrixArchive & archive, int column
   }
 }
 
-void AbstractCalibrator::setCalibrationVariablesActivity(const EstConf& ec) { 
+void AbstractCalibrator::setCalibrationVariablesActivity(const CalibrationConfI& ec) {
   using sm::timing::Timer;
   Timer timerSetActive("Calibrator: SetActive");
   for (Module& m : getModel().getModules()) {
@@ -180,7 +181,7 @@ void AbstractCalibrator::addMeasurementTimestamp(Timestamp t, const Sensor & sen
 
 
 
-void AbstractCalibrator::addFactors(const EstConf& estimationConfig, ErrorTermReceiver & problem, std::function<void()> statusCallback) {
+void AbstractCalibrator::addFactors(const CalibrationConfI& estimationConfig, ErrorTermReceiver & problem, std::function<void()> statusCallback) {
   for(Module & m : getModel().getModules()){
     LOG(INFO) << "Adding module " << m.getName() << "'s error terms.";
     m.addErrorTerms(*this, getCurrentStorage(), estimationConfig, problem);
@@ -265,7 +266,7 @@ void AbstractCalibrator::updateOptimizerInspector(const CalibrationProblem &  cu
     });
 }
 
-void AbstractCalibrator::estimate(const EstConf & estimationConfig, CalibrationProblem & problem, BatchStateReceiver & batchStateReceiver, std::function<void()> optimize) {
+void AbstractCalibrator::estimate(const CalibrationConfI & estimationConfig, CalibrationProblem & problem, BatchStateReceiver & batchStateReceiver, std::function<void()> optimize) {
   using sm::timing::Timer;
 
   {

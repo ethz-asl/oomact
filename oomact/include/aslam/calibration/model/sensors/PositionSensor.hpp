@@ -29,7 +29,7 @@ class PositionSensor : public Sensor, public InputReceiverIT<PositionMeasurement
   void addInputTo(Timestamp t, const PositionMeasurement & position, ModuleStorage & s) const override;
 
   virtual void clearMeasurements() override;
-  void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
+  void addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
  private:
   std::shared_ptr<PositionMeasurements> measurements;
 

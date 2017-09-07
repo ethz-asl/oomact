@@ -99,7 +99,7 @@ class Imu : public Sensor, public StateCarrier, public InputReceiverIT<Accelerom
   void writeConfig(std::ostream & out) const override;
 
  private:
-  void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, backend::ErrorTermReceiver & errorTermReceiver, bool observeOnly) const override;
+  void addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, backend::ErrorTermReceiver & errorTermReceiver, bool observeOnly) const override;
   std::shared_ptr<Measurements> measurements_;
   const bool useAcc_, useGyro_;
 

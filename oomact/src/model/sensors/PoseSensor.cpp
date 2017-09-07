@@ -56,7 +56,7 @@ void PoseSensor::addMeasurement(const Timestamp t, const PoseMeasurement& pose, 
   getMeasurementsMutable(storage).emplace_back(t, pose);
 }
 
-void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
+void PoseSensor::addMeasurementErrorTerms(CalibratorI& calib, const CalibrationConfI & /*ec*/, ErrorTermReceiver & problem, const bool observeOnly) const {
   const std::string errorTermGroupName = getName() + "Pose";
   const ModuleStorage & storage = calib.getCurrentStorage();
   if(!hasMeasurements(storage)){

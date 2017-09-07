@@ -8,7 +8,7 @@
 #include <sm/value_store/ValueStore.hpp>
 
 #include <aslam/calibration/data/StorageI.h>
-#include <aslam/calibration/tools/Printable.h>
+#include <aslam/calibration/tools/Named.h>
 
 namespace boost {
   template<typename T> class shared_ptr;
@@ -20,41 +20,13 @@ class ErrorTermReceiver;
 }
 namespace calibration {
 using backend::ErrorTermReceiver;
+class Activator;
+class BatchStateReceiver;
+class CalibrationConfI;
 class CalibratorI;
 class DesignVariableReceiver;
-class BatchStateReceiver;
-class Sensor;
 class Model;
-
-class Named : public Printable {
- public:
-  virtual const std::string& getName() const = 0;
-  virtual ~Named() = default;
-  virtual void print(std::ostream & o) const override {
-    o << getName();
-  }
-};
-
-class NamedMinimal : virtual public Named {
- public:
-  NamedMinimal(const std::string & name) : name(name) {}
-  const std::string& getName() const override { return name; }
-
-  virtual ~NamedMinimal() = default;
- private:
-  const std::string name;
-};
-
-std::string getUnnamedObjectName(const void *o);
-
-template <typename T>
-std::string getObjectName(const T & o) {
-  if(auto p = dynamic_cast<const Named*>(&o)){
-    return p->getName();
-  } else {
-    return getUnnamedObjectName(&o);
-  }
-}
+class Sensor;
 
 class Used {
  public:
@@ -73,40 +45,6 @@ class Calibratable {
  public:
   virtual bool isToBeCalibrated() const = 0;
   virtual ~Calibratable() = default;
-};
-
-
-class Activatable : public virtual Named {
- public:
-  bool operator == (const Activatable & other) const { return this == & other; }
-  virtual ~Activatable(){}
-};
-class Activator {
- public:
-  virtual bool isActive(const Activatable & a) const = 0;
-  virtual ~Activator() {}
-};
-
-extern const Activator & AllActiveActivator;
-
-class EstConf : virtual public Printable {
- public:
-  virtual const Activator& getCalibrationActivator() const = 0;
-
-  virtual const Activator& getStateActivator() const = 0;
-
-  virtual const Activator& getErrorTermActivator() const = 0;
-
-  virtual bool isSpatialActive() const = 0;
-  virtual bool isTemporalActive() const = 0;
-
-  virtual std::string getOutputFolder(size_t segmentIndex = 0) const = 0;
-
-  virtual bool shouldSensorsBeRegistered(const Sensor & from, const Sensor & to) const = 0;
-
-  virtual bool getUseCalibPriors() const = 0;
-
-  virtual ~EstConf(){}
 };
 
 struct ModuleLinkBase;
@@ -162,15 +100,15 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
 
-  virtual void setCalibrationActive(const EstConf & ec);
+  virtual void setCalibrationActive(const CalibrationConfI & ec);
   virtual bool initState(CalibratorI & calib);
   virtual void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
 
   virtual void clearMeasurements(ModuleStorage & storage);
   virtual void clearMeasurements(); //TODO Deprecate in favor of clearMeasurements(ModuleStorage & storage); and make that one const. AND remove all the non storage compat functions.
-  virtual void addErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
+  virtual void addErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const CalibrationConfI & ec, ErrorTermReceiver & errorTermReceiver) const;
   virtual void preProcessNewWindow(CalibratorI & calib);
-  virtual void writeSnapshot(const EstConf & ec, bool stateWasUpdatedSinceLastTime) const;
+  virtual void writeSnapshot(const CalibrationConfI & ec, bool stateWasUpdatedSinceLastTime) const;
 
   virtual void estimatesUpdated(CalibratorI & calib) const;
 
@@ -219,7 +157,7 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
     return createCVIfUsed<CV>(getMyConfig().getChild(configElementName), variableNamePostifx, args...);
   }
 
-  bool shouldObserveOnly(const EstConf& ec) const;
+  bool shouldObserveOnly(const CalibrationConfI& ec) const;
 
   bool operator == (const Module & other) const {
     return this == &other;
@@ -229,7 +167,7 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
   virtual void registerWithModel();
 
   virtual void setActive(bool spatial, bool temporal);
-  virtual bool isCalibrationIntended(const EstConf & ec) const;
+  virtual bool isCalibrationIntended(const CalibrationConfI & ec) const;
 
  private:
   friend class Model;
@@ -238,9 +176,9 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
 
   void resolveLinks(ModuleRegistry & reg);
 
-  virtual void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & errorTermReceiver) const;
-  virtual void addMeasurementErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
-  virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const;
+  virtual void addErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & errorTermReceiver) const;
+  virtual void addMeasurementErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const CalibrationConfI & ec, ErrorTermReceiver & problem, bool observeOnly) const;
+  virtual void addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem, bool observeOnly) const;
   void setUid(const std::string& uid) { uid_ = uid; }
 
   Model & model_;
@@ -338,15 +276,5 @@ class ModuleLink : public ModuleLinkBase {
 
 } /* namespace calibration */
 } /* namespace aslam */
-
-namespace std {
-template <>
-struct hash<std::reference_wrapper<aslam::calibration::Activatable> > {
- public :
-  size_t operator()(const std::reference_wrapper<aslam::calibration::Activatable> & ref) const {
-    return hash<size_t>()(reinterpret_cast<size_t>(&ref));
-  }
-};
-};
 
 #endif /* INCLUDE_ASLAM_CALIBRATION_MODULE_H_ */

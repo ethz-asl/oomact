@@ -13,7 +13,7 @@ class Registry;
 }
 }
 namespace calibration {
-class EstConf;
+class CalibrationConfI;
 class CalibrationProblem;
 
 
@@ -78,10 +78,10 @@ class AbstractCalibrator : public virtual CalibratorI {
 
 protected:
   bool initStates();
-  void estimate(const EstConf & estimationConfig, CalibrationProblem & calibrationProblem, BatchStateReceiver & batchStateReceiver, std::function<void()> optimize);
+  void estimate(const CalibrationConfI & estimationConfig, CalibrationProblem & calibrationProblem, BatchStateReceiver & batchStateReceiver, std::function<void()> optimize);
   void printBatchErrorTermStatistics(const CalibrationProblem& batch, bool updateError, std::ostream& out);
   void updateOptimizerInspector(const CalibrationProblem &  currentBatch, bool printRegessionErrorStatistics, std::function<void(std::ostream & o)> printOptimizationState, backend::callback::Registry & callbackRegistry);
-  virtual void addFactors(const EstConf& estimationConfig, backend::ErrorTermReceiver & problem, std::function<void()> statusCallback);
+  virtual void addFactors(const CalibrationConfI& estimationConfig, backend::ErrorTermReceiver & problem, std::function<void()> statusCallback);
 
   Timestamp _lastTimestamp = InvalidTimestamp();
   Timestamp _lowestTimestamp = InvalidTimestamp();
@@ -102,7 +102,7 @@ protected:
  private:
   void addMeasurementTimestamp(Timestamp lowerBound, Timestamp upperBound = InvalidTimestamp());
 
-  void setCalibrationVariablesActivity(const EstConf& ec);
+  void setCalibrationVariablesActivity(const CalibrationConfI& ec);
 
   virtual bool handleNewTimeBaseTimestamp(Timestamp t) = 0;
   virtual void clearAfterEstimation();

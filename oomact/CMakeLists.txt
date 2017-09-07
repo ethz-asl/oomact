@@ -26,6 +26,7 @@ cs_add_library(${PROJECT_NAME}
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/algo/splinesToFile.cpp
+  src/CalibrationConfI.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/calibrator/BatchCalibrator.cpp
@@ -84,6 +85,7 @@ cs_add_library(${PROJECT_NAME}
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
   src/tools/Interval.cpp
   src/tools/MeasurementContainerTools.cpp
+  src/tools/Named.cpp
   src/tools/Parallelizer.cpp
   src/tools/Printable.cpp
   src/tools/tools.cpp
