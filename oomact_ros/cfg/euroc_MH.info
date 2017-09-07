@@ -41,7 +41,7 @@ sensors {
     covPosition { sigma "0.01" }
     covOrientation { sigma "0.01" }
 
-    absoluteMeasurements true
+    absoluteMeasurements false
 
     rotation {
       used false
