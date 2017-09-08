@@ -1,12 +1,13 @@
 #include <aslam/calibration/model/Module.h>
 
-#include "aslam/calibration/tools/tools.h"
 #include <glog/logging.h>
 #include <sm/assert_macros.hpp>
 
+#include <aslam/calibration/CalibrationConfI.h>
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
+#include <aslam/calibration/tools/tools.h>
 #include <aslam/calibration/tools/TypeName.h>
 
 namespace aslam {
@@ -87,7 +88,7 @@ void Module::clearMeasurements(ModuleStorage& storage) {
 void Module::clearMeasurements() {
 }
 
-bool Module::shouldObserveOnly(const EstConf& ec) const {
+bool Module::shouldObserveOnly(const CalibrationConfI& ec) const {
   const bool observeOnly = isA<Observer>() && as<Observer>().isObserveOnly();
   const bool errorTermsInactive = isA<Activatable>() && !ec.getErrorTermActivator().isActive(as<Activatable>());
   LOG(INFO) << getName() <<  " shouldObserveOnly: observe only=" << observeOnly << ", error terms inactive=" << errorTermsInactive;
@@ -95,10 +96,10 @@ bool Module::shouldObserveOnly(const EstConf& ec) const {
 }
 
 
-void Module::addErrorTerms(CalibratorI& /*calib*/, const EstConf& /*ec*/, ErrorTermReceiver& /*errorTermReceiver*/) const {
+void Module::addErrorTerms(CalibratorI& /*calib*/, const CalibrationConfI& /*ec*/, ErrorTermReceiver& /*errorTermReceiver*/) const {
 }
 
-void Module::addErrorTerms(CalibratorI& calib, const ModuleStorage & storage, const EstConf & ec, ErrorTermReceiver & problem) const {
+void Module::addErrorTerms(CalibratorI& calib, const ModuleStorage & storage, const CalibrationConfI & ec, ErrorTermReceiver & problem) const {
   if(isUsed()){
     addErrorTerms(calib, ec, problem);
     const bool observeOnly = shouldObserveOnly(ec);
@@ -108,9 +109,9 @@ void Module::addErrorTerms(CalibratorI& calib, const ModuleStorage & storage, co
   }
 }
 
-void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const ModuleStorage & /*storage*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
+void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const ModuleStorage & /*storage*/, const CalibrationConfI & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }
-void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const EstConf & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
+void Module::addMeasurementErrorTerms(CalibratorI& /*calib*/, const CalibrationConfI & /*ec*/, ErrorTermReceiver & /*problem*/, bool /*observeOnly*/) const {
 }
 
 void Module::writeInfo(std::ostream& out) const {
@@ -133,7 +134,7 @@ ObserverMinimal::ObserverMinimal(const Module * module) :
 }
 
 //TODO C move the next three to Calibrateable interface
-void Module::setCalibrationActive(const EstConf& ec) {
+void Module::setCalibrationActive(const CalibrationConfI& ec) {
   const auto & activator = ec.getCalibrationActivator();
   const bool active =
          (!isA<Activatable>() || activator.isActive(as<Activatable>()))
@@ -143,7 +144,7 @@ void Module::setCalibrationActive(const EstConf& ec) {
   setActive(active && ec.isSpatialActive(), active && ec.isTemporalActive());
   getModel().updateCVIndices();
 }
-bool Module::isCalibrationIntended(const EstConf& /*ec*/) const {
+bool Module::isCalibrationIntended(const CalibrationConfI& /*ec*/) const {
   return true;
 }
 void Module::setActive(bool /*spatial*/, bool /*temporal*/) {
@@ -152,10 +153,6 @@ void Module::setActive(bool /*spatial*/, bool /*temporal*/) {
 CalibratableMinimal::CalibratableMinimal(const Module * module) :
   toBeCalibrated_(module->getMyConfig().getBool("estimate", true))
 {
-}
-
-std::string getUnnamedObjectName(const void* o) {
-  return TypeName(typeid(o)).toString() + "@" + size_t(&o);
 }
 
 class AllActiveActivatorImpl : public Activator{
@@ -221,7 +218,7 @@ const Module& Module::getModule() const {
   return *this;
 }
 
-void Module::writeSnapshot(const EstConf & /*ec*/, bool /*stateWasUpdatedSinceLastTime*/) const {
+void Module::writeSnapshot(const CalibrationConfI & /*ec*/, bool /*stateWasUpdatedSinceLastTime*/) const {
 }
 
 } /* namespace calibration */

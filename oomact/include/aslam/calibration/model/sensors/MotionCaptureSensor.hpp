@@ -34,7 +34,7 @@ class MotionCaptureSensor : public AbstractPoseSensor {
 
   void preProcessNewWindow(CalibratorI & calib) override;
 
-  void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
+  void addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
   Interval getSnappedWindow(CalibratorI & calib, const Interval & i);
 

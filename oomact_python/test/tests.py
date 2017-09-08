@@ -51,16 +51,14 @@ class Tests(unittest.TestCase):
                 assert_array_almost_equal(logL(v, expL(v, v2[0:3])), v2[0:3], 15)
 
     def testQuatStat(self):
-        n = 200;
-        sigma = 0.2
+        n = 500;
+        sigma = 0.1
         randVector = np.random.multivariate_normal(np.zeros(3), np.identity(3) * sigma * sigma, n)
         
         qStart = sm.quatRandom()
         quats = [ expR(qStart, randVector[i, :]) for i in range(n) ]
         
-        #print quats;
-        #print angularQuatDists(sm.quatIdentity(), quats)
-        print(np.linalg.norm(angularQuatDists(qStart, quats) - np.linalg.norm(randVector, 2, 1), 2), '~', 0) 
+        self.assertAlmostEqual(0, np.linalg.norm(angularQuatDists(qStart, quats) - np.linalg.norm(randVector, 2, 1), 2), 5)
         
         q0 = qStart
         
@@ -69,7 +67,7 @@ class Tests(unittest.TestCase):
         
         qVar = quatVar(qMean, quats)
         assert_array_almost_equal(qVar, np.mean(np.linalg.norm(randVector, 2, 1)**2), 2)
-        assert_array_almost_equal(qVar, 3 * sigma * sigma, 1)
+        assert_array_almost_equal(qVar, 3 * sigma * sigma, 2)
 
 
 if __name__ == '__main__':

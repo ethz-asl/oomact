@@ -82,7 +82,7 @@ void WheelOdometry::addMeasurement(CalibratorI & calib, const Timestamp t, const
   }
 }
 
-void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, bool observeOnly) const {
+void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & /*ec*/, ErrorTermReceiver & problem, bool observeOnly) const {
   LOG(INFO) << "Adding " << 2 * measurements_.size() << " wheels error terms";
 
   Timestamp minTime = Timestamp::Numerator(std::numeric_limits<Timestamp::Integer>::max()), maxTime = InvalidTimestamp();

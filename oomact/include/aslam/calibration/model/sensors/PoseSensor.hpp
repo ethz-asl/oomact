@@ -14,7 +14,7 @@ class PoseSensor : public AbstractPoseSensor, public InputReceiverIT<PoseMeasure
 
   virtual ~PoseSensor();
 
-  virtual void addMeasurementErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
+  virtual void addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem, bool observeOnly) const override;
 
   void addInputTo(Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const override;
   void addMeasurement(Timestamp t, const PoseMeasurement& pose, ModuleStorage & storage) const;

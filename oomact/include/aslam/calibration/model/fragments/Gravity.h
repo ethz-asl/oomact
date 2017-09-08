@@ -1,6 +1,7 @@
 #ifndef H5D8032BB_3274_46C6_B264_B4CECCC53D72
 #define H5D8032BB_3274_46C6_B264_B4CECCC53D72
 #include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/calibration/CalibrationConfI.h>
 #include <aslam/calibration/model/Module.h>
 
 namespace aslam {

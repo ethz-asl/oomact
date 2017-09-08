@@ -1,6 +1,7 @@
 #ifndef H22B0B098_C827_4C3A_ACE2_10734530AF87
 #define H22B0B098_C827_4C3A_ACE2_10734530AF87
 
+#include <aslam/calibration/CalibrationConfI.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/StateCarrier.h>
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
@@ -19,7 +20,7 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
 
   bool initState(CalibratorI & calib) override;
   void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem) override;
-  void addErrorTerms(CalibratorI & calib, const EstConf & ec, ErrorTermReceiver & problem) const override;
+  void addErrorTerms(CalibratorI & calib, const CalibrationConfI & ec, ErrorTermReceiver & problem) const override;
 
 
   const So3R3Trajectory & getCurrentTrajectory() const;

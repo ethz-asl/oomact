@@ -1,7 +1,6 @@
 #include <aslam/calibration/model/SetActivator.h>
-#include <ostream>
 
-#include <aslam/calibration/model/Module.h>
+#include <ostream>
 
 namespace aslam {
 namespace calibration {

@@ -19,7 +19,7 @@ Eigen::Matrix3d squaredMatrix(const Eigen::MatrixXd & m){
   return m.transpose() * m;
 }
 
-void CrossPoseCvPrior::addMeasurementErrorTerms(CalibratorI& calib, const EstConf & /*ec*/, ErrorTermReceiver & problem, bool observeOnly) const {
+void CrossPoseCvPrior::addMeasurementErrorTerms(CalibratorI& calib, const CalibrationConfI & /*ec*/, ErrorTermReceiver & problem, bool observeOnly) const {
   if(!from.hasAny()){
     LOG(INFO) << "Not adding error term because " << getObjectName(from) << " has no variables.";
   }

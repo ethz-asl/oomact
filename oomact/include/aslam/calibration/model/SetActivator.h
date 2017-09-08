@@ -4,7 +4,7 @@
 #include <iosfwd>
 #include <unordered_set>
 
-#include "Module.h"
+#include <aslam/calibration/CalibrationConfI.h>
 
 namespace aslam {
 namespace calibration {
