@@ -87,7 +87,7 @@ TEST(CalibrationTestSuite, testEstimateOnePoseSensorsAndOnePosition) {
   for (auto& p : MmcsRotatingStraightLine.getPoses(startTime, endTime)) {
     mcSensorA.addMeasurement(p.time, p.q, p.p, c->getCurrentStorage());
     c->addMeasurementTimestamp(p.time, mcSensorA);
-    mcSensorB.addMeasurement(PositionMeasurement{p.p}, p.time);
+    mcSensorB.addMeasurement(p.time, PositionMeasurement{p.p});
   }
 
   c->calibrate();
