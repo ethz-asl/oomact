@@ -17,27 +17,12 @@
 #include <sm/value_store/ValueStore.hpp>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/error-terms/MeasurementErrorTerm.h>
+#include <aslam/calibration/tools/Covariance.h>
 
 namespace aslam {
 namespace calibration {
 
 using namespace ::sm::value_store;
-
-class Covariance {
- public:
-  Covariance(ValueStoreRef valueStore, int dim, bool load = true);
-
-  const Eigen::MatrixXd & getValueSqrt() const{
-    return covarianceSqrt;
-  }
-  Eigen::MatrixXd getValue() const{
-    return covarianceSqrt.transpose() * covarianceSqrt;
-  }
-
-  friend std::ostream & operator << (std::ostream & o, const Covariance &);
- private:
-  Eigen::MatrixXd covarianceSqrt;
-};
 
 class CalibrationVariable {
  public:

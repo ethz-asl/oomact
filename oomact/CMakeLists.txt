@@ -74,6 +74,7 @@ cs_add_library(${PROJECT_NAME}
   src/test/TestData.cpp
   src/test/Tools.cpp
   src/tools/CheckNotNull.cpp
+  src/tools/Covariance.cpp
   src/tools/ErrorTermStatistics.cpp
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
   src/tools/Interval.cpp
