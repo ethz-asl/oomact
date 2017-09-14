@@ -284,10 +284,12 @@ const ValueStoreRef& Model::getConfig() const {
 
 ModelAtTime Model::getAtTime(Timestamp, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
+  return ModelAtTime(nullptr); // soothe the static analysis
 }
 
 ModelAtTime Model::getAtTime(const BoundedTimeExpression&, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
+  return ModelAtTime(nullptr); // soothe the static analysis
 }
 
 void Model::addModule(Module& module) {
