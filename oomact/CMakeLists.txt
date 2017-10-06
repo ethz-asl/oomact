@@ -21,21 +21,13 @@ endif()
 
 cs_add_library(${PROJECT_NAME}
   src/algo/OdometryPath.cpp
-  src/algo/OdometryPath.cpp
   src/algo/PredictionWriter.cpp
-  src/algo/PredictionWriter.cpp
-  src/algo/splinesToFile.cpp
   src/algo/splinesToFile.cpp
   src/CalibrationConfI.cpp
   src/calibrator/AbstractCalibrator.cpp
-  src/calibrator/AbstractCalibrator.cpp
-  src/calibrator/BatchCalibrator.cpp
   src/calibrator/BatchCalibrator.cpp
   src/data/MapStorage.cpp
-  src/data/MapStorage.cpp
   src/data/ObservationManagerI.cpp
-  src/data/ObservationManagerI.cpp
-  src/data/StorageI.cpp
   src/data/StorageI.cpp
   src/error-terms/ErrorTermAccelerometer.cpp
   src/error-terms/ErrorTermAngularVelocity.cpp
