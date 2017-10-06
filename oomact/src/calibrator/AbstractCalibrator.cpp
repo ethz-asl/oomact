@@ -47,7 +47,8 @@ AbstractCalibratorOptions::~AbstractCalibratorOptions(){
 AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model) :
   _timeBaseSensor("Calibrator", "timeBaseSensor", config.getString("timeBaseSensor"), true), //TODO C support LinkBase with config and owner name
   _modelSP(model),
-  _model(*model)
+  _model(*model),
+  _config(config)
 {
   _timeBaseSensor.resolve(_model);
 }
@@ -188,6 +189,10 @@ void AbstractCalibrator::addFactors(const CalibrationConfI& estimationConfig, Er
     m.addErrorTerms(*this, getCurrentStorage(), estimationConfig, problem);
     statusCallback();
   }
+}
+
+ValueStoreRef AbstractCalibrator::getValueStore() const {
+  return _config;
 }
 
 void AbstractCalibrator::clearAfterEstimation() {

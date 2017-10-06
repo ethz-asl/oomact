@@ -47,6 +47,8 @@ class CalibratorI : public ObservationManagerI {
   virtual Model & getModel() = 0;
   virtual const Model & getModel() const = 0;
 
+  virtual ValueStoreRef getValueStore() const = 0; // TODO D this should be a ConstValueStore once it exists
+
   virtual void setUpdateHandler(StatusUpdateHandler statusUpdateHandler, CalibrationUpdateHandler calibrationUpdateHandler) = 0;
 
   virtual void addToArchive(sm::MatrixArchive & ma, bool append = false) const = 0;
