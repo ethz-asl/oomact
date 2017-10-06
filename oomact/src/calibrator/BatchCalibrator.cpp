@@ -59,6 +59,9 @@ class BatchCalibrationConf : public CalibrationConfI {
   bool shouldSensorsBeRegistered(const Sensor & /*from*/, const Sensor & /*to*/) const override {
     return true; //TODO B make registration configurable
   }
+  bool shouldAnySensorBeRegisteredTo(const Sensor & /*to*/) const override {
+    return true;
+  }
  private:
   bool useCalibPriors_ = false;
 };

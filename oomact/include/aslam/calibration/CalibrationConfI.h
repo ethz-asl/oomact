@@ -33,6 +33,7 @@ class CalibrationConfI : public virtual Printable {
 
   virtual std::string getOutputFolder(size_t segmentIndex = 0) const = 0;
 
+  virtual bool shouldAnySensorBeRegisteredTo(const Sensor & to) const = 0;
   virtual bool shouldSensorsBeRegistered(const Sensor & from, const Sensor & to) const = 0;
 
   virtual bool getUseCalibPriors() const = 0;
