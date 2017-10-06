@@ -51,6 +51,10 @@ AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Mod
   _config(config)
 {
   _timeBaseSensor.resolve(_model);
+
+  // Sanity checks
+  CHECK(_timeBaseSensor.get().isUsed()) << "Time base sensor (" << _timeBaseSensor.get() << ") is not used!";
+  CHECK(!_timeBaseSensor.get().hasDelay()) << "Time base sensor (" << _timeBaseSensor.get() << ") with delay isn't supported!";
 }
 
 
