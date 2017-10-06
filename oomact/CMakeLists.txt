@@ -26,6 +26,7 @@ cs_add_library(${PROJECT_NAME}
   src/CalibrationConfI.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/calibrator/BatchCalibrator.cpp
+  src/calibrator/CalibratorPlugin.cpp
   src/data/MapStorage.cpp
   src/data/ObservationManagerI.cpp
   src/data/StorageI.cpp
@@ -81,6 +82,7 @@ cs_add_library(${PROJECT_NAME}
   src/tools/MeasurementContainerTools.cpp
   src/tools/Named.cpp
   src/tools/Parallelizer.cpp
+  src/tools/PluginManager.cpp
   src/tools/Printable.cpp
   src/tools/tools.cpp
   src/tools/TypeName.cpp
@@ -105,6 +107,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/tools/ParallelizerTest.cpp
   test/tools/TreeTest.cpp
+  test/tools/PluginManagerTest.cpp
 
   WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}/test
 )
