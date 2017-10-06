@@ -198,8 +198,24 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     }
   }
 
-  virtual ModuleStorage & getCurrentStorage() override {
+  bool isMeasurementRelevant(const Sensor &, Timestamp) const {
+    return true; // TODO B support predefined batch interval in time
+  }
+
+  ModuleStorage & getCurrentStorage() override {
     return storage_;
+  }
+
+  const ModuleStorage & getCurrentStorage() const override {
+    return storage_;
+  }
+
+  bool isNextWindowScheduled() const override {
+    return _currentEffectiveBatchInterval.start != InvalidTimestamp();
+  }
+
+  Timestamp getNextTimeWindowStartTimestamp() const override {
+    return _currentEffectiveBatchInterval.start;
   }
 
  private:

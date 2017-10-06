@@ -18,9 +18,14 @@ class ObservationManagerI {
   virtual ~ObservationManagerI();
 
   virtual ModuleStorage & getCurrentStorage() = 0;
+  virtual const ModuleStorage & getCurrentStorage() const = 0;
 
   virtual void setLowestTimestamp(Timestamp lowestTimeStamp) = 0;
   virtual void addMeasurementTimestamp(Timestamp t, const Sensor & sensor) = 0;
+
+  virtual bool isNextWindowScheduled() const = 0;
+  virtual Timestamp getNextTimeWindowStartTimestamp() const = 0;
+  virtual bool isMeasurementRelevant(const Sensor & s, Timestamp t) const = 0;
 
   virtual double secsSinceStart(Timestamp timestamp) const = 0;
   virtual std::string secsSinceStart(const Interval & interval) const = 0;
