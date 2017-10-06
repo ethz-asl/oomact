@@ -37,6 +37,7 @@ class CalibratorOptionsI {
   virtual bool getVerbose() const = 0;
   virtual void setVerbose(bool verbose) = 0;
   virtual bool getAcceptConstantErrorTerms() const = 0;
+  virtual int getNumThreads() const = 0;
 };
 
 class CalibratorI : public ObservationManagerI {

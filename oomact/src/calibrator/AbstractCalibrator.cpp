@@ -33,7 +33,8 @@ AbstractCalibratorOptions::AbstractCalibratorOptions(const sm::value_store::Valu
     predictResults(config.getBool("predictResults", true)),
     verbose(config.getBool("verbose", false)),
     acceptConstantErrorTerms(config.getBool("acceptConstantErrorTerms", true)),
-    splineOutputSamplePeriod(config.getDouble("splineOutputSamplePeriod", 0.01))
+    splineOutputSamplePeriod(config.getDouble("splineOutputSamplePeriod", 0.01)),
+    numThreads(config.getInt("numThreads", 1))
 {
   if(acceptConstantErrorTerms){
     LOG(INFO)<< "Using acceptConstantErrorTerms = true";

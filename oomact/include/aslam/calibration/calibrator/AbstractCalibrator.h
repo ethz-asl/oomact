@@ -42,11 +42,19 @@ class AbstractCalibratorOptions : public CalibratorOptionsI {
   void setAcceptConstantErrorTerms(bool acceptConstantErrorTerms) {
     this->acceptConstantErrorTerms = acceptConstantErrorTerms;
   }
+
+  int getNumThreads() const override {
+    return numThreads;
+  }
+  void setNumThreads(int numThreads) {
+    this->numThreads = numThreads;
+  }
  private:
   bool predictResults;
   bool verbose;
   bool acceptConstantErrorTerms;
   double splineOutputSamplePeriod;
+  int numThreads;
 };
 
 class AbstractCalibrator : public virtual CalibratorI {
