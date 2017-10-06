@@ -185,8 +185,6 @@ void AbstractCalibrator::addMeasurementTimestamp(Timestamp t, const Sensor & sen
   }
 }
 
-
-
 void AbstractCalibrator::addFactors(const CalibrationConfI& estimationConfig, ErrorTermReceiver & problem, std::function<void()> statusCallback) {
   for(Module & m : getModel().getModules()){
     LOG(INFO) << "Adding module " << m.getName() << "'s error terms.";

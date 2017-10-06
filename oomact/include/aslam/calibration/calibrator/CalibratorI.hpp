@@ -21,8 +21,6 @@ using sm::value_store::ValueStoreRef;
 
 class Model;
 class CalibrationVariable;
-class CalibratorOptions;
-class MotionCaptureSource;
 class ModuleList;
 class PredictionFunctorWriter;
 

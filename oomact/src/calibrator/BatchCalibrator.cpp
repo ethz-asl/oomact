@@ -18,9 +18,9 @@ class BatchCalibratorOptions : public AbstractCalibratorOptions {
   using AbstractCalibratorOptions::AbstractCalibratorOptions;
 };
 
-class BatchCalibrationConfI : public CalibrationConfI {
+class BatchCalibrationConf : public CalibrationConfI {
  public:
-  virtual ~BatchCalibrationConfI(){}
+  virtual ~BatchCalibrationConfI() = default;
 
   const Activator& getCalibrationActivator() const override {
     return AllActiveActivator;
@@ -149,7 +149,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
       return;
     }
 
-    BatchCalibrationConfI estConf;
+    BatchCalibrationConf estConf;
     BatchCalibrationProblem problem;
 
     estimate(estConf, problem, problem, [&](){
