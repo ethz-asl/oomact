@@ -79,6 +79,7 @@ cs_add_library(${PROJECT_NAME}
   src/plan/SmartDriver.cpp
   src/test/MockMotionCaptureSource.cpp
   src/test/SimpleModel.cpp
+  src/test/TestData.cpp
   src/test/Tools.cpp
   src/tools/CheckNotNull.cpp
   src/tools/ErrorTermStatistics.cpp
@@ -107,6 +108,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/input/InputProviderTest.cpp
   test/model/ModelTest.cpp
   test/plan/PlanTest.cpp
+  test/test/TestDataTest.cpp
   test/test_main.cpp
   test/tools/ParallelizerTest.cpp
   test/tools/TreeTest.cpp

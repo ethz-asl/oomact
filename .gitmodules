@@ -1,0 +1,3 @@
+[submodule "oomact_test_data"]
+	path = oomact_test_data
+	url = git@github.com:ethz-asl/oomact_test_data.git
