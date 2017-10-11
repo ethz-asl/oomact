@@ -147,7 +147,8 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
   BatchCalibrator (ValueStoreRef config, std::shared_ptr<Model> model) :
     AbstractCalibrator(config, model),
     config_(config),
-    options_(config)
+    options_(config),
+    storage_(*this)
   {
   }
 
@@ -232,7 +233,32 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
  private:
   sm::value_store::ValueStoreRef config_;
   BatchCalibratorOptions options_;
-  MapStorage<const Module *> storage_;
+
+  class Storage : public ModuleStorage {
+    using ModuleStorage::ModuleStorage;
+
+    void remove(ModuleStorage::Key key) override {
+      impl.remove(key);
+    }
+    void clear() {
+      impl.clear();
+    }
+
+    void * get(ModuleStorage::Key key) const override {
+      return impl.get(key);
+    }
+
+    void add(ModuleStorage::Key key, StorageElement && data) override {
+      impl.add(key, std::move(data));
+    }
+
+    size_t size() const override {
+      return impl.size();
+    }
+
+   private:
+    MapStorage<const Module*> impl;
+  } storage_;
 };
 
 

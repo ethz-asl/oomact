@@ -7,6 +7,7 @@
 
 #include <sm/value_store/ValueStore.hpp>
 
+#include <aslam/calibration/calibrator/CalibratorRef.h>
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/tools/Named.h>
 
@@ -86,7 +87,11 @@ std::string normalizeParamName(const char * parameter);
 
 class Module;
 
-typedef StorageI<const Module*> ModuleStorage;
+class ModuleStorage : public StorageI<const Module*>, public CalibratorRef {
+ public:
+  template <typename Value> using Connector = StorageConnector<Value, ModuleStorage>;
+  using CalibratorRef::CalibratorRef;
+};
 
 class ModuleBase {
  public:
