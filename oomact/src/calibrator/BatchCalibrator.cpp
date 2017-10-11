@@ -20,7 +20,9 @@ class BatchCalibratorOptions : public AbstractCalibratorOptions {
 
 class BatchCalibrationConf : public CalibrationConfI {
  public:
-  virtual ~BatchCalibrationConfI() = default;
+  BatchCalibrationConf(BatchCalibratorI & calibrator) : calibrator_(calibrator) {}
+
+  virtual ~BatchCalibrationConf() = default;
 
   const Activator& getCalibrationActivator() const override {
     return AllActiveActivator;
@@ -62,7 +64,16 @@ class BatchCalibrationConf : public CalibrationConfI {
   bool shouldAnySensorBeRegisteredTo(const Sensor & /*to*/) const override {
     return true;
   }
+
+  const BatchCalibratorI & getCalibrator() const override {
+    return calibrator_;
+  }
+  BatchCalibratorI & getCalibrator() override {
+    return calibrator_;
+  }
+
  private:
+  BatchCalibratorI & calibrator_;
   bool useCalibPriors_ = false;
 };
 
@@ -152,7 +163,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
       return;
     }
 
-    BatchCalibrationConf estConf;
+    BatchCalibrationConf estConf(*this);
     BatchCalibrationProblem problem;
 
     estimate(estConf, problem, problem, [&](){

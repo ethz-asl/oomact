@@ -38,6 +38,9 @@ class CalibrationConfI : public virtual Printable {
 
   virtual bool getUseCalibPriors() const = 0;
 
+  virtual CalibratorI & getCalibrator() = 0;
+  virtual const CalibratorI & getCalibrator() const = 0;
+
   virtual ~CalibrationConfI();
 };
 
