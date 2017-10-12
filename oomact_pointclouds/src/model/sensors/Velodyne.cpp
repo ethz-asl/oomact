@@ -482,16 +482,17 @@ class VelodyneCloudMeasurements : public EuclideanCloudMeasurements, private Raw
 
 }
 
+CloudBatch::TimestampsInputVector getTimestamps(const Timestamp& t, size_t scanSize){
+  CloudBatch::TimestampsInputVector timestamps(scanSize, 1);
+  timestamps.setConstant(t.getNumerator()); //TODO A use individual timestamps!
+  return timestamps;
+}
+
 void Velodyne::addNewPackage(const Timestamp& t, const std::string& data, ModuleStorage& storage) const {
-  auto getTimestamps = [t](size_t scanSize){
-    CloudBatch::TimestampsInputVector timestamps(scanSize, 1);
-    timestamps.setConstant(t.getNumerator()); //TODO A use individual timestamps!
-    return timestamps;
-  };
   if(!doIntrinsicCalibration){
     CloudBatch::PointCloud scan;
     convertPacketInto(data, scan, minimalDistance, maximalDistance, getCalibration());
-    getClouds(storage).addCloudScan(*this, scan, getTimestamps(scan.cols()));
+    getClouds(storage).addCloudScan(*this, scan, getTimestamps(t, scan.cols()));
   } else {
     RawMeasurements scan;
     toRawMeasurements(data, scan, minimalDistance, maximalDistance);
@@ -500,7 +501,7 @@ void Velodyne::addNewPackage(const Timestamp& t, const std::string& data, Module
         [&, t](CloudBatch& toCloud){
           return toCloud.getMeasurements<VelodyneCloudMeasurements>().addData(*this, t, scan);
         },
-        getTimestamps(size)
+        getTimestamps(t, size)
       );
   }
 }
@@ -509,8 +510,11 @@ void Velodyne::addInputTo(Timestamp t, const VelodynePackageRef& input, ModuleSt
   addNewPackage(t, std::string(input.data, input.length), storage);
 }
 
-void Velodyne::addInputTo(Timestamp t, const VelodynePoint& input, ModuleStorage& storage) const {
-  //TODO 0
+void Velodyne::addInputTo(Timestamp t, const VelodynePointsFunctor& input, ModuleStorage& storage) const {
+  CHECK(!doIntrinsicCalibration) << "Pointwise input is not supported in combination with intrinsic calibration.";
+  CloudBatch::PointCloud scan(3, input.length);
+  input.fillCloud(scan);
+  getClouds(storage).addCloudScan(*this, scan, getTimestamps(t, scan.cols()));
 }
 
 void Velodyne::estimatesUpdated(CalibratorI& calib) const {

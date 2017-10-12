@@ -3,6 +3,7 @@
 
 #include <array>
 #include <vector>
+#include <functional>
 
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/calibration/input/InputReceiverI.h>
@@ -22,12 +23,12 @@ struct VelodynePackageRef {
   size_t length;
 };
 
-struct VelodynePoint {
-  std::array<float, 3> p;
-  float intensity;
+struct VelodynePointsFunctor {
+  std::function<void(Eigen::MatrixXf &)> fillCloud;
+  size_t length;
 };
 
-class Velodyne : public Lidar3d, public InputReceiverIT<VelodynePackageRef>, public InputReceiverIT<VelodynePoint> {
+class Velodyne : public Lidar3d, public InputReceiverIT<VelodynePackageRef>, public InputReceiverIT<VelodynePointsFunctor> {
  public:
   Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRef config);
   virtual ~Velodyne();
@@ -49,7 +50,7 @@ class Velodyne : public Lidar3d, public InputReceiverIT<VelodynePackageRef>, pub
   void addNewPackage(const Timestamp& t, const std::string& data, ModuleStorage& storage) const;
 
   void addInputTo(Timestamp t, const VelodynePackageRef & input, ModuleStorage & s) const override;
-  void addInputTo(Timestamp t, const VelodynePoint & input, ModuleStorage & s) const override;
+  void addInputTo(Timestamp t, const VelodynePointsFunctor & input, ModuleStorage & s) const override;
 
   float getBeamDistantanceCorrection(int laserIndex) const;
   aslam::backend::ScalarExpression getBeamDistantanceCorrectionExpression(int laserIndex) const;
