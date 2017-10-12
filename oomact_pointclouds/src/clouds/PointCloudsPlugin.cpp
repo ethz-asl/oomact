@@ -369,7 +369,7 @@ void PointCloudsPlugin::closeAllCurrentClouds() {
   }
 }
 
-void PointCloudsPlugin::preprocessWindowClouds() {
+void PointCloudsPlugin::preProcessNewWindow(CalibratorI &) {
   LOG(INFO) << "Preprocessing current window's clouds.";
   closeAllCurrentClouds();
 
@@ -387,7 +387,7 @@ void PointCloudsPlugin::preprocessWindowClouds() {
 
       s+= measurements.getSize();
 
-      if (measurements.getSize() < 1000) { // TODO Make constant
+      if (measurements.getSize() < 1000) { // TODO C Make magic number a named constant or parameter
         LOG(WARNING) << "Got too small point cloud, containing only " << measurements.getSize()<< " points!";
       }
     }
