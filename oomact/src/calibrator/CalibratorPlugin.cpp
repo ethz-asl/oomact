@@ -5,7 +5,7 @@
 namespace aslam {
 namespace calibration {
 
-CalibratorPlugin::CalibratorPlugin(CalibratorI& calibrator) : calibrator_(calibrator) {
+CalibratorPlugin::CalibratorPlugin(CalibratorI& calibrator, sm::ValueStoreRef config) : calibrator_(calibrator), config_(config) {
 }
 
 CalibratorPlugin::~CalibratorPlugin() {

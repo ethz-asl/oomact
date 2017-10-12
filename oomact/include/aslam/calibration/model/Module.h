@@ -7,6 +7,7 @@
 
 #include <sm/value_store/ValueStore.hpp>
 
+#include <aslam/calibration/CalibrationPhaseClient.h>
 #include <aslam/calibration/calibrator/CalibratorRef.h>
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/tools/IsA.h>
@@ -70,7 +71,7 @@ class ModuleBase {
   Module & getModule();
 };
 
-class Module : public virtual ModuleBase, public virtual Named, public virtual Used, public IsA<Module> {
+class Module : public virtual ModuleBase, public virtual Named, public virtual Used, public IsA<Module>, public CalibrationPhaseClientI {
  public:
   Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault = true);
   Module(const Module & m);
@@ -80,9 +81,8 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
   virtual void addToBatch(const Activator & stateActivator, BatchStateReceiver & batchStateReceiver, DesignVariableReceiver & problem);
 
   virtual void clearMeasurements(ModuleStorage & storage);
-  virtual void clearMeasurements(); //TODO Deprecate in favor of clearMeasurements(ModuleStorage & storage); and make that one const. AND remove all the non storage compat functions.
+  virtual void clearMeasurements(); //TODO C Remove in favor of clearMeasurements(ModuleStorage & storage); and make that one const. AND remove all the non storage compat functions.
   virtual void addErrorTerms(CalibratorI & calib, const ModuleStorage & storage, const CalibrationConfI & ec, ErrorTermReceiver & errorTermReceiver) const;
-  virtual void preProcessNewWindow(CalibratorI & calib);
   virtual void writeSnapshot(const CalibrationConfI & ec, bool stateWasUpdatedSinceLastTime) const;
 
   virtual void estimatesUpdated(CalibratorI & calib) const;

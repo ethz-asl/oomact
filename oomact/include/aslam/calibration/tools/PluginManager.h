@@ -21,7 +21,6 @@ class PluginManager {
   template <typename T> T* getPluginPtr() { return static_cast<T*>(getPluginPtr_(typeid(T))); }
   template <typename T> const T* getPluginPtr() const { return const_cast<PluginManager&>(*this).getPluginPtr<T>(); }
 
- protected:
   template <typename T> void addPlugin(T * plugin) { addPlugin_(typeid(*plugin), plugin); }
 
   template <typename T, typename Func> T& getOrCreatePlugin(Func factory) {

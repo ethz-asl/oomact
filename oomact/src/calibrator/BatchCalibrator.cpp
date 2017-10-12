@@ -156,9 +156,10 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     LOG(INFO) << "Before calibration:" << std::endl << getModel() << std::endl;
     LOG(INFO) << "Staring calibration in interval " << secsSinceStart(getCurrentEffectiveBatchInterval());
 
-    for(Module & m : getModel().getModules()){
-      m.preProcessNewWindow(*this);
+    for(CalibrationPhaseClientI & c : _calibrationPhaseClients){
+      c.preProcessNewWindow(*this);
     }
+
     if(!initStates()){
       LOG(FATAL) << "initStates failed";
       return;

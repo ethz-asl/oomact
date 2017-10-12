@@ -1,6 +1,10 @@
 #ifndef HA0283384_8D04_4319_BE62_1F66D8BADFBF
 #define HA0283384_8D04_4319_BE62_1F66D8BADFBF
+#include <sm/value_store/ValueStore.hpp>
+
 #include <aslam/calibration/tools/PluginI.h>
+
+using sm::value_store::ValueStoreRef;
 
 namespace aslam {
 namespace calibration {
@@ -9,7 +13,7 @@ class Model;
 
 class CalibratorPlugin : public PluginI {
  public:
-  CalibratorPlugin(CalibratorI & calibrator);
+  CalibratorPlugin(CalibratorI & calibrator, sm::ValueStoreRef config);
   virtual ~CalibratorPlugin();
 
   CalibratorI& getCalibrator() {
@@ -22,8 +26,14 @@ class CalibratorPlugin : public PluginI {
   Model& getModel();
   const Model& getModel() const;
 
+ protected:
+  const sm::ValueStoreRef & getConfig() {
+    return config_;
+  }
+
  private:
   CalibratorI & calibrator_;
+  sm::ValueStoreRef config_;
 };
 
 } /* namespace calibration */

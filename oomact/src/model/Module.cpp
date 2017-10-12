@@ -130,9 +130,6 @@ void Module::writeInfo(std::ostream& out) const {
 void Module::writeConfig(std::ostream& /*out*/) const {
 }
 
-void Module::preProcessNewWindow(CalibratorI& /*calib*/) {
-}
-
 ObserverMinimal::ObserverMinimal(const Module * module) :
     observeOnly_(module->getMyConfig().getBool("observeOnly", false))
 {

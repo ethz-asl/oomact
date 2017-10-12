@@ -8,13 +8,15 @@
 #include <sm/MatrixArchive.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
-#include <aslam/calibration/calibrator/CalibrationConfI.h>
 
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/calibrator/CalibrationProblem.h>
-#include <aslam/calibration/DesignVariableReceiver.h>
-#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/calibrator/CalibratorPlugin.h>
 #include <aslam/calibration/calibrator/StateCarrier.h>
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
+#include <aslam/calibration/model/Model.h>
+#include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 
 using std::chrono::system_clock;
@@ -55,8 +57,22 @@ AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Mod
   // Sanity checks
   CHECK(_timeBaseSensor.get().isUsed()) << "Time base sensor (" << _timeBaseSensor.get() << ") is not used!";
   CHECK(!_timeBaseSensor.get().hasDelay()) << "Time base sensor (" << _timeBaseSensor.get() << ") with delay isn't supported!";
+
+
+  for(Module & m : _model.getModules()){
+    handleNewPhaseClientCandidate(m);
+  }
 }
 
+
+template <typename T> void AbstractCalibrator::handleNewPhaseClientCandidate(T & t){
+  if(auto p = t.template ptrAs<CalibrationPhaseClientI>()){
+    _calibrationPhaseClients.emplace_back(*p);
+  }
+}
+void AbstractCalibrator::setupNewPlugin(CalibratorPlugin& plugin) {
+  handleNewPhaseClientCandidate(plugin);
+}
 
 bool AbstractCalibrator::initStates(){
   for(Module & m : getModel().getModules()){

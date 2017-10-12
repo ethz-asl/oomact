@@ -24,6 +24,7 @@ class Model;
 class CalibrationVariable;
 class ModuleList;
 class PredictionFunctorWriter;
+class CalibratorPlugin;
 
 typedef std::function<void()> CalibrationUpdateHandler;
 typedef std::function<void(std::string)> StatusUpdateHandler;
@@ -39,7 +40,7 @@ class CalibratorOptionsI {
   virtual int getNumThreads() const = 0;
 };
 
-class CalibratorI : public ObservationManagerI, public PluginManager {
+class CalibratorI : public ObservationManagerI {
  public:
   virtual ~CalibratorI(){}
 
@@ -69,6 +70,13 @@ class CalibratorI : public ObservationManagerI, public PluginManager {
   }
 
   ModelAtTime getModelAt(const Sensor& sensor, Timestamp time, int maximalDerivativeOrder, const ModelSimplification& simplification) const;
+
+  template<typename T> T& getPlugin();
+  template <typename T> const T& getPlugin() const { return const_cast<PluginManager&>(*this).getPlugin<T>(); }
+ protected:
+  PluginManager pm_;
+ private:
+  virtual void setupNewPlugin(CalibratorPlugin & plugin) = 0;
 };
 
 class BatchCalibratorI :public virtual CalibratorI {
@@ -101,6 +109,16 @@ class IncrementalCalibratorI : public virtual CalibratorI {
 
 std::unique_ptr<IncrementalCalibratorI> createIncrementalCalibrator(ValueStoreRef vs, std::shared_ptr<Model> model);
 std::unique_ptr<BatchCalibratorI> createBatchCalibrator(ValueStoreRef vs, std::shared_ptr<Model> model);
+
+template<typename T>
+inline T& CalibratorI::getPlugin() {
+  return pm_.getOrCreatePlugin<T>([this]() {
+      T* p = new T(*this, getValueStore());
+      setupNewPlugin(*p);
+      return p;
+    });
+}
+
 }
 }
 

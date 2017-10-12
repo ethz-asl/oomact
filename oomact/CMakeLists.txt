@@ -24,6 +24,7 @@ cs_add_library(${PROJECT_NAME}
   src/algo/PredictionWriter.cpp
   src/algo/splinesToFile.cpp
   src/CalibrationConfI.cpp
+  src/CalibrationPhaseClient.cpp
   src/calibrator/AbstractCalibrator.cpp
   src/calibrator/BatchCalibrator.cpp
   src/calibrator/CalibratorPlugin.cpp

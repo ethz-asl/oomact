@@ -106,6 +106,7 @@ protected:
   StatusUpdateHandler _statusUpdateHandler;
   CalibrationUpdateHandler _calibrationUpdateHandler;
 
+  std::vector<std::reference_wrapper<CalibrationPhaseClientI>> _calibrationPhaseClients; //TODO B convert to phase registry
 
   const std::shared_ptr<Model> _modelSP;
   Model & _model;
@@ -118,6 +119,10 @@ protected:
 
   virtual bool handleNewTimeBaseTimestamp(Timestamp t) = 0;
   virtual void clearAfterEstimation();
+
+  void setupNewPlugin(CalibratorPlugin & plugin) override;
+
+  template <typename T> void handleNewPhaseClientCandidate(T & t);
 };
 
 extern template class ModuleLink<Sensor>;
