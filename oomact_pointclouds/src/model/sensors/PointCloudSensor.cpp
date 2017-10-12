@@ -13,15 +13,16 @@
 namespace aslam {
 namespace calibration {
 
-std::unique_ptr<CloudMeasurements> createCloudMeasurements(const PointCloudSensor& pcs, CloudBatch& cloud){
-  return pcs.createCloudMeasurements(cloud);
-}
-
 PointCloudSensor::PointCloudSensor(Model& model, const std::string& name, sm::value_store::ValueStoreRef config)
 : Sensor(model, name, config),
   filter(isUsed() ? model.resolveConfigPath(config.getString(name + "/pcFilterConfig")) : std::string()),
   nanPolicy({true, false})
 {
+}
+
+void PointCloudSensor::writeConfig(std::ostream& out) const {
+  MODULE_WRITE_PARAM(nanPolicy.checkForNans);
+  MODULE_WRITE_PARAM(nanPolicy.nansAreFine);
 }
 
 PointCloudSensor::~PointCloudSensor(){
@@ -122,16 +123,9 @@ void SimplePointCloudPolicy::prepareForEstimation(const PointCloudsPlugin& pcp, 
   }
 }
 
-const PointCloudPolicy& PointCloudSensor::getPointCloudPolicy(const PointCloudsPlugin& pc) const {
-  if(!pointCloudPolicy){
-    pointCloudPolicy = pc.getPointCloudPolicy(*this);
-  }
-  return *pointCloudPolicy;
-}
-
 Interval PointCloudSensor::getCurrentMeasurementTimestampRange(const CalibratorI& calib) const {
-  auto& clouds = calib.getPlugin<PointCloudsPlugin>().getCloudsContainer().getCloudsFor(id);
-  CHECK(!clouds.empty() && ! clouds.front().isEmpty());
+  auto& clouds = getClouds(calib.getCurrentStorage());
+  CHECK(clouds.hasData());
   return Interval(clouds.front().getMinTimestamp(), (clouds.back().isEmpty() ? *(clouds.end()-2) : clouds.back()).getMaxTimestamp());
 }
 
@@ -152,9 +146,12 @@ std::unique_ptr<CloudMeasurements> PointCloudSensor::createCloudMeasurements(Clo
   return std::unique_ptr<CloudMeasurements>(new EuclideanCloudMeasurements(nanPolicy));
 }
 
-void PointCloudSensor::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAM(nanPolicy.checkForNans);
-  MODULE_WRITE_PARAM(nanPolicy.nansAreFine);
+std::shared_ptr<const PointCloudPolicy> PointCloudSensor::getDefaultPointCloudPolicy(const PointCloudsPlugin& pcp) const {
+  return pcp.getDefaultPointCloudPolicy();
+}
+
+bool PointCloudSensor::hasClouds(const ModuleStorage& storage) const {
+  return !getClouds(storage).empty();
 }
 
 } /* namespace calibration */

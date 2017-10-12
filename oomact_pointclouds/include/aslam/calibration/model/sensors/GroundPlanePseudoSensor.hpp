@@ -20,6 +20,7 @@ class GroundPlanePseudoSensor : public Lidar3d {
   void preProcessNewWindow(CalibratorI& calib) override;
   void addMeasurementErrorTerms(CalibratorI& calib, const CalibrationConfI& cc, ErrorTermReceiver& problem, bool observeOnly) const override;
 
+  std::shared_ptr<const PointCloudPolicy> getDefaultPointCloudPolicy(const PointCloudsPlugin & pcp) const override;
  protected:
   void writeConfig(std::ostream& out) const override;
  private:

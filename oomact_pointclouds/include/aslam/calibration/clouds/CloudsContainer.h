@@ -8,7 +8,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <aslam/calibration/SensorId.hpp>
 #include <Eigen/Core>
 
 #include <aslam/calibration/clouds/CloudBatch.h>
@@ -21,13 +20,10 @@ class Model;
 class Parallelizer;
 class PointCloudSensor;
 class PointCloudsPlugin;
-class Sensor;
 
-struct CloudBatches : private std::vector<CloudBatch> {
-  CloudBatches(const Sensor& sensor)
-      : sensor(sensor) {
-  }
-  const Sensor& sensor;
+class CloudBatches : private std::vector<CloudBatch> {
+ public:
+  CloudBatches(const PointCloudSensor& sensor, CalibratorI & calib);
 
   void finishCurrentCloud(const PointCloudsPlugin& pcp);
   CloudBatch& createNewCloud(const PointCloudsPlugin& pcp, const PointCloudSensor& sensor);
@@ -35,6 +31,28 @@ struct CloudBatches : private std::vector<CloudBatch> {
   CloudBatch& getCurrentCloud();  // requires an open cloud
   const CloudBatch& getCurrentCloud() const;  // requires an open cloud
   void dropCurrentCloud();
+
+  bool hasData() const;
+
+  template<typename Sensor, typename Data, typename TimestampVector>
+  void addCloudScan(const Sensor& /*pcSensor*/, const Data& data, const TimestampVector& timestamps) {
+    // TODO B check that pcSensor == sensor_
+    applyCloudDataFunctor(
+        [&](CloudBatch& toCloud) {
+          return toCloud.getMeasurements<typename Sensor::CloudMeasurementsImpl>().addData(timestamps, data, timestamps.size());
+        },
+        timestamps
+      );
+  }
+
+  template<typename TimestampVector>
+  void applyCloudDataFunctor(std::function<int(CloudBatch& toCloud)> addDataFuctor, const TimestampVector& timestamps);
+
+  const PointCloudPolicy& getPointCloudPolicy() const;
+
+  const PointCloudSensor& getSensor() const {
+    return sensor_;
+  }
 
   using std::vector<CloudBatch>::size;
   using std::vector<CloudBatch>::empty;
@@ -44,6 +62,10 @@ struct CloudBatches : private std::vector<CloudBatch> {
   using std::vector<CloudBatch>::front;
   using std::vector<CloudBatch>::back;
   using std::vector<CloudBatch>::clear;
+ private:
+  const PointCloudSensor& sensor_;
+  PointCloudsPlugin& pcp_;
+  std::shared_ptr<const PointCloudPolicy> pointCloudPolicy_;
 };
 
 /**
@@ -54,11 +76,11 @@ class CloudsContainer {
   CloudsContainer(PointCloudsPlugin& pcp);
   virtual ~CloudsContainer();
 
-  size_t associationsIntersection(const Sensor& sensorA, const Sensor& sensorB);
+  size_t associationsIntersection(const PointCloudSensor& sensorA, const PointCloudSensor& sensorB);
 
   size_t computeAssociations(const CalibrationConfI& cc);
 
-  size_t associationsRandomSubsample(double prob, const Sensor& sensorA, const Sensor& sensorB);
+  size_t associationsRandomSubsample(double prob, const PointCloudSensor& sensorA, const PointCloudSensor& sensorB);
 
   const Eigen::VectorXi& getIndices(const int& readIter, const int& refIter) const;
 
@@ -77,33 +99,14 @@ class CloudsContainer {
   void saveAlignedClouds(const std::string& folderName, size_t version) const;
 
   /// Save filtered clouds
-  void saveFilteredClouds(const SensorId& sensorId, const std::string& folderName, size_t version, Parallelizer& parallelizer) const;
+  void saveFilteredClouds(const PointCloudSensor& sensor, const std::string& folderName, size_t version, Parallelizer& parallelizer) const;
   void saveTransformations(const std::string& folderName) const;
-  void clearClouds();
 
   void clearAssociations();
-  size_t countAssociations(const Sensor& from, const Sensor& to) const;
+  size_t countAssociations(const PointCloudSensor& from, const PointCloudSensor& to) const;
 
-  CloudBatches& getCloudsFor(SensorId id) {
-    return cloudBatchesMap_.at(id);
-  }
-  const CloudBatches& getCloudsFor(SensorId id) const {
-    return cloudBatchesMap_.at(id);
-  }
-
-  template<typename Sensor, typename Data, typename TimestampVector>
-  void addCloudScan(const Sensor& pcSensor, const Data& data, const TimestampVector& timestamps) {
-    applyCloudDataFunctor(
-        pcSensor,
-        [&](CloudBatch& toCloud) {
-          return toCloud.getMeasurements<typename Sensor::CloudMeasurementsImpl>().addData(timestamps, data, timestamps.size());
-        },
-        timestamps
-      );
-  }
-
-  template<typename TimestampVector>
-  void applyCloudDataFunctor(const PointCloudSensor& sensor, std::function<int(CloudBatch& toCloud)> addDataFuctor, const TimestampVector& timestamps);
+  CloudBatches& getCloudsFor(const PointCloudSensor& s);
+  const CloudBatches& getCloudsFor(const PointCloudSensor& s) const;
 
  protected:
   friend PointCloudsPlugin;
@@ -119,11 +122,9 @@ class CloudsContainer {
   /// Last timestamp
   Timestamp lastCloudBatchTimestamp_;
 
-  /// Point cloud source id to cloud batches map
-  std::unordered_map<SensorId, CloudBatches> cloudBatchesMap_;
-
   std::shared_ptr<PM::Transformation> rigidTrans_;
 };
+
 }
 }
 

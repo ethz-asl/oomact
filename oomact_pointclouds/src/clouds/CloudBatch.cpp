@@ -15,13 +15,12 @@
 #include <sm/kinematics/Transformation.hpp>
 
 #include <aslam/calibration/clouds/PointCloudsPlugin.h>
+#include <aslam/calibration/model/sensors/PointCloudSensor.h>
 
 using aslam::calibration::transform;
 
 namespace aslam {
 namespace calibration {
-
-std::unique_ptr<CloudMeasurements> createCloudMeasurements(const PointCloudSensor& pcs, CloudBatch& cloud);
 
 CloudMeasurements::CloudMeasurements(NanPolicy nanPolicy) : nanPolicy_(nanPolicy) {
 }
@@ -29,7 +28,7 @@ CloudMeasurements::CloudMeasurements(NanPolicy nanPolicy) : nanPolicy_(nanPolicy
 CloudBatch::CloudBatch(const PointCloudSensor& sensor, CloudId id):
     sensor(sensor),
     id(id),
-    measurements(createCloudMeasurements(sensor, *this))
+    measurements(sensor.createCloudMeasurements(*this))
 {
 }
 

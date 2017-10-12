@@ -14,25 +14,23 @@
 #include <boost/make_shared.hpp>
 #include <Eigen/Core>
 #include <glog/logging.h>
-
-#include <aslam/calibration/CalibrationConfI.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
-#include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/tools/Parallelizer.hpp>
-#include <aslam/calibration/tools/tools.h>
 #include <sm/boost/null_deleter.hpp>
 #include <sm/kinematics/EulerAnglesYawPitchRoll.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
+#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibratorI.hpp>
 #include <aslam/calibration/clouds/CalibrationMatcher.h>
+#include <aslam/calibration/clouds/PointCloudsPlugin.h>
+#include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/sensors/GroundPlanePseudoSensor.hpp>
 #include <aslam/calibration/model/sensors/PointCloudSensor.h>
 #include <aslam/calibration/model/sensors/StereoCamera.hpp>
 #include <aslam/calibration/model/sensors/Velodyne.hpp>
-#include <aslam/calibration/clouds/PointCloudsPlugin.h>
+#include <aslam/calibration/tools/Parallelizer.hpp>
 #include <aslam/calibration/tools/PointCloudTools.h>
+#include <aslam/calibration/tools/tools.h>
 
 namespace aslam {
 namespace calibration {
@@ -47,9 +45,6 @@ CloudsContainer::CloudsContainer(PointCloudsPlugin& pcp):
     currentCloudBatchStartTimestamp_(InvalidTimestamp()),
     lastCloudBatchTimestamp_(InvalidTimestamp())
 {
-  for(const PointCloudSensor& s : model_.getSensors<PointCloudSensor>()){
-    cloudBatchesMap_.emplace(s.getId(),  CloudBatches(s));
-  }
 }
 
 CloudsContainer::~CloudsContainer() {
@@ -161,22 +156,21 @@ void CloudsContainer::saveReducedAssociations2d(const size_t& laserId, const std
 /// Save aligned clouds
 /// Transform all the cloud into the RF of the first cloud
 void CloudsContainer::saveAlignedClouds(const std::string& folderName, size_t version) const{
-  if (!boost::filesystem::exists(folderName))
+  if (!boost::filesystem::exists(folderName)){
      boost::filesystem::create_directory(folderName);
-  for (auto& idCloudBatchPair : cloudBatchesMap_){
+  }
+  for (const PointCloudSensor& sensor : model_.getSensors<PointCloudSensor>()){
     int i=0;
-    for (auto& cloud : idCloudBatchPair.second){
-      auto sensorId = idCloudBatchPair.first;
-      auto& sensor = model_.getSensor(sensorId);
-      transformAndSave(folderName + "aligned_" + sensor.getName() + "_" + "_" + i + "_" + version + "." + CloudFileSuffix,
-                                            i == 0 ? TP::Identity(4, 4) : cloud.getMatchesTo(idCloudBatchPair.second.front()).T_ref_read, cloud.getCloud());
-      i++;
+    const CloudBatches& clouds = sensor.getClouds(pcp_.getCalibrator().getCurrentStorage());
+    if(clouds.hasData()){
+      for (auto& cloud : clouds) {
+        transformAndSave(folderName + "aligned_" + sensor.getName() + "_" + "_" + i + "_" + version + "." + CloudFileSuffix,
+                                              i == 0 ? TP::Identity(4, 4) : cloud.getMatchesTo(clouds.front()).T_ref_read, cloud.getCloud());
+        i++;
+      }
     }
   }
 }
-
-
-
 
 void CloudsContainer::transformAndSave(const std::string& fileName, const TP& T, const DP& inCloud) const {
   auto newCloud = rigidTrans_->compute(inCloud,T);
@@ -184,13 +178,13 @@ void CloudsContainer::transformAndSave(const std::string& fileName, const TP& T,
 }
 
 /// Save filtered clouds
-void CloudsContainer::saveFilteredClouds(const SensorId& sensorId, const std::string& folderName, size_t version, Parallelizer& parallelizer) const{
+void CloudsContainer::saveFilteredClouds(const PointCloudSensor& sensor, const std::string& folderName, size_t version, Parallelizer& parallelizer) const{
   if (!boost::filesystem::exists(folderName))
     boost::filesystem::create_directory(folderName);
   int i=0;
-  for (auto& cloud : cloudBatchesMap_.at(sensorId)){
-    parallelizer.add([i, version, sensorId, &cloud, &folderName, this](){
-      cloud.saveFilteredCloud(folderName + model_.getSensorName(sensorId) + "_" + i + "_" + version + "." + CloudFileSuffix);
+  for (auto& cloud : getCloudsFor(sensor)){
+    parallelizer.add([i, version, sensor, &cloud, &folderName, this](){
+      cloud.saveFilteredCloud(folderName + sensor.getName() + "_" + i + "_" + version + "." + CloudFileSuffix);
     });
     i++;
   }
@@ -218,15 +212,10 @@ void CloudsContainer::saveTransformations(const std::string& folderName) const{
 }
 */
 
-void CloudsContainer::clearClouds(){
-  for(auto& idCloudBatchPair : cloudBatchesMap_){
-    idCloudBatchPair.second.clear();
-  }
-}
-
 void CloudsContainer::clearAssociations(){
-  for(auto& idCloudBatchPair : cloudBatchesMap_){
-    for (auto& cloud : idCloudBatchPair.second){
+  auto& storage = pcp_.getCalibrator().getCurrentStorage();
+  for (const PointCloudSensor& sensor : model_.getSensors<PointCloudSensor>()){
+    for (auto& cloud : sensor.getClouds(storage)){
       cloud.clearAssociations();
     }
   }
@@ -241,10 +230,11 @@ size_t CloudsContainer::computeAssociations(const CalibrationConfI& cc){
 
   Parallelizer parallelizer(pcp_.getCalibrator().getOptions().getNumThreads());
 
-  for(const Sensor& sensorReference : model_.getSensors<PointCloudSensor>()){
-    const SensorId sensorReferenceId = sensorReference.getId();
-    if(cloudBatchesMap_.count(sensorReferenceId) == 0) continue;
-    auto& cloudBatchesReference = cloudBatchesMap_.at(sensorReferenceId);
+  auto& storage = pcp_.getCalibrator().getCurrentStorage();
+
+  for(const PointCloudSensor& sensorReference : model_.getSensors<PointCloudSensor>()){
+    auto& cloudBatchesReference = sensorReference.getClouds(storage);
+    if(!cloudBatchesReference.hasData()) continue;
 
     LOG(INFO) << "New reference sensor: " << sensorReference.getName()  << " with " << cloudBatchesReference.size() << " clouds.";
 
@@ -262,7 +252,7 @@ size_t CloudsContainer::computeAssociations(const CalibrationConfI& cc){
       //TODO B make the cloud matching logic more flexible
       //TODO C optimize: select only some 3d clouds depending on the 2d laser.
       //TODO B optimize: prepare point matcher with reference
-      for(Sensor& sensorRegister : model_.getSensors()){
+      for(const PointCloudSensor& sensorRegister : model_.getSensors<PointCloudSensor>()){
         if(!sensorRegister.isUsed() || !sensorRegister.isA<PointCloudSensor>()){
           continue;
         }
@@ -279,7 +269,8 @@ size_t CloudsContainer::computeAssociations(const CalibrationConfI& cc){
           continue;
         }
 
-        if (cloudBatchesMap_.count(sensorRegister.getId()) == 0) {
+        auto& cloudBatchesRegister = sensorRegister.getClouds(storage);
+        if(!cloudBatchesRegister.hasData()) {
           LOG(WARNING) << "Skipping associations of " << sensorRegister.getName() << " because it has no clouds!";
           continue;
         }
@@ -289,8 +280,6 @@ size_t CloudsContainer::computeAssociations(const CalibrationConfI& cc){
           LOG(INFO) << "Skipping associations of " << sensorRegister.getName() << " to " << sensorReference.getName() << " because the cloud matcher is inactive.";
           continue;
         }
-
-        auto& cloudBatchesRegister = cloudBatchesMap_.at(sensorRegister.getId());
 
         LOG(INFO) << "New register sensor: " << sensorRegister.getName()  << " with " << cloudBatchesRegister.size() << " clouds.";
 
@@ -351,12 +340,12 @@ size_t CloudsContainer::computeAssociations(const CalibrationConfI& cc){
   return numberReducedAssociations;
 }
 
-size_t CloudsContainer::associationsIntersection(const Sensor& sensorA, const Sensor& sensorB){
+size_t CloudsContainer::associationsIntersection(const PointCloudSensor& sensorA, const PointCloudSensor& sensorB){
   std::atomic<size_t> numberIntersectedAssociations(0);
 
     //TODO A support cross sensor
   SM_ASSERT_EQ(std::runtime_error, sensorA, sensorB, "");
-  auto& cloudBatchesA = cloudBatchesMap_.at(sensorA.getId()); //TODO A rename
+  auto& cloudBatchesA = getCloudsFor(sensorA); //TODO A rename
   for (CloudBatch& readCloud : cloudBatchesA) {
     for (CloudBatch& refCloud : cloudBatchesA){
       if(readCloud.getId() >= refCloud.getId()) continue;
@@ -458,7 +447,7 @@ size_t CloudsContainer::associationsIntersection(const Sensor& sensorA, const Se
   return numberIntersectedAssociations;
 }
 
-bool isReferenceSensor(const Sensor& s){
+bool isReferenceSensor(const PointCloudSensor& s){
   if(auto sPtr = s.ptrAs<PointCloudSensor>()){
     return sPtr->isA<Velodyne>(); // TODO B introduce the configurable notion of a reference sensor
   } else {
@@ -466,12 +455,12 @@ bool isReferenceSensor(const Sensor& s){
   }
 }
 
-size_t CloudsContainer::associationsRandomSubsample(double prob, const Sensor& sensorA, const Sensor& sensorB){
+size_t CloudsContainer::associationsRandomSubsample(double prob, const PointCloudSensor& sensorA, const PointCloudSensor& sensorB){
   if(prob >= 1){
     throw (std::runtime_error("Filtering with prob >= 1"));
   }
-  auto& cloudBatchesA = cloudBatchesMap_.at(sensorA.getId());
-  auto& cloudBatchesB = cloudBatchesMap_.at(sensorB.getId());
+  auto& cloudBatchesA = getCloudsFor(sensorA);
+  auto& cloudBatchesB = getCloudsFor(sensorB);
 
   const bool bothReferenceSensors = isReferenceSensor(sensorA) && isReferenceSensor(sensorB);
   const bool symmetricMatchesRequired = bothReferenceSensors && pcp_.getCalibrator().getPlugin<PointCloudsPlugin>().getUseSymmetricLidar3dAssociations() && sensorA == sensorB;
@@ -545,61 +534,60 @@ size_t CloudsContainer::associationsRandomSubsample(double prob, const Sensor& s
   return numberReducedAssociations;
 }
 
-size_t CloudsContainer::countAssociations(const Sensor& from, const Sensor& to) const {
-  auto fromClouds = cloudBatchesMap_.find(from.getId());
-  if(fromClouds != cloudBatchesMap_.end()){
-    size_t n = 0;
-    for(const CloudBatch& c : fromClouds->second){
-      for(const auto& m : c.getSensorCloud2AssociationsMap()){
-        if(m.first.get().getSensor() == to){
-          n+=m.second.size();
-        }
+size_t CloudsContainer::countAssociations(const PointCloudSensor& from, const PointCloudSensor& to) const {
+  size_t n = 0;
+  for(const CloudBatch& c : from.getClouds(pcp_.getCalibrator().getCurrentStorage())){
+    for(const auto& m : c.getSensorCloud2AssociationsMap()){
+      if(m.first.get().getSensor() == to){
+        n+=m.second.size();
       }
     }
-    return n;
-  } else {
-    return 0;
   }
+  return n;
+}
+
+CloudBatches::CloudBatches(const PointCloudSensor& sensor, CalibratorI & calib)
+    : sensor_(sensor),
+      pcp_(calib.getPlugin<PointCloudsPlugin>())
+{
+  pointCloudPolicy_ = pcp_.getPointCloudPolicy(sensor);
 }
 
 template <typename TimestampVector>
-void CloudsContainer::applyCloudDataFunctor(const PointCloudSensor& pcSensor, std::function<int(CloudBatch& toCloud)> addDataFuctor, const TimestampVector& timestamps) {
-  if(!pcSensor.isUsed()){
-    LOG(ERROR) << "Got scan input for " << pcSensor.getName() <<  " in spite of it being disabled.";
+void CloudBatches::applyCloudDataFunctor(std::function<int(CloudBatch& toCloud)> addDataFuctor, const TimestampVector& timestamps) {
+  if(!getSensor().isUsed()){
+    LOG(ERROR) << "Got scan input for " << getSensor().getName() <<  " in spite of it being disabled.";
     return;
   }
   if(timestamps.size() == 0){
-    LOG(WARNING) << "Got empty cloud from " << pcSensor.getName();
+    LOG(WARNING) << "Got empty cloud from " << getSensor().getName();
     return;
   }
 
-  pcp_.getCalibrator().addMeasurementTimestamp(timestamps[0], pcSensor);
+  pcp_.getCalibrator().addMeasurementTimestamp(timestamps[0], getSensor());
 
-  if(!pcp_.getCalibrator().isMeasurementRelevant(pcSensor, timestamps[0])){ //TODO B support dropping only beginning of cloud
+  if(!pcp_.getCalibrator().isMeasurementRelevant(getSensor(), timestamps[0])){ //TODO B support dropping only beginning of cloud
     VLOG(1) << "Skipping irrelevant scan data from " << pcp_.getCalibrator().secsSinceStart(Interval{timestamps[0], timestamps[timestamps.size() - 1]});
     return;
   }
 
-  auto& pcPol = pcSensor.getPointCloudPolicy(pcp_);
-  auto& sensorClouds = cloudBatchesMap_.at(pcSensor.getId());
+  getPointCloudPolicy().prepareForNewData(pcp_, *this, timestamps[0], getSensor());
 
-  pcPol.prepareForNewData(pcp_, sensorClouds, timestamps[0], pcSensor);
-
-  if(sensorClouds.isAcceptingData()){
-    const int i = addDataFuctor(sensorClouds.getCurrentCloud());
+  if(isAcceptingData()){
+    const int i = addDataFuctor(getCurrentCloud());
     if(i > 0) {
-      pcp_.getCalibrator().addMeasurementTimestamp(timestamps[0], pcSensor);
-      pcp_.getCalibrator().addMeasurementTimestamp(timestamps[i - 1], pcSensor);
+      pcp_.getCalibrator().addMeasurementTimestamp(timestamps[0], getSensor());
+      pcp_.getCalibrator().addMeasurementTimestamp(timestamps[i - 1], getSensor());
     }
 
     if(i < static_cast<int>(timestamps.size())){
-      VLOG(1) << "Dropping " << (timestamps.size() - i) << " points from " << pcSensor.getName();
+      VLOG(1) << "Dropping " << (timestamps.size() - i) << " points from " << getSensor().getName();
     }
   }
 }
 // request instantiation
-template void CloudsContainer::applyCloudDataFunctor(const PointCloudSensor& pcSensor, std::function<int(CloudBatch& toCloud)> addDataFuctor, const Eigen::Matrix<Timestamp, Eigen::Dynamic, 1>& timestamps);
-template void CloudsContainer::applyCloudDataFunctor(const PointCloudSensor& pcSensor, std::function<int(CloudBatch& toCloud)> addDataFuctor, const std::vector<Timestamp>& timestamps);
+template void CloudBatches::applyCloudDataFunctor(std::function<int(CloudBatch& toCloud)> addDataFuctor, const Eigen::Matrix<Timestamp, Eigen::Dynamic, 1>& timestamps);
+template void CloudBatches::applyCloudDataFunctor(std::function<int(CloudBatch& toCloud)> addDataFuctor, const std::vector<Timestamp>& timestamps);
 
 
 void CloudBatches::dropCurrentCloud() {
@@ -618,7 +606,7 @@ void CloudBatches::finishCurrentCloud(const PointCloudsPlugin& pcp) {
     if(!back().isClosed()){
       back().close();
       auto& calib = pcp.getCalibrator();
-      LOG(INFO) << "New full cloud : " << sensor.getName() << "(" << size() - 1 << ")[" << calib.secsSinceStart(back().getMinTimestamp()) << ", " << calib.secsSinceStart(back().getMaxTimestamp()) << "](#=" << back().getMeasurements().getSize() << ")";
+      LOG(INFO) << "New full cloud : " << getSensor().getName() << "(" << size() - 1 << ")[" << calib.secsSinceStart(back().getMinTimestamp()) << ", " << calib.secsSinceStart(back().getMaxTimestamp()) << "](#=" << back().getMeasurements().getSize() << ")";
     }
   }
 }
@@ -647,6 +635,22 @@ const CloudBatch& CloudBatches::getCurrentCloud() const {
 
 bool CloudBatches::isAcceptingData() const {
   return !empty() && !back().isClosed();
+}
+
+bool CloudBatches::hasData() const {
+  return !empty() && !front().isEmpty();
+}
+
+const CloudBatches& CloudsContainer::getCloudsFor(const PointCloudSensor& s) const {
+  return s.getClouds(pcp_.getCalibrator().getCurrentStorage());
+}
+
+CloudBatches& CloudsContainer::getCloudsFor(const PointCloudSensor& s) {
+  return s.getClouds(pcp_.getCalibrator().getCurrentStorage());
+}
+
+const aslam::calibration::PointCloudPolicy& CloudBatches::getPointCloudPolicy() const {
+  return *pointCloudPolicy_;
 }
 
 }

@@ -1,11 +1,12 @@
 #ifndef HD99F880C_876B_4FC1_A6D7_CBC4D83CB182
 #define HD99F880C_876B_4FC1_A6D7_CBC4D83CB182
 
-#include <aslam/backend/ScalarExpression.hpp>
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
+#include <array>
 #include <vector>
 
-using aslam::backend::ScalarExpression;
+#include <aslam/backend/ScalarExpression.hpp>
+#include <aslam/calibration/input/InputReceiverI.h>
+#include <aslam/calibration/model/sensors/Lidar3d.hpp>
 
 namespace ethz {
 namespace velodyne {
@@ -16,7 +17,17 @@ class Velodyne32Calibration;
 namespace aslam {
 namespace calibration {
 
-class Velodyne : public Lidar3d {
+struct VelodynePackageRef {
+  const char * data;
+  size_t length;
+};
+
+struct VelodynePoint {
+  std::array<float, 3> p;
+  float intensity;
+};
+
+class Velodyne : public Lidar3d, public InputReceiverIT<VelodynePackageRef>, public InputReceiverIT<VelodynePoint> {
  public:
   Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRef config);
   virtual ~Velodyne();
@@ -35,17 +46,22 @@ class Velodyne : public Lidar3d {
 
   const ethz::velodyne::Velodyne32Calibration& getCalibration() const { return *calibration; }
 
-  void addNewPackage(CalibratorI& calibrator, const std::string& data, const Timestamp& t) const;
+  void addNewPackage(const Timestamp& t, const std::string& data, ModuleStorage& storage) const;
+
+  void addInputTo(Timestamp t, const VelodynePackageRef & input, ModuleStorage & s) const override;
+  void addInputTo(Timestamp t, const VelodynePoint & input, ModuleStorage & s) const override;
 
   float getBeamDistantanceCorrection(int laserIndex) const;
-  ScalarExpression getBeamDistantanceCorrectionExpression(int laserIndex) const;
+  aslam::backend::ScalarExpression getBeamDistantanceCorrectionExpression(int laserIndex) const;
   float getBeamVerticalAngleCorrection(int laserIndex) const;
-  ScalarExpression getBeamVerticalAngleCorrectionExpression(int laserIndex) const;
+  aslam::backend::ScalarExpression getBeamVerticalAngleCorrectionExpression(int laserIndex) const;
 
   virtual std::unique_ptr<CloudMeasurements> createCloudMeasurements(CloudBatch& cloudBatch) const;
+
  protected:
   void writeConfig(std::ostream& out) const override;
   void setActive(bool spatial, bool temporal) override;
+
  private:
   bool doIntrinsicCalibration;
   bool doBeamAngleCalibration;
@@ -55,9 +71,9 @@ class Velodyne : public Lidar3d {
 
   std::shared_ptr<ethz::velodyne::Velodyne32Calibration> calibration;
   std::vector<ScalarCvSp> beamDistanceOffsets;
-  std::vector<ScalarExpression> beamDistanceOffsetExpressions;
+  std::vector<aslam::backend::ScalarExpression> beamDistanceOffsetExpressions;
   std::vector<ScalarCvSp> beamVerticalAngle;
-  std::vector<ScalarExpression> beamVerticalAngleExpressions;
+  std::vector<aslam::backend::ScalarExpression> beamVerticalAngleExpressions;
 };
 
 } /* namespace calibration */

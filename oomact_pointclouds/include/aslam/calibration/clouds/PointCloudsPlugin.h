@@ -34,7 +34,7 @@ class Sensor;
 struct CloudMatcher;
 class MeasurementTransformer;
 
-class PointCloudsPlugin : public CalibratorPlugin {
+class PointCloudsPlugin : public CalibratorPlugin, public CalibrationPhaseClient {
  public:
   typedef std::shared_ptr<CloudsContainer> CloudsContainerSP;
 
@@ -51,7 +51,7 @@ class PointCloudsPlugin : public CalibratorPlugin {
   const CalibrationMatcher& getCloudMatcher(const Sensor& sensorRegister, const Sensor& sensorReference) const;
 
   std::shared_ptr<const PointCloudPolicy> getDefaultPointCloudPolicy() const;
-  std::shared_ptr<const PointCloudPolicy> getPointCloudPolicy(const Sensor& sensor) const;
+  std::shared_ptr<const PointCloudPolicy> getPointCloudPolicy(const PointCloudSensor& sensor) const;
 
   const Frame& getMapFrame() const;
 
@@ -59,14 +59,14 @@ class PointCloudsPlugin : public CalibratorPlugin {
 
  private:
 //  friend CloudsContainer;
-  void addCloudAssociationsErrorTerms(const PointCloudSensor& sensorRef, const PointCloudSensor& sensorRead, const CloudsContainerSP& cloudsContainer, backend::ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec);
-  void addCloudAssociationsErrorTerms(const Sensor& referenceSensor, const std::function<bool(const Sensor &)> sensorFilter, const CloudsContainerSP& cloudsContainer, backend::ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec);
+  void addCloudAssociationsErrorTerms(const PointCloudSensor& sensorRef, const PointCloudSensor& sensorRead, backend::ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec);
+  void addCloudAssociationsErrorTerms(const Sensor& referenceSensor, const std::function<bool(const Sensor &)> sensorFilter, backend::ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec);
   void buildCloudProblem(CloudsContainerSP& batches, const CalibrationConfI & config);
   void clearCloudsAssociations();
-  void closeAllCurrentClouds(CloudsContainer& cloudContainer) const;
-  void closeCurrentCloud(CloudsContainer& cloudContainer, const PointCloudSensor& pcs) const;
+  void closeAllCurrentClouds();
+  void closeCurrentCloud(const PointCloudSensor& pcs);
   void postprocessAssociations();
-  void preprocessWindowClouds(CloudsContainer& cloudContainer);
+  void preprocessWindowClouds() override; //TODO 0
   void updateCloudUsingCurrentTrajectory(CloudBatch& cloud, const sm::kinematics::Transformation& T_r_laser, const Sensor& sensor);
   void writeSnapshot(const CalibrationConfI& config, const std::string& path, bool updateFirstBasedOnCurrentSplines);
 

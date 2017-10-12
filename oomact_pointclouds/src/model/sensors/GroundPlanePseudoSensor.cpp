@@ -45,7 +45,6 @@ GroundPlanePseudoSensor::GroundPlanePseudoSensor(Model& model, std::string name,
   SM_ASSERT_GT(std::runtime_error, gridNx, 0, "Grid gridNx must be bigger than 0");
   gridNy = lidarConfig.getInt("gridNy", 500);
   SM_ASSERT_GT(std::runtime_error, gridNy, 0, "Grid gridNy must be bigger than 0");
-  setPointCloudPolicy(std::make_shared<GroundPlanePseudoSensorPoinCloudPolicy>());
 }
 
 size_t GroundPlanePseudoSensor::findPointsInFieldOfView(const DP& piontCloud, const sm::kinematics::Transformation& T_sensor_pointCloud, std::vector<bool>&goodPoints) const {
@@ -90,7 +89,7 @@ void GroundPlanePseudoSensor::preProcessNewWindow(CalibratorI& calib) {
   timestamps.setConstant(timeStamp);
   LOG(INFO)<< "Adding ground plain point clout at " << calib.secsSinceStart(timeStamp) << ".";
   auto& pcp = calib.getPlugin<PointCloudsPlugin>();
-  CloudBatches& clouds = pcp.getCloudsContainer().getCloudsFor(id);
+  CloudBatches& clouds = getClouds(calib.getCurrentStorage());
   clouds.createNewCloud(pcp, *this).getMeasurements<EuclideanCloudMeasurements>().addData(timestamps, points, points.cols());
   clouds.finishCurrentCloud(pcp);
 }
@@ -137,6 +136,10 @@ void GroundPlanePseudoSensor::writeConfig(std::ostream& out) const {
   out << ", gridDelta=" << gridDelta;
   out << ", gridNx=" << gridNx;
   out << ", gridNy=" << gridNy;
+}
+
+std::shared_ptr<const PointCloudPolicy> GroundPlanePseudoSensor::getDefaultPointCloudPolicy(const PointCloudsPlugin&) const {
+  return std::make_shared<GroundPlanePseudoSensorPoinCloudPolicy>();
 }
 
 } /* namespace calibration */

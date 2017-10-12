@@ -23,10 +23,10 @@
 #include "aslam/calibration/laser-scanner/laser3d.h"
 #include "aslam/calibration/clouds/PointCloudsPlugin.h"
 
+using aslam::backend::ScalarExpression;
 using boost::algorithm::starts_with;
 using ethz::velodyne::Velodyne32Calibration;
 using namespace sm::value_store;
-
 
 //TODO Deploy move libvelodyne dependent stuff to a velodyne_calibration_package to get rid of this dependency
 
@@ -420,8 +420,8 @@ aslam::backend::EuclideanExpression toEuclideanExpression(const RawMeasurement& 
     const float sinRot = sin(yaw);
     const float cosRot = cos(yaw);
     aslam::backend::ScalarExpression bVAC = velodyne.getBeamVerticalAngleCorrectionExpression(m.beamIndex);
-    ScalarExpression sinVertCorr = sin(bVAC);
-    ScalarExpression cosVertCorr = cos(bVAC);
+    aslam::backend::ScalarExpression sinVertCorr = sin(bVAC);
+    aslam::backend::ScalarExpression cosVertCorr = cos(bVAC);
     p =   aslam::backend::EuclideanExpression(Eigen::Vector3d::UnitX() * sinRot) * cosVertCorr
         + aslam::backend::EuclideanExpression(Eigen::Vector3d::UnitY() * cosRot) * cosVertCorr
         + aslam::backend::EuclideanExpression(Eigen::Vector3d::UnitZ()) *sinVertCorr;
@@ -482,23 +482,21 @@ class VelodyneCloudMeasurements : public EuclideanCloudMeasurements, private Raw
 
 }
 
-void Velodyne::addNewPackage(CalibratorI& calibrator, const std::string& data, const Timestamp& t) const {
+void Velodyne::addNewPackage(const Timestamp& t, const std::string& data, ModuleStorage& storage) const {
   auto getTimestamps = [t](size_t scanSize){
     CloudBatch::TimestampsInputVector timestamps(scanSize, 1);
     timestamps.setConstant(t.getNumerator()); //TODO A use individual timestamps!
     return timestamps;
   };
-  auto& pointCloudsPlugin = calibrator.getPlugin<PointCloudsPlugin>();
   if(!doIntrinsicCalibration){
     CloudBatch::PointCloud scan;
     convertPacketInto(data, scan, minimalDistance, maximalDistance, getCalibration());
-    pointCloudsPlugin.getCloudsContainer().addCloudScan(*this, scan, getTimestamps(scan.cols()));
+    getClouds(storage).addCloudScan(*this, scan, getTimestamps(scan.cols()));
   } else {
     RawMeasurements scan;
     toRawMeasurements(data, scan, minimalDistance, maximalDistance);
     const size_t size = scan.rawMeasurements.size();
-    pointCloudsPlugin.getCloudsContainer().applyCloudDataFunctor(
-        *this,
+    getClouds(storage).applyCloudDataFunctor(
         [&, t](CloudBatch& toCloud){
           return toCloud.getMeasurements<VelodyneCloudMeasurements>().addData(*this, t, scan);
         },
@@ -507,11 +505,18 @@ void Velodyne::addNewPackage(CalibratorI& calibrator, const std::string& data, c
   }
 }
 
+void Velodyne::addInputTo(Timestamp t, const VelodynePackageRef& input, ModuleStorage& storage) const {
+  addNewPackage(t, std::string(input.data, input.length), storage);
+}
+
+void Velodyne::addInputTo(Timestamp t, const VelodynePoint& input, ModuleStorage& storage) const {
+  //TODO 0
+}
 
 void Velodyne::estimatesUpdated(CalibratorI& calib) const {
   if(doIntrinsicCalibration){
     LOG(INFO) << "Updating point clouds after an update of the intrinsics.";
-    for(CloudBatch& c : calib.getPlugin<PointCloudsPlugin>().getCloudsContainer().getCloudsFor(*this)){
+    for(CloudBatch& c : getClouds(calib.getCurrentStorage())){
       c.getMeasurements<VelodyneCloudMeasurements>().updatePoints(*this);
     }
   }
@@ -529,4 +534,3 @@ std::unique_ptr<CloudMeasurements> Velodyne::createCloudMeasurements(CloudBatch&
 
 } /* namespace calibration */
 } /* namespace aslam */
-

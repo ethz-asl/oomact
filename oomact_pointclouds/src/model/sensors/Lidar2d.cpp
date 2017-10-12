@@ -8,7 +8,7 @@ namespace calibration {
 Lidar2d::Lidar2d(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
   Lidar(model, name, config)
 {
-  minimalAngle = lidarConfig.getDouble("minimalAngle");  // TODO B use mirror information
+  minimalAngle = lidarConfig.getDouble("minimalAngle");
   maximalAngle = lidarConfig.getDouble("maximalAngle");
   angularResolution = lidarConfig.getDouble("angularResolution");
   measurementTimeIncrement = lidarConfig.getDouble("measurementTimeIncrement");

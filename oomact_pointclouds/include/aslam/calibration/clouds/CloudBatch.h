@@ -172,34 +172,8 @@ inline bool operator == (reference_wrapper<const aslam::calibration::CloudBatch>
 namespace aslam {
 namespace calibration {
 
+//TODO A RENAME to Cloud
 class CloudBatch{
-
-      // TODO: Define the clean functions, if we want to implement a reoptimization,
-      // - we need to save all the measurements, as they are, in a std::vector
-      //
-      // - for each run of the pipeline, building the DataPoints for pointmatcher
-      //   WITHOUT deleting the std::vector of the measurements, penalty we have to
-      //   refill it
-      //
-      // - when we finish the buildCloudProblem, we can delete the matrices, it causes
-      //   an overhead but it is just related to the span of the buildCloudProblem function
-      //   so we need a function to delete the matrices, as cleanPointCloudsPlugin()
-      //
-      // - when we add the error terms and we need to clean the measurements, we need another function
-      //   in the cleanMeasurements in calibrator, that deletes the associations
-      //
-      // - we need to keep ALL the initial points, without filtering, since another spline
-      //   will positionate the points in different parts, so we need to refilter all (it is good)
-      //   We don't need to create another vector of indices since the first (referring to the whole)
-      //   cloud is sufficient,
-      //
-      // - Find a way to estimate the covariance of the normals, and add in a vector (if we want it spherical)
-      //
-      // - Add accessor functions to get the minimun angle, timestamp, ecc. as done
-      //   in Jerome library
-
-      // TODO: Adapt the structure to accept intensity measurement, for the future
-      // integration with the cameras
      public:
       typedef PM::IntMatrix::Scalar Index;
       typedef TP Transformation;

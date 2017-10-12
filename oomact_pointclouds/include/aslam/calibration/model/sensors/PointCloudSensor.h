@@ -45,19 +45,11 @@ struct SimplePointCloudPolicy : public PointCloudPolicy, public NamedMinimal {
 class PointCloudSensor : public Sensor {
  public:
   PointCloudSensor(Model& model, const std::string& name, sm::value_store::ValueStoreRef config);
-  void filterPointCloud(CloudBatch& data);
-
-  virtual size_t findPointsInFieldOfView(const DP& pointCloud, const sm::kinematics::Transformation& T_sensor_pointCloud, std::vector<bool>&goodPoints) const;
-
-  virtual Eigen::Matrix3d covPoint(bool useSurfaceNormal, const Eigen::Vector3d& pInSensorFrame, const Eigen::Vector3d& nInSensorFrame) const;
-
-  virtual const PointCloudPolicy& getPointCloudPolicy(const PointCloudsPlugin& pcp) const;
-
   virtual ~PointCloudSensor();
 
-  void setPointCloudPolicy(const std::shared_ptr<const PointCloudPolicy>& pointCloudPolicy) {
-    this->pointCloudPolicy = pointCloudPolicy;
-  }
+  void filterPointCloud(CloudBatch& data);
+  virtual size_t findPointsInFieldOfView(const DP& pointCloud, const sm::kinematics::Transformation& T_sensor_pointCloud, std::vector<bool>&goodPoints) const;
+  virtual Eigen::Matrix3d covPoint(bool useSurfaceNormal, const Eigen::Vector3d& pInSensorFrame, const Eigen::Vector3d& nInSensorFrame) const;
 
   Interval getCurrentMeasurementTimestampRange(const CalibratorI& calib) const override;
 
@@ -69,12 +61,16 @@ class PointCloudSensor : public Sensor {
   typedef EuclideanCloudMeasurements CloudMeasurementsImpl;
   virtual std::unique_ptr<CloudMeasurements> createCloudMeasurements(CloudBatch& cloudBatch) const;
 
+  virtual std::shared_ptr<const PointCloudPolicy> getDefaultPointCloudPolicy(const PointCloudsPlugin & pcp) const;
+
+  bool hasClouds(const ModuleStorage& storage) const;
+  virtual const CloudBatches& getClouds(const ModuleStorage& storage) const;
+  virtual CloudBatches& getClouds(ModuleStorage& storage) const;
  protected:
   void writeConfig(std::ostream& out) const override;
 
  private:
   PmFilter filter;
-  mutable std::shared_ptr<const PointCloudPolicy> pointCloudPolicy;
 
  protected:
   NanPolicy nanPolicy;

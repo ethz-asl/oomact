@@ -5,7 +5,6 @@
 #include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/TransformationExpression.hpp>
 #include <aslam/calibration/calibrator/CalibratorI.hpp>
-#include <aslam/calibration/model/Sensor.hpp>
 
 #include <aslam/calibration/clouds/CalibrationMatcher.h>
 #include <aslam/calibration/clouds/CloudsContainer.h>
@@ -35,7 +34,7 @@ struct CloudMatcher {
 };
 
 PointCloudsPlugin::PointCloudsPlugin(CalibratorI& calib, ValueStoreRef config) :
-  CalibratorPlugin(calib),
+  CalibratorPlugin(calib, config),
   useSymmetricLidar3dAssociations_(config.getBool("useSymmetricLidar3dAssociations")),
   usePointToPlainErrorTerm_(config.getBool("usePointToPlainErrorTerm")),
   mapFrame_(calib.getModel().getFrame(config.getString("mapFrame"))),
@@ -89,7 +88,7 @@ std::shared_ptr<const PointCloudPolicy> PointCloudsPlugin::getDefaultPointCloudP
   return std::static_pointer_cast<const PointCloudPolicy>(defaultPointCloudPolicy_);
 }
 
-std::shared_ptr<const PointCloudPolicy> PointCloudsPlugin::getPointCloudPolicy(const Sensor& sensor) const {
+std::shared_ptr<const PointCloudPolicy> PointCloudsPlugin::getPointCloudPolicy(const PointCloudSensor& sensor) const {
   CHECK(!pointCloudPolicies_.empty()) << "This requires at least one point cloud policy";
   std::shared_ptr<const PointCloudPolicy> found;
 
@@ -104,18 +103,11 @@ std::shared_ptr<const PointCloudPolicy> PointCloudsPlugin::getPointCloudPolicy(c
     }
   }
   if(!found){
-   found = getDefaultPointCloudPolicy();
+   found = sensor.getDefaultPointCloudPolicy(*this);
   }
 
   LOG(INFO) << "Using " << *found << " for " << sensor.getName() << ".";
   return found;
-}
-
-const PointCloudPolicy& getPointCloudPolicy(const PointCloudsPlugin& pc, const Sensor& s) {
-  if(auto ptr = s.ptrAs<PointCloudSensor>()){
-    return ptr->getPointCloudPolicy(pc);
-  }
-  return *pc.getDefaultPointCloudPolicy();
 }
 
 const Frame& PointCloudsPlugin::getMapFrame() const {
@@ -146,7 +138,7 @@ PM::ScalarType getNormalWeight(const CloudBatch& cloud, const int readIndex) {
   return p;
 }
 
-void PointCloudsPlugin::addCloudAssociationsErrorTerms(const Sensor& referenceSensor, const std::function<bool(const Sensor &)> sensorFilter, const CloudsContainerSP& cloudsContainer, ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec) {
+void PointCloudsPlugin::addCloudAssociationsErrorTerms(const Sensor& referenceSensor, const std::function<bool(const Sensor &)> sensorFilter, ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec) {
   CHECK(referenceSensor.isA<PointCloudSensor>()) << "Sensor " << referenceSensor << " is not a PointCloudSensor!";
 
   const std::string taskName =  referenceSensor.getName() + " to sensor selection error terms.";
@@ -159,12 +151,12 @@ void PointCloudsPlugin::addCloudAssociationsErrorTerms(const Sensor& referenceSe
   for (const Sensor& s : getModel().getSensors()) {
     if(sensorFilter(s)){
       CHECK(s.isA<PointCloudSensor>()) << "Sensor " << s << " is not a PointCloudSensor!";
-      addCloudAssociationsErrorTerms(referenceSensor.as<PointCloudSensor>(), s.as<PointCloudSensor>(), cloudsContainer, errorTermReceiver, ec);
+      addCloudAssociationsErrorTerms(referenceSensor.as<PointCloudSensor>(), s.as<PointCloudSensor>(), errorTermReceiver, ec);
     }
   }
 }
 
-void PointCloudsPlugin::addCloudAssociationsErrorTerms(const PointCloudSensor& sensorRef, const PointCloudSensor& sensorRead, const CloudsContainerSP& cloudsContainer, ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec) {
+void PointCloudsPlugin::addCloudAssociationsErrorTerms(const PointCloudSensor& sensorRef, const PointCloudSensor& sensorRead, ErrorTermReceiver& errorTermReceiver, const CalibrationConfI& ec) {
   ErrorTermCloudAssociation::CovarianceInput Qn;
   if(auto lidar3dPtr = sensorRef.ptrAs<Lidar3d>()){
     // Covariance of the normal needs further investigation (Not used)
@@ -176,12 +168,14 @@ void PointCloudsPlugin::addCloudAssociationsErrorTerms(const PointCloudSensor& s
     return;
   }
 
+  const auto& storage = getCalibrator().getCurrentStorage();
+
   const std::string taskGroupName = sensorRead.getName() + " to " + sensorRef.getName() + " association";
-  if(cloudsContainer->cloudBatchesMap_.count(sensorRead.getId()) == 0){
+  if(!sensorRead.hasClouds(storage)){
     LOG(INFO) << "Skipping " << taskGroupName << " error terms because " << sensorRead.getName() << " has no clouds.";
     return;
   }
-  if(cloudsContainer->cloudBatchesMap_.count(sensorRef.getId()) == 0){
+  if(!sensorRef.hasClouds(storage)){
     LOG(INFO) << "Skipping " << taskGroupName << " error terms because " << sensorRef.getName() << " has no clouds.";
     return;
   }
@@ -196,8 +190,8 @@ void PointCloudsPlugin::addCloudAssociationsErrorTerms(const PointCloudSensor& s
   LOG(INFO) << "Adding " << taskGroupName << " error terms.";
   ErrorTermStatistics totalToRefSensorStat(taskGroupName);
 
-  const auto& cloudBatchesRef = cloudsContainer->cloudBatchesMap_.at(sensorRef.getId());
-  const auto& cloudBatchesRead = cloudsContainer->cloudBatchesMap_.at(sensorRead.getId());
+  const auto& cloudBatchesRef = sensorRef.getClouds(storage);
+  const auto& cloudBatchesRead = sensorRead.getClouds(storage);
 
   auto& calib = getCalibrator();
   const Interval& validRange = calib.getCurrentEffectiveBatchInterval();
@@ -301,7 +295,7 @@ void PointCloudsPlugin::addCloudAssociationsErrorTerms(const PointCloudSensor& s
                 etgr));
           }
 
-          e_cloud->setMEstimatorPolicy(sensorRead.getMEstimator()); //TODO D allow different m-estimator (should be definable for ordered sensor pairs)
+          e_cloud->setMEstimatorPolicy(sensorRead.getMEstimator());
 
           totalToRefSensorStat.add(e_cloud);
           taskStat.add(e_cloud);
@@ -362,26 +356,26 @@ void PointCloudsPlugin::postprocessAssociations() {
   }
 }
 
-
-void PointCloudsPlugin::closeCurrentCloud(CloudsContainer& cloudContainer, const PointCloudSensor& pcs) const {
-  LOG(INFO) << "Closing current cloud for " << pcs.getName();
-  pcs.getPointCloudPolicy(*this).prepareForEstimation(*this, cloudContainer.getCloudsFor(pcs.getId()));
+void PointCloudsPlugin::closeCurrentCloud(const PointCloudSensor& sensor) {
+  LOG(INFO) << "Closing current cloud for " << sensor.getName();
+  auto& clouds = sensor.getClouds(getCalibrator().getCurrentStorage());
+  clouds.getPointCloudPolicy().prepareForEstimation(*this, clouds);
 }
 
-
-void PointCloudsPlugin::closeAllCurrentClouds(CloudsContainer& cloudContainer) const {
+void PointCloudsPlugin::closeAllCurrentClouds() {
   LOG(INFO) << "Closing all remaining open clouds.";
-  for (auto& sensorIdCloudsPair : cloudContainer.cloudBatchesMap_) {
-    calibration::getPointCloudPolicy(*this, getModel().getSensor(sensorIdCloudsPair.first)).prepareForEstimation(*this, sensorIdCloudsPair.second);
+  for (const PointCloudSensor& sensor : getModel().getSensors<PointCloudSensor>()){
+    closeCurrentCloud(sensor);
   }
 }
 
-void PointCloudsPlugin::preprocessWindowClouds(CloudsContainer& cloudContainer) {
+void PointCloudsPlugin::preprocessWindowClouds() {
   LOG(INFO) << "Preprocessing current window's clouds.";
-  closeAllCurrentClouds(cloudContainer);
+  closeAllCurrentClouds();
 
-  for(auto& sensorIdCloudsPair : cloudContainer.cloudBatchesMap_){
-    auto& clouds = sensorIdCloudsPair.second;
+  auto& storage = getCalibrator().getCurrentStorage();
+  for (const PointCloudSensor& sensor : getModel().getSensors<PointCloudSensor>()){
+    auto& clouds = sensor.getClouds(storage);
     size_t s = 0;
     for (auto& cloud : clouds) {
       Timer deleting_points_timer("Deleting out of bounds points");
@@ -393,11 +387,11 @@ void PointCloudsPlugin::preprocessWindowClouds(CloudsContainer& cloudContainer) 
 
       s+= measurements.getSize();
 
-      if (measurements.getSize() < 1000) {
+      if (measurements.getSize() < 1000) { // TODO Make constant
         LOG(WARNING) << "Got too small point cloud, containing only " << measurements.getSize()<< " points!";
       }
     }
-    LOG(INFO)<< "Point cloud sensor " << getModel().getSensorName(sensorIdCloudsPair.first) << " has " << clouds.size() << " clouds with a total of " << s << " points.";
+    LOG(INFO)<< "Point cloud sensor " << sensor.getName() << " has " << clouds.size() << " clouds with a total of " << s << " points.";
   }
 }
 
@@ -407,11 +401,11 @@ void PointCloudsPlugin::buildCloudProblem(CloudsContainerSP& cloudsContainer, co
 
   Parallelizer parallelizer(getCalibrator().getOptions().getNumThreads());
 
-  for(PointCloudSensor& sensor : getModel().getSensors<PointCloudSensor>()){
-    const SensorId id = sensor.getId();
+  auto& storage = getCalibrator().getCurrentStorage();
 
-    if(cloudsContainer->cloudBatchesMap_.count(id) == 0) continue;
-    auto& clouds = cloudsContainer->cloudBatchesMap_.at(id);
+  for(PointCloudSensor& sensor : getModel().getSensors<PointCloudSensor>()){
+    auto& clouds = sensor.getClouds(storage);
+    if(!clouds.hasData()) continue;
 
     size_t cloudCount = 0;
     const auto T_r_s = sensor.calcTransformationToParent();
@@ -525,15 +519,15 @@ void PointCloudsPlugin::clearCloudsAssociations() {
 
 void PointCloudsPlugin::writeSnapshot(const CalibrationConfI&, const std::string& path, bool updateFirstBasedOnCurrentSplines){
   Parallelizer parallelizer(getCalibrator().getOptions().getNumThreads());
+  auto& storage = getCalibrator().getCurrentStorage();
 
   cloudVersionCounter_ ++;
 
   if(updateFirstBasedOnCurrentSplines){
     // Update clouds with newest trajectory
-    for(auto& idCloudBatchesPair : cloudsContainer_->cloudBatchesMap_){
-      const Sensor& sensor = getModel().getSensor(idCloudBatchesPair.first);
+    for(const PointCloudSensor& sensor : getModel().getSensors<PointCloudSensor>()){
       auto T_p_s = sensor.calcTransformationToParent(); // TODO A support more comples models.
-      for (auto& cloud : idCloudBatchesPair.second){
+      for (auto& cloud : sensor.getClouds(storage)){
         parallelizer.add([this, &cloud, T_p_s, &sensor](){ updateCloudUsingCurrentTrajectory(cloud, T_p_s, sensor); });
       }
     }
@@ -542,8 +536,10 @@ void PointCloudsPlugin::writeSnapshot(const CalibrationConfI&, const std::string
   }
 
   // Write clouds
-  for(auto& idCloudBatchesPair : cloudsContainer_->cloudBatchesMap_){
-    cloudsContainer_->saveFilteredClouds(idCloudBatchesPair.first, path, cloudVersionCounter_, parallelizer);
+  for(const PointCloudSensor& s : getModel().getSensors<PointCloudSensor>()){
+    if(s.hasClouds(storage)){
+      cloudsContainer_->saveFilteredClouds(s, path, cloudVersionCounter_, parallelizer);
+    }
   }
   parallelizer.doAndWait();
   LOG(INFO) << "Fished parallel writing of the point clouds." <<std::endl;
