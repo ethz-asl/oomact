@@ -9,6 +9,7 @@
 
 #include <aslam/calibration/calibrator/CalibratorRef.h>
 #include <aslam/calibration/data/StorageI.h>
+#include <aslam/calibration/tools/IsA.h>
 #include <aslam/calibration/tools/Named.h>
 
 namespace boost {
@@ -51,37 +52,6 @@ class Calibratable {
 struct ModuleLinkBase;
 struct ModuleRegistry;
 
-template <typename Derived>
-class IsA {
- public:
-  template <typename T>
-  bool isA() const {
-    return dynamic_cast<const T*>(getDerived()) != nullptr;
-  }
-  template <typename T>
-  const T& as() const {
-    return *dynamic_cast<const T*>(getDerived());
-  }
-  template <typename T>
-  T& as() {
-    return *dynamic_cast<T*>(getDerived());
-  }
-  template <typename T>
-  const T* ptrAs() const {
-    return dynamic_cast<const T*>(getDerived());
-  }
-  template <typename T>
-  T* ptrAs() {
-    return dynamic_cast<T*>(getDerived());
-  }
- private:
-  Derived * getDerived() {
-    return static_cast<Derived*>(this);
-  }
-  const Derived * getDerived() const {
-    return static_cast<const Derived*>(this);
-  }
-};
 
 std::string normalizeParamName(const char * parameter);
 
