@@ -529,7 +529,7 @@ aslam::backend::EuclideanExpression Velodyne::calcMeasurementExpressionByUnfilte
 }
 
 std::unique_ptr<CloudMeasurements> Velodyne::createCloudMeasurements(CloudBatch& /*cloudBatch*/) const {
-  return std::unique_ptr<CloudMeasurements>(doIntrinsicCalibration ? new VelodyneCloudMeasurements(nanPolicy) : new EuclideanCloudMeasurements(nanPolicy));
+  return std::unique_ptr<CloudMeasurements>(doIntrinsicCalibration ? new VelodyneCloudMeasurements(nanPolicy_) : new EuclideanCloudMeasurements(nanPolicy_));
 }
 
 } /* namespace calibration */

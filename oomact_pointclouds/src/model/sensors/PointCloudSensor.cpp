@@ -15,21 +15,29 @@ namespace calibration {
 
 PointCloudSensor::PointCloudSensor(Model& model, const std::string& name, sm::value_store::ValueStoreRef config)
 : Sensor(model, name, config),
-  filter(isUsed() ? model.resolveConfigPath(config.getString(name + "/pcFilterConfig")) : std::string()),
-  nanPolicy({true, false})
+  filter_(isUsed() ? model.resolveConfigPath(config.getString(name + "/pcFilterConfig")) : std::string()),
+  nanPolicy_({true, false})
 {
 }
 
+const CloudBatches& PointCloudSensor::getClouds(const ModuleStorage& storage) const {
+  return clouds_.getDataFrom(storage);
+}
+
+CloudBatches& PointCloudSensor::getClouds(ModuleStorage& storage) const {
+  return clouds_.getDataFrom(storage);
+}
+
 void PointCloudSensor::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAM(nanPolicy.checkForNans);
-  MODULE_WRITE_PARAM(nanPolicy.nansAreFine);
+  MODULE_WRITE_PARAM(nanPolicy_.checkForNans);
+  MODULE_WRITE_PARAM(nanPolicy_.nansAreFine);
 }
 
 PointCloudSensor::~PointCloudSensor(){
 }
 
 void PointCloudSensor::filterPointCloud(CloudBatch& data) {
-  filter.filter(data);
+  filter_.filter(data);
 }
 
 size_t PointCloudSensor::findPointsInFieldOfView(const DP& /* pointCloud */, const sm::kinematics::Transformation& /* T_sensor_pointCloud */, std::vector<bool>& /* goodPoints */) const {
@@ -60,29 +68,29 @@ void PointCloudPolicy::prepareForEstimation(const PointCloudsPlugin& pcp, CloudB
 
 SimplePointCloudPolicy::SimplePointCloudPolicy(std::string name, ValueStoreRef config) :
     NamedMinimal(name),
-    maximalDuration(config.getDouble("maximalDuration")),
-    minimalDuration(config.getDouble("minimalDuration", double(maximalDuration) / 2.0)),
-    minimalGap(config.getDouble("minimalGap")),
-    startPadding(config.getDouble("startPadding", 0.01))
+    maximalDuration_(config.getDouble("maximalDuration")),
+    minimalDuration_(config.getDouble("minimalDuration", double(maximalDuration_) / 2.0)),
+    minimalGap_(config.getDouble("minimalGap")),
+    startPadding_(config.getDouble("startPadding", 0.01))
 {
-  SM_ASSERT_GE(std::runtime_error, minimalDuration, Duration(0.), "");
-  SM_ASSERT_GE(std::runtime_error, minimalGap, Duration(0.), "");
-  SM_ASSERT_LT(std::runtime_error, minimalDuration, maximalDuration, "");
+  SM_ASSERT_GE(std::runtime_error, minimalDuration_, Duration(0.), "");
+  SM_ASSERT_GE(std::runtime_error, minimalGap_, Duration(0.), "");
+  SM_ASSERT_LT(std::runtime_error, minimalDuration_, maximalDuration_, "");
 }
 void SimplePointCloudPolicy::print(std::ostream& out) const {
   out << "SimplePointCloudPolicy( "<< getName();
-  MODULE_WRITE_PARAM(minimalDuration);
-  MODULE_WRITE_PARAM(maximalDuration);
-  MODULE_WRITE_PARAM(minimalGap);
-  MODULE_WRITE_PARAM(startPadding);
+  MODULE_WRITE_PARAM(minimalDuration_);
+  MODULE_WRITE_PARAM(maximalDuration_);
+  MODULE_WRITE_PARAM(minimalGap_);
+  MODULE_WRITE_PARAM(startPadding_);
   out << ")";
 }
 
 bool SimplePointCloudPolicy::isReady(CloudBatch& b) const {
-  return minimalDuration <= Duration(b.getDuration());
+  return minimalDuration_ <= Duration(b.getDuration());
 }
 bool SimplePointCloudPolicy::wouldStillFit(CloudBatch& b, Timestamp t) const {
-  return ! b.isClosed() && (b.isEmpty() || t - Timestamp(b.getMinTimestamp()) <= maximalDuration);
+  return ! b.isClosed() && (b.isEmpty() || t - Timestamp(b.getMinTimestamp()) <= maximalDuration_);
 }
 
 void SimplePointCloudPolicy::prepareForNewData(const PointCloudsPlugin& pcp, CloudBatches& clouds, Timestamp t, const PointCloudSensor& sensor) const {
@@ -101,14 +109,14 @@ void SimplePointCloudPolicy::prepareForNewData(const PointCloudsPlugin& pcp, Clo
   if(!clouds.isAcceptingData() && calib.isNextWindowScheduled()) {
     Timestamp startTime;
     if(clouds.empty()){
-      startTime = calib.getNextTimeWindowStartTimestamp() + startPadding;
+      startTime = calib.getNextTimeWindowStartTimestamp() + startPadding_;
     } else {
       auto& lastCloud = clouds.back();
-      startTime = Timestamp(lastCloud.getMaxTimestamp()) + minimalGap;
+      startTime = Timestamp(lastCloud.getMaxTimestamp()) + minimalGap_;
     }
     if(startTime <= t){
       clouds.createNewCloud(pcp, sensor);
-      clouds.getCurrentCloud().setMaximalDuration(maximalDuration);
+      clouds.getCurrentCloud().setMaximalDuration(maximalDuration_);
     }
   }
 }
@@ -143,7 +151,7 @@ aslam::backend::EuclideanExpression PointCloudSensor::calcMeasurementExpressionB
 }
 
 std::unique_ptr<CloudMeasurements> PointCloudSensor::createCloudMeasurements(CloudBatch& /*cloudBatch*/) const {
-  return std::unique_ptr<CloudMeasurements>(new EuclideanCloudMeasurements(nanPolicy));
+  return std::unique_ptr<CloudMeasurements>(new EuclideanCloudMeasurements(nanPolicy_));
 }
 
 std::shared_ptr<const PointCloudPolicy> PointCloudSensor::getDefaultPointCloudPolicy(const PointCloudsPlugin& pcp) const {

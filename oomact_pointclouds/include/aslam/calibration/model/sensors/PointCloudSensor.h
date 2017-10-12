@@ -36,10 +36,10 @@ struct SimplePointCloudPolicy : public PointCloudPolicy, public NamedMinimal {
   void prepareForNewData(const PointCloudsPlugin& pcp, CloudBatches& clouds, Timestamp t, const PointCloudSensor& sensor) const override;
   void print(std::ostream& o) const override;
  private:
-  Duration maximalDuration;
-  Duration minimalDuration;
-  Duration minimalGap;
-  Duration startPadding;
+  Duration maximalDuration_;
+  Duration minimalDuration_;
+  Duration minimalGap_;
+  Duration startPadding_;
 };
 
 class PointCloudSensor : public Sensor {
@@ -70,10 +70,11 @@ class PointCloudSensor : public Sensor {
   void writeConfig(std::ostream& out) const override;
 
  private:
-  PmFilter filter;
+  PmFilter filter_;
 
  protected:
-  NanPolicy nanPolicy;
+  NanPolicy nanPolicy_;
+  ModuleStorage::Connector<CloudBatches> clouds_;
 };
 
 } /* namespace calibration */

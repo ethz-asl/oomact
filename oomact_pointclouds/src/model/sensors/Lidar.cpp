@@ -37,8 +37,8 @@ Lidar::Lidar(Model& model, const std::string& name, sm::value_store::ValueStoreR
   noiseGainY = lidarConfig.getDouble(base + "noiseGainY");
   noiseGainZ = lidarConfig.getDouble(base + "noiseGainZ");
 
-  nanPolicy.checkForNans = lidarConfig.getBool("checkForNans", nanPolicy.checkForNans);
-  nanPolicy.nansAreFine = lidarConfig.getBool("nansAreFine", nanPolicy.nansAreFine);
+  nanPolicy_.checkForNans = lidarConfig.getBool("checkForNans", nanPolicy_.checkForNans);
+  nanPolicy_.nansAreFine = lidarConfig.getBool("nansAreFine", nanPolicy_.nansAreFine);
 }
 
 Eigen::Matrix3d Lidar::covPoint(bool useSurfaceNormal, const Eigen::Vector3d& pInSensorFrame, const Eigen::Vector3d& nInSensorFrame) const {

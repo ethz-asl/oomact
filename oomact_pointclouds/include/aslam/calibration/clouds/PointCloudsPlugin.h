@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <aslam/calibration/calibrator/CalibratorPlugin.h>
+#include <aslam/calibration/CalibrationPhaseClient.h>
 #include <aslam/calibration/Timestamp.hpp>
 #include <Eigen/Dense>
 #include <sm/value_store/ValueStore.hpp>
@@ -34,7 +35,7 @@ class Sensor;
 struct CloudMatcher;
 class MeasurementTransformer;
 
-class PointCloudsPlugin : public CalibratorPlugin, public CalibrationPhaseClient {
+class PointCloudsPlugin : public CalibratorPlugin, public CalibrationPhaseClientI {
  public:
   typedef std::shared_ptr<CloudsContainer> CloudsContainerSP;
 
@@ -66,7 +67,7 @@ class PointCloudsPlugin : public CalibratorPlugin, public CalibrationPhaseClient
   void closeAllCurrentClouds();
   void closeCurrentCloud(const PointCloudSensor& pcs);
   void postprocessAssociations();
-  void preprocessWindowClouds() override; //TODO 0
+  void preProcessNewWindow(CalibratorI &) override;
   void updateCloudUsingCurrentTrajectory(CloudBatch& cloud, const sm::kinematics::Transformation& T_r_laser, const Sensor& sensor);
   void writeSnapshot(const CalibrationConfI& config, const std::string& path, bool updateFirstBasedOnCurrentSplines);
 
