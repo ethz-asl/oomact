@@ -30,7 +30,7 @@ struct VelodynePointsFunctor {
 
 class Velodyne : public Lidar3d, public InputReceiverIT<VelodynePackageRef>, public InputReceiverIT<VelodynePointsFunctor> {
  public:
-  Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRef config);
+  Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
   virtual ~Velodyne();
 
   void registerWithModel() override;
