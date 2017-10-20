@@ -15,7 +15,7 @@ namespace calibration {
 
 PointCloudSensor::PointCloudSensor(Model& model, const std::string& name, sm::value_store::ValueStoreRef config)
 : Sensor(model, name, config),
-  filter_(isUsed() ? model.resolveConfigPath(config.getString(name + "/pcFilterConfig")) : std::string()),
+  filter_(isUsed() ? model.resolveConfigPath(getMyConfig().getString("pcFilterConfig")) : std::string()),
   nanPolicy_({true, false}),
   clouds_(this, [this](const Module*, ModuleStorage& storage){ return new CloudBatches(*this, storage.getCalibrator());})
 {

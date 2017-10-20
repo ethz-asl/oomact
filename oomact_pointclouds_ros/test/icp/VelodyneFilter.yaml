@@ -1,0 +1,13 @@
+- SurfaceNormalDataPointsFilter:
+    epsilon: 3
+    knn: 30
+    keepNormals: 1
+    keepDensities: 1
+    keepEigenValues: 1
+    keepEigenVectors: 1
+
+- ObservationDirectionDataPointsFilter:
+
+- SamplingSurfaceNormalDataPointsFilter:
+    ratio: 0.4
+    knn: 30

@@ -11,34 +11,22 @@ namespace aslam {
 namespace calibration {
 
 Lidar::Lidar(Model& model, const std::string& name, sm::value_store::ValueStoreRef config) :
-  PointCloudSensor(model, name, config),
-  lidarConfig(config.getChild(name))
+  PointCloudSensor(model, name, config)
 {
-  const std::string lidarModel = lidarConfig.getString("model", std::string());
+  auto myConfig = getMyConfig();
+  minimalDistance = myConfig.getDouble("minimalDistance");
+  maximalDistance = myConfig.getDouble("maximalDistance");
+  nanPolicy_.checkForNans = myConfig.getBool("checkForNans", nanPolicy_.checkForNans);
+  nanPolicy_.nansAreFine = myConfig.getBool("nansAreFine", nanPolicy_.nansAreFine);
 
-  if(!lidarModel.empty()){
-    LOG(INFO) << "Using model=" << lidarModel << " for Lidar " << name << ".";
-    std::shared_ptr<sm::value_store::LayeredValueStore> lvs = std::make_shared<LayeredValueStore>();
-    lvs->add(config.getChild(name).getValueStoreSharedPtr());
-    lvs->add(config.getChild(lidarModel).getValueStoreSharedPtr());
-    lidarConfig = ValueStoreRef(lvs);
-  }
-
-  minimalDistance = lidarConfig.getDouble("minimalDistance");
-  maximalDistance = lidarConfig.getDouble("maximalDistance");
-
-  std::string base = "noise/";
-
-  vertAngleVariance = lidarConfig.getDouble(base + "vertAngleVariance");
-  horizAngleVariance = lidarConfig.getDouble(base + "horizAngleVariance");
-  rangeVariance = lidarConfig.getDouble(base + "rangeVariance");
-  beamDiverAngle = lidarConfig.getDouble(base + "beamDiverAngle");
-  noiseGainX = lidarConfig.getDouble(base + "noiseGainX");
-  noiseGainY = lidarConfig.getDouble(base + "noiseGainY");
-  noiseGainZ = lidarConfig.getDouble(base + "noiseGainZ");
-
-  nanPolicy_.checkForNans = lidarConfig.getBool("checkForNans", nanPolicy_.checkForNans);
-  nanPolicy_.nansAreFine = lidarConfig.getBool("nansAreFine", nanPolicy_.nansAreFine);
+  auto noiseVs = myConfig.getChild("noise");
+  vertAngleVariance = noiseVs.getDouble("vertAngleVariance");
+  horizAngleVariance = noiseVs.getDouble("horizAngleVariance");
+  rangeVariance = noiseVs.getDouble("rangeVariance");
+  beamDiverAngle = noiseVs.getDouble("beamDiverAngle");
+  noiseGainX = noiseVs.getDouble("noiseGainX");
+  noiseGainY = noiseVs.getDouble("noiseGainY");
+  noiseGainZ = noiseVs.getDouble("noiseGainZ");
 }
 
 Eigen::Matrix3d Lidar::covPoint(bool useSurfaceNormal, const Eigen::Vector3d& pInSensorFrame, const Eigen::Vector3d& nInSensorFrame) const {

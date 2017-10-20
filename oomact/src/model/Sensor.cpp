@@ -33,7 +33,7 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
     ObserverMinimal(this),
     CalibratableMinimal(this),
     id(isUsed()? model.createNewSensorId() : NoSensorId),
-    maximalExpectedGap(config.getDouble(name + "/maximalExpectedGap", -1.0)), //TODO C RENAME maximalExpectedGap to expectedMaximalGap
+    maximalExpectedGap(getMyConfig().getDouble("maximalExpectedGap", -1.0)), //TODO C RENAME maximalExpectedGap to expectedMaximalGap
     mEstimator(getMestimator(name, getMyConfig().getChild("mestimator"), 1))
 {
 }

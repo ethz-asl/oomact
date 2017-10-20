@@ -36,14 +36,14 @@ GroundPlanePseudoSensor::GroundPlanePseudoSensor(Model& model, std::string name,
     baseFrame_(getModel().getFrame(getMyConfig().getString("baseFrame"))),
     baseTrajectory_(*this, "poseTrajectory")
 {
-  cutOffDistance_ = lidarConfig.getDouble("cutOffDistance");
-  hightSigma_ = lidarConfig.getDouble("hightSigma", 1e-9);
-  attitudeSigma_ = lidarConfig.getDouble("attitudeSigma", 1e-9);
-  gridDelta = lidarConfig.getDouble("gridDelta", 0.1);
+  cutOffDistance_ = getMyConfig().getDouble("cutOffDistance");
+  hightSigma_ = getMyConfig().getDouble("hightSigma", 1e-9);
+  attitudeSigma_ = getMyConfig().getDouble("attitudeSigma", 1e-9);
+  gridDelta = getMyConfig().getDouble("gridDelta", 0.1);
   SM_ASSERT_GT(std::runtime_error, gridDelta, 0.05, "Grid delta needs to be bigger than 0");
-  gridNx = lidarConfig.getInt("gridNx", 500);
+  gridNx = getMyConfig().getInt("gridNx", 500);
   SM_ASSERT_GT(std::runtime_error, gridNx, 0, "Grid gridNx must be bigger than 0");
-  gridNy = lidarConfig.getInt("gridNy", 500);
+  gridNy = getMyConfig().getInt("gridNy", 500);
   SM_ASSERT_GT(std::runtime_error, gridNy, 0, "Grid gridNy must be bigger than 0");
 }
 

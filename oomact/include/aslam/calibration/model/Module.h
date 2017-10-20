@@ -112,7 +112,7 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
   bool isUsed() const override { return used_; }
 
   const sm::value_store::ValueStoreRef& getMyConfig() const {
-    return myConfig;
+    return myConfig_;
   }
 
 
@@ -147,7 +147,6 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
  private:
   friend class Model;
 
-  sm::value_store::ValueStoreRef myConfig;
 
   void resolveLinks(ModuleRegistry & reg);
 
@@ -158,6 +157,7 @@ class Module : public virtual ModuleBase, public virtual Named, public virtual U
 
   Model & model_;
   const std::string name_;
+  sm::value_store::ValueStoreRef myConfig_;
   const bool used_ = false;
   std::string uid_;
   bool isRegistered_ = false;

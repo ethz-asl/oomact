@@ -26,8 +26,6 @@ class Lidar : public PointCloudSensor {
   double maximalDistance;
  protected:
   void writeConfig(std::ostream& out) const override;
-
-  ValueStoreRef lidarConfig;
 };
 
 } /* namespace calibration */

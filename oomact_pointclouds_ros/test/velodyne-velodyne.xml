@@ -1,0 +1,232 @@
+<oomact>
+	<parents></parents>
+	<version>Velodyne-Velodyne</version>
+	<calibrator>
+		<windowDuration>0.2</windowDuration>
+		<shortWindowDuration>0.1</shortWindowDuration>
+		<acceptConstantErrorTerms>true</acceptConstantErrorTerms>
+
+		<timeBaseSensor>a</timeBaseSensor>
+
+		<useCollectingSet>false</useCollectingSet>
+
+		<startRelPos>0.0</startRelPos>
+		<endRelPos>1</endRelPos>
+		<useStartPosePrior>false</useStartPosePrior>
+		<loopOptimization>true</loopOptimization>
+		<skipFirstCloudComputation>true</skipFirstCloudComputation>
+		<verbose>true</verbose>
+		<preOptimize>false</preOptimize>
+		<useFastTermination>false</useFastTermination>
+		<acceptAll>false</acceptAll>
+		<dontTouchTrajectoryInFirstLidarRounds>true
+		</dontTouchTrajectoryInFirstLidarRounds>
+		<writeLogFile>false</writeLogFile>
+		<writeData>false</writeData>
+		<writeDebugData>false</writeDebugData>
+		<writeMeasurements>true</writeMeasurements>
+		<printRegessionErrorStatistics></printRegessionErrorStatistics>
+
+		<cloudPolicies>
+			<default>
+				<maximalDuration>0.2</maximalDuration>
+				<minimalDuration></minimalDuration>
+				<minimalGap>1.8</minimalGap>
+				<startPadding></startPadding>
+			</default>
+		</cloudPolicies>
+
+		<cloudMatchers>
+			<default>
+				readingDataPointsFilters:
+				- IdentityDataPointsFilter
+
+				referenceDataPointsFilters:
+				- IdentityDataPointsFilter
+
+				matcher:
+				KDTreeMatcher:
+				knn: 2
+				epsilon: 5
+
+				# it should be better a medianFilter
+				outlierFilters:
+				# - SurfaceNormalOutlierFilter:
+				# maxAngle: 1
+				# -
+				MaxDistOutlierFilter:
+				# maxDist: 0.2
+				# - TrimmedDistOutlierFilter: #
+				With 0.5 acts as a median filter
+				# ratio: 0.5
+				-
+				VarTrimmedDistOutlierFilter:
+				minRatio: 0.3
+				maxRatio: 0.8
+
+				errorMinimizer:
+				PointToPlaneErrorMinimizer
+
+				transformationCheckers:
+				-
+				CounterTransformationChecker:
+				maxIterationCount: 40
+				-
+				DifferentialTransformationChecker:
+				minDiffRotErr: 0.001
+				minDiffTransErr: 0.001
+				smoothLength: 4
+
+				inspector:
+				NullInspector
+
+				logger:
+				NullLogger
+			</default>
+		</cloudMatchers>
+
+		<usePose>false</usePose>
+		<useCalibrationPriors>false</useCalibrationPriors>
+
+		<estimateWithCurrentCalibrationFirst>false
+		</estimateWithCurrentCalibrationFirst>
+		<estimateFirstStateWithVelodyne>false</estimateFirstStateWithVelodyne>
+		<maxNumCloudAssociations>15000</maxNumCloudAssociations>
+		<predictResults>true</predictResults>
+		<estimate>
+			<timeDelays>true</timeDelays>
+			<spatialExtrinsics>true</spatialExtrinsics>
+			<pureObservers>false</pureObservers>
+		</estimate>
+		<nThreads>4</nThreads>
+	</calibrator>
+	<model>
+		<frames>body,world</frames>
+		<splines>
+			<splineKnotsPerSecond>5</splineKnotsPerSecond>
+		</splines>
+		<traj>
+			<used>false</used>
+			<tangentialConstraint>
+				<used>true</used>
+				<variance>1e-8</variance>
+			</tangentialConstraint>
+			<estimate>false</estimate>
+			<assumeStatic>true</assumeStatic>
+			<initWithPoseMeasurements>false</initWithPoseMeasurements>
+			<splines>
+				<rotSplineOrder>4</rotSplineOrder>
+				<rotFittingLambda>0.00001</rotFittingLambda>
+				<transSplineOrder>4</transSplineOrder>
+				<transFittingLambda>0.00001</transFittingLambda>
+				<knotsPerSecond>5</knotsPerSecond>
+			</splines>
+			<frame>LowerBody</frame>
+			<referenceFrame>world</referenceFrame>
+		</traj>
+		<sensors>
+			<Velodyne>
+				<frame>body</frame>
+				<estimate>true</estimate>
+				<observeOnly>false</observeOnly>
+				<used>true</used>
+				<intrinsicCalibrationFile>calib-HDL-32E.dat
+				</intrinsicCalibrationFile>
+				<doIntrinsicCalibration>false</doIntrinsicCalibration>
+				<doBeamAngleCalibration></doBeamAngleCalibration>
+
+				<minimalDistance>0.5</minimalDistance>
+				<maximalDistance>100</maximalDistance>
+				<filterMaxVerticalAngleDeg></filterMaxVerticalAngleDeg>
+				<filterMinVerticalAngleDeg></filterMinVerticalAngleDeg>
+				<noise>
+					<mestimator>
+						<name></name>
+						<cauchySigma2>10</cauchySigma2>
+					</mestimator>
+					<normalsVarianceX>4e-4</normalsVarianceX>
+					<normalsVarianceY>4e-4</normalsVarianceY>
+					<normalsVarianceZ>4e-4</normalsVarianceZ>
+					<!-- Specifications given by the constructor using resolutions and noise 
+						model for discretization, also for the range case (all angles in deg) -->
+					<vertAngleVariance>1e-12</vertAngleVariance>
+					<!-- <vertAngleVariance>4.5e-5</vertAngleVariance> -->
+					<horizAngleVariance>1e-11</horizAngleVariance>
+					<!-- <horizAngleVariance>6.5e-7</horizAngleVariance> -->
+					<rangeVariance>4e-4</rangeVariance>
+					<!-- Beam divergence angle in radians -->
+					<beamDiverAngle>2e-3</beamDiverAngle>
+					<!-- Gains arbitrarily set up to limit the effect of the coVariance -->
+					<noiseGainX>0.2</noiseGainX>
+					<noiseGainY>0.3</noiseGainY>
+					<noiseGainZ>0.3</noiseGainZ>
+				</noise>
+				<pcFilterConfig>icp/VelodyneFilter.yaml</pcFilterConfig>
+			</Velodyne>
+			<a>
+				<parent>Velodyne</parent>
+				<debugConfig>true</debugConfig>
+				<frame>body</frame>
+				<delay><used>false</used></delay>
+				<translation>
+					<x>0</x>
+					<y>5</y>
+					<z>0</z>
+				</translation>
+				<rotation>
+					<used>false</used>
+				</rotation>
+			</a>
+			<b>
+				<parent>Velodyne</parent>
+				<debugConfig>true</debugConfig>
+				<frame>body</frame>
+				<delay><used>false</used></delay>
+				<translation>
+					<used>false</used>
+				</translation>
+				<rotation>
+					<used>false</used>
+				</rotation>
+			</b>
+			<GroundPlane>
+				<frame>Map</frame>
+				<estimate>false</estimate>
+				<observeOnly>true</observeOnly>
+				<used>false</used>
+				<cutOffDistance>0.2</cutOffDistance>
+				<minimalDistance>0</minimalDistance>
+				<maximalDistance>100</maximalDistance>
+				<attitudeSigma>1e-3</attitudeSigma>
+				<hightSigma>1e-3</hightSigma>
+				<noise>
+					<vertAngleVariance>1e-9</vertAngleVariance>
+					<horizAngleVariance>1e-11</horizAngleVariance>
+					<rangeVariance>4e-4</rangeVariance>
+					<beamDiverAngle>0.015</beamDiverAngle>
+					<noiseGainX>0.00001</noiseGainX>
+					<noiseGainY>0.00001</noiseGainY>
+					<noiseGainZ>0.00001</noiseGainZ>
+				</noise>
+				<translation>
+					<used>false</used>
+					<x>0</x>
+					<y>0</y>
+					<z>0</z>
+					<sigma>0.1</sigma>
+				</translation>
+				<rotation>
+					<used>false</used>
+					<yaw>0.0</yaw>
+					<pitch>0.0</pitch>
+					<roll>0.0</roll>
+					<sigma>0.001,0.1,0.1</sigma>
+				</rotation>
+				<delay>
+					<used>false</used>
+				</delay>
+				<pcFilterConfig>icp/GroundPlaneFilter.yaml</pcFilterConfig>
+			</GroundPlane>
+		</sensors>
+	</model>
+</oomact>

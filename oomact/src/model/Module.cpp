@@ -1,7 +1,12 @@
 #include <aslam/calibration/model/Module.h>
 
+#include <memory>
+
 #include <glog/logging.h>
 #include <sm/assert_macros.hpp>
+#include <sm/value_store/LayeredValueStore.hpp>
+#include <sm/value_store/PrefixedValueStore.hpp>
+#include <sm/value_store/VerboseValueStore.hpp>
 
 #include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/data/StorageI.h>
@@ -53,18 +58,67 @@ std::string stripFolder(std::string path){
   return p.filename().string();
 }
 
+std::string getSibling(std::string path, std::string name){
+  boost::filesystem::path p(path);
+  return (p.parent_path() / name).normalize().string();
+}
+
+sm::value_store::ValueStoreRef addVerboseLayer(const std::string & name, sm::value_store::ValueStoreRef vs, bool force = false){
+  if(force || vs.getBool("debugConfig", false)){
+    if(!force){
+      LOG(INFO) << "Adding verbosity layer to " + stripFolder(name) + "'s configuration.";
+    }
+    return sm::value_store::ValueStoreRef(std::make_shared<sm::value_store::VerboseValueStore>(vs, [name](std::string v){
+      LOG(INFO) << name << " configuration: "<< v;
+    }));
+  }
+  return vs;
+}
+
+std::shared_ptr<VerboseValueStore> getVerboseValueStore(const std::shared_ptr<ValueStore> & vs){
+  return std::dynamic_pointer_cast<VerboseValueStore>(vs);
+}
+
+
 Module::Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault) :
-    myConfig((config.isEmpty() ? model.getConfig() : config).getChild(name)),
     model_(model),
     name_(stripFolder(name)),
-    used_(myConfig.getBool("used", isUsedByDefault))
+    myConfig_(addVerboseLayer(getName(), (config.isEmpty() ? model.getConfig() : config).getChild(name))),
+    used_(myConfig_.getBool("used", isUsedByDefault))
 {
+  std::string parent, layeredNameStr, lastName = getName();
+  std::shared_ptr<sm::value_store::LayeredValueStore> lvs;
+  auto currentConfig = getMyConfig();
+  while (!(parent = currentConfig.getString("parent", std::string())).empty()) {
+    CHECK(config.isEmpty()) << "Configuration inheritance is not supported for module specific configuration."; // TODO D support configuration inheritance for module special configurations
+    LOG(INFO) << "Module " << getName() << " inherits configuration from " << parent << ".";
+    if(!lvs) {
+      lvs = std::make_shared<LayeredValueStore>();
+      auto myVs = getMyConfig().getValueStoreSharedPtr();
+      if(auto p = getVerboseValueStore(myVs)){
+        myVs = p->getUnderlyingValueStore();
+      }
+      lvs->add(myVs);
+      layeredNameStr = getName();
+    }
+    currentConfig = model.getConfig().getChild(getSibling(name, parent));
+    lastName = stripFolder(parent);
+    layeredNameStr += "|" + lastName;
+    lvs->add(currentConfig.getValueStoreSharedPtr());
+  }
+  if(lvs){
+    if(getVerboseValueStore(getMyConfig())){
+      myConfig_ = addVerboseLayer(layeredNameStr, ValueStoreRef(lvs), true);
+    } else {
+      myConfig_ = ValueStoreRef(lvs);
+    }
+  }
 }
 
 Module::Module(const Module& m) :
-  myConfig(m.myConfig),
   model_(m.model_),
   name_(m.name_),
+  myConfig_(m.myConfig_),
   used_(m.used_)
 {
   LOG(WARNING) << "Module " << m << " got copied!";

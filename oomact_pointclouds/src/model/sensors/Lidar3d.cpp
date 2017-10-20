@@ -7,7 +7,7 @@ namespace calibration {
 
 Lidar3d::Lidar3d(Model& model, const std::string& name, sm::value_store::ValueStoreRef config) :
     Lidar(model, name, config),
-    normalsCovariance_{lidarConfig.getChild("noise/normalsCov"), 3, isUsed()}
+    normalsCovariance_{getMyConfig().getChild("noise/normalsCov"), 3, isUsed()}
 {
 }
 

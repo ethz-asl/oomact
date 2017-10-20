@@ -137,10 +137,10 @@ namespace {
 
 Velodyne::Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRef config) :
     Lidar3d(model, name, config),
-    doIntrinsicCalibration(lidarConfig.getBool("doIntrinsicCalibration", false)),
-    doBeamAngleCalibration(doIntrinsicCalibration && lidarConfig.getBool("doBeamAngleCalibration", true))
+    doIntrinsicCalibration(getMyConfig().getBool("doIntrinsicCalibration", false)),
+    doBeamAngleCalibration(doIntrinsicCalibration && getMyConfig().getBool("doBeamAngleCalibration", true))
 {
-  std::string calibPath = model.resolveConfigPath(lidarConfig.getString("intrinsicCalibrationFile"));
+  std::string calibPath = model.resolveConfigPath(getMyConfig().getString("intrinsicCalibrationFile"));
   LOG(INFO) << "Loading Velodyne calibration from " << calibPath << ".";
   calibration = ethz::velodyne::loadVelodyne32Calibration(calibPath);
 
@@ -150,8 +150,8 @@ Velodyne::Velodyne(Model& model, std::string name, sm::value_store::ValueStoreRe
     for(size_t i = 0; i < calibration->getNumLasers(); ++i){
       vertAngles.insert(sm::kinematics::rad2deg(calibration->getVertCorr(i)));
     }
-    filterMaxVerticalAngleDeg = lidarConfig.getDouble("filterMaxVerticalAngleDeg", *vertAngles.rbegin() + 0.5);
-    filterMinVerticalAngleDeg = lidarConfig.getDouble("filterMinVerticalAngleDeg", *vertAngles.begin() - 0.5);
+    filterMaxVerticalAngleDeg = getMyConfig().getDouble("filterMaxVerticalAngleDeg", *vertAngles.rbegin() + 0.5);
+    filterMinVerticalAngleDeg = getMyConfig().getDouble("filterMinVerticalAngleDeg", *vertAngles.begin() - 0.5);
   }
 
   std::string velBeamPrefix = getName() + "_BD";
