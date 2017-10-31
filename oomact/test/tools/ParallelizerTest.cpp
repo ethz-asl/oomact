@@ -16,20 +16,19 @@ TEST(Parallelizer, testParallel) {
   int N = 3;
   Parallelizer p(N);
   for(int i = 0 ; i < N + 1; i++)
-  p.add([&](){
-    {
-      std::lock_guard<std::mutex> mlock(m);
-      s << "s";
-    }
+    p.add([&](){
+      {
+        std::lock_guard<std::mutex> mlock(m);
+        s << "s";
+      }
       std::this_thread::sleep_for(std::chrono::milliseconds(WaitMillis));
-    {
-      std::lock_guard<std::mutex> mlock(m);
-      s << "e";
-    }
-      std::this_thread::sleep_for(std::chrono::milliseconds(WaitMillis));
-  });
+      {
+        std::lock_guard<std::mutex> mlock(m);
+        s << "e";
+      }
+    });
 
   p.doAndWait();
 
-  ASSERT_EQ(std::string(N, 's') + std::string(N, 'e') + "se", s.str());
+  ASSERT_EQ(std::string(N, 's') + "e", s.str().substr(0, N+1));
 }
