@@ -4,7 +4,7 @@
   <version>0.0.1</version>
   <description>ROS based examples for oomact</description>
   <maintainer email="sommerh@ethz.ch">Hannes Sommer</maintainer>
-  <author>Hannes Sommer</author>
+  <author>Zachary Taylor, Hannes Sommer</author>
   <license>BSD-3-Clause</license>
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>.
