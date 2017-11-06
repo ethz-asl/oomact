@@ -2,7 +2,7 @@
 <package format="2">
   <name>oomact_ros</name>
   <version>0.0.1</version>
-  <description>Ros input module for oomact</description>
+  <description>ROS input module for oomact</description>
   <maintainer email="sommerh@ethz.ch">Hannes Sommer</maintainer>
   <author>Zachary Taylor, Hannes Sommer</author>
   <license>BSD-3-Clause</license>
