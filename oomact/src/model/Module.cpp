@@ -48,10 +48,15 @@ std::string normalizeParamName(const char * parameter){
   return (p.empty() || p.back() != '_') ? p : p.substr(0, p.size() - 1);
 }
 
+std::string stripFolder(std::string path){
+  boost::filesystem::path p(path);
+  return p.filename().string();
+}
+
 Module::Module(Model & model, const std::string & name, sm::value_store::ValueStoreRef config, bool isUsedByDefault) :
     myConfig((config.isEmpty() ? model.getConfig() : config).getChild(name)),
     model_(model),
-    name_(name),
+    name_(stripFolder(name)),
     used_(myConfig.getBool("used", isUsedByDefault))
 {
 }

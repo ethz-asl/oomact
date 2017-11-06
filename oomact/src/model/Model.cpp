@@ -187,9 +187,7 @@ const Frame & Model::getOrCreateFrame(const std::string& name) {
 }
 
 const Frame & Model::getFrame(const std::string& name) const {
-  if(!id2framesMap.count(name)){
-    throw std::runtime_error("A frame with name " + name + " doesn't exists.");
-  }
+  CHECK(id2framesMap.count(name)) << "A frame with name \"" + name + "\" doesn't exist.";
   return id2framesMap.at(name);
 }
 
@@ -284,10 +282,12 @@ const ValueStoreRef& Model::getConfig() const {
 
 ModelAtTime Model::getAtTime(Timestamp, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
+  return ModelAtTime(nullptr); // soothe the static analysis
 }
 
 ModelAtTime Model::getAtTime(const BoundedTimeExpression&, int, const ModelSimplification&) const {
   LOG(FATAL) << __PRETTY_FUNCTION__ << " not implemented!";
+  return ModelAtTime(nullptr); // soothe the static analysis
 }
 
 void Model::addModule(Module& module) {

@@ -21,8 +21,6 @@ using sm::value_store::ValueStoreRef;
 
 class Model;
 class CalibrationVariable;
-class CalibratorOptions;
-class MotionCaptureSource;
 class ModuleList;
 class PredictionFunctorWriter;
 
@@ -37,6 +35,7 @@ class CalibratorOptionsI {
   virtual bool getVerbose() const = 0;
   virtual void setVerbose(bool verbose) = 0;
   virtual bool getAcceptConstantErrorTerms() const = 0;
+  virtual int getNumThreads() const = 0;
 };
 
 class CalibratorI : public ObservationManagerI {
@@ -45,6 +44,8 @@ class CalibratorI : public ObservationManagerI {
 
   virtual Model & getModel() = 0;
   virtual const Model & getModel() const = 0;
+
+  virtual ValueStoreRef getValueStore() const = 0; // TODO D this should be a ConstValueStore once it exists
 
   virtual void setUpdateHandler(StatusUpdateHandler statusUpdateHandler, CalibrationUpdateHandler calibrationUpdateHandler) = 0;
 

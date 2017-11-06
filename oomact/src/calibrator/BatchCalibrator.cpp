@@ -18,9 +18,11 @@ class BatchCalibratorOptions : public AbstractCalibratorOptions {
   using AbstractCalibratorOptions::AbstractCalibratorOptions;
 };
 
-class BatchCalibrationConfI : public CalibrationConfI {
+class BatchCalibrationConf : public CalibrationConfI {
  public:
-  virtual ~BatchCalibrationConfI(){}
+  BatchCalibrationConf(BatchCalibratorI & calibrator) : calibrator_(calibrator) {}
+
+  virtual ~BatchCalibrationConf() = default;
 
   const Activator& getCalibrationActivator() const override {
     return AllActiveActivator;
@@ -59,7 +61,19 @@ class BatchCalibrationConfI : public CalibrationConfI {
   bool shouldSensorsBeRegistered(const Sensor & /*from*/, const Sensor & /*to*/) const override {
     return true; //TODO B make registration configurable
   }
+  bool shouldAnySensorBeRegisteredTo(const Sensor & /*to*/) const override {
+    return true;
+  }
+
+  const BatchCalibratorI & getCalibrator() const override {
+    return calibrator_;
+  }
+  BatchCalibratorI & getCalibrator() override {
+    return calibrator_;
+  }
+
  private:
+  BatchCalibratorI & calibrator_;
   bool useCalibPriors_ = false;
 };
 
@@ -133,7 +147,8 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
   BatchCalibrator (ValueStoreRef config, std::shared_ptr<Model> model) :
     AbstractCalibrator(config, model),
     config_(config),
-    options_(config)
+    options_(config),
+    storage_(*this)
   {
   }
 
@@ -149,7 +164,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
       return;
     }
 
-    BatchCalibrationConfI estConf;
+    BatchCalibrationConf estConf(*this);
     BatchCalibrationProblem problem;
 
     estimate(estConf, problem, problem, [&](){
@@ -195,14 +210,55 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     }
   }
 
-  virtual ModuleStorage & getCurrentStorage() override {
+  bool isMeasurementRelevant(const Sensor &, Timestamp) const {
+    return true; // TODO B support predefined batch interval in time
+  }
+
+  ModuleStorage & getCurrentStorage() override {
     return storage_;
+  }
+
+  const ModuleStorage & getCurrentStorage() const override {
+    return storage_;
+  }
+
+  bool isNextWindowScheduled() const override {
+    return _currentEffectiveBatchInterval.start != InvalidTimestamp();
+  }
+
+  Timestamp getNextTimeWindowStartTimestamp() const override {
+    return _currentEffectiveBatchInterval.start;
   }
 
  private:
   sm::value_store::ValueStoreRef config_;
   BatchCalibratorOptions options_;
-  MapStorage<const Module *> storage_;
+
+  class Storage : public ModuleStorage {
+    using ModuleStorage::ModuleStorage;
+
+    void remove(ModuleStorage::Key key) override {
+      impl.remove(key);
+    }
+    void clear() {
+      impl.clear();
+    }
+
+    void * get(ModuleStorage::Key key) const override {
+      return impl.get(key);
+    }
+
+    void add(ModuleStorage::Key key, StorageElement && data) override {
+      impl.add(key, std::move(data));
+    }
+
+    size_t size() const override {
+      return impl.size();
+    }
+
+   private:
+    MapStorage<const Module*> impl;
+  } storage_;
 };
 
 
