@@ -1,11 +1,7 @@
-model {
-  Gravity {
-    used false
-  }
+sensors {  
+  a {
+    type pose
 
-  frames body:world
-
-  pose0 {
     frame body
     targetFrame world
 
@@ -35,7 +31,9 @@ model {
       cauchySigma2 "10"
     }
   }
-  pose1 {
+  b {
+    type pose
+
     frame body
     targetFrame world
 
@@ -48,9 +46,9 @@ model {
 
     rotation {
       used true
-      yaw 0.1
-      pitch 0.1
-      roll 0.1
+      yaw 1.8
+      pitch 0.0
+      roll 2.5
     }
     translation {
       used true
@@ -69,12 +67,20 @@ model {
       cauchySigma2 "10"
     }
   }
+}
+
+model {
+  Gravity {
+    used false
+  }
+
+  frames body:world
 
   traj {
     frame body
     referenceFrame world
     initWithPoseMeasurements true
-    McSensor pose1
+    McSensor a
     splines {
       knotsPerSecond 10
       rotSplineOrder 4
@@ -87,7 +93,7 @@ model {
 
 calibrator {
   verbose true
-  timeBaseSensor pose1
+  timeBaseSensor a
   estimator {
     optimizer {
       maxIterations 150

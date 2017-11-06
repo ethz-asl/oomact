@@ -1,0 +1,10 @@
+<launch>
+  <arg name="bag_file" default="/home/z/Datasets/euroc/MH_01_easy_rovio.bag"/>
+
+   <node name="CalibrationNode" pkg="oomact_ros" type="CalibrationNode" output="screen">
+    <param name="config_file" value="$(find oomact_ros)/cfg/euroc_MH.info" />
+    <param name="bag_file" value="$(arg bag_file)" />
+    <param name="output_file" value="/home/z/Desktop/New Folder/out.info" />
+  </node>
+
+</launch>

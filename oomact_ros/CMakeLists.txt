@@ -20,6 +20,7 @@ endif()
 
 cs_add_library(${PROJECT_NAME}
   src/feeder/PoseSensorInputFeeder.cpp
+  src/feeder/PositionSensorInputFeeder.cpp
   src/feeder/ImuInputFeeder.cpp
   src/InputFeederFactoryI.cpp
   src/InputFeederFactoryRegistry.cpp

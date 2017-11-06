@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package format="2">
-  <name>oomact_ros</name>
+  <name>oomact_ros_examples</name>
   <version>0.0.1</version>
-  <description>ROS input module for oomact</description>
+  <description>ROS based examples for oomact</description>
   <maintainer email="sommerh@ethz.ch">Hannes Sommer</maintainer>
   <author>Zachary Taylor, Hannes Sommer</author>
   <license>BSD-3-Clause</license>

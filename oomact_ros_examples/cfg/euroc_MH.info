@@ -1,0 +1,94 @@
+sensors {  
+  leica {
+    type position
+
+    frame body
+    targetFrame world
+    invertInput false
+    
+    topic "/leica/position"
+
+    covPosition { sigma "0.01" }
+    covOrientation { sigma "0.01" }
+
+    absoluteMeasurements true
+
+    rotation {
+      used true
+      roll 0.0
+      pitch 0.0
+      yaw 0.0
+    }
+    translation {
+      used true
+      x 0.0
+      y 0.0
+      z 0.0
+    }
+    delay { used false }
+  }
+  rovio {
+    type pose
+
+    used true
+
+    frame body
+    targetFrame world
+    invertInput false
+
+    topic "/rovio/transform"
+
+    covPosition { sigma "0.01" }
+    covOrientation { sigma "0.01" }
+
+    absoluteMeasurements false
+
+    rotation {
+      used false
+      roll 0.0
+      pitch 0.0
+      yaw 0.0
+    }
+    translation {
+      used false
+      x 0.0
+      y 0.0
+      z 0.0
+    }
+    delay { used false }
+  }
+}
+
+model {
+  Gravity { 
+    used false
+    magnitude 9.81 
+  }
+  frames "body,world"
+
+  traj {
+    frame body
+    referenceFrame world
+    initWithPoseMeasurements true
+    McSensor rovio
+    splines {
+      knotsPerSecond 40
+      rotSplineOrder 4
+      rotFittingLambda 0.0000001
+      transSplineOrder 4
+      transFittingLambda 0.0000001
+    }
+  }
+}
+
+calibrator {
+  verbose true
+  timeBaseSensor rovio
+  estimator {
+    optimizer {
+      maxIterations 150
+      convergenceDeltaError 1e-6
+      convergenceDeltaX 1e-6
+    }
+  }
+}

@@ -6,6 +6,8 @@
 #include <rosbag/view.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <nav_msgs/Odometry.h>
 
 #include "aslam/calibration/ros/InputFeederFactoryRegistry.h"
 #include "aslam/calibration/ros/InputFeederFactoryI.h"
@@ -30,9 +32,23 @@ bool msg2Measurement(const geometry_msgs::PoseStamped &msg, PoseMeasurement & m)
   return true;
 }
 
+bool msg2Measurement(const geometry_msgs::PoseWithCovarianceStamped &msg, PoseMeasurement & m){
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation, PoseMeasurement::USE_JPL_MULT);
+  return true;
+}
+
+bool msg2Measurement(const nav_msgs::Odometry &msg, PoseMeasurement & m){
+  m.t = rosVector3dToEigenVector3(msg.pose.pose.position);
+  m.q = rosQuaternionToVector4dXYZW(msg.pose.pose.orientation, PoseMeasurement::USE_JPL_MULT);
+  return true;
+}
+
 namespace {
 InputFeederFactoryRegistry::RegistryEntry regEntries[] = {
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseStamped, PoseMeasurement>,
+    new InputFeederFactoryForMessageWithHeader<geometry_msgs::PoseWithCovarianceStamped, PoseMeasurement>,
+    new InputFeederFactoryForMessageWithHeader<nav_msgs::Odometry, PoseMeasurement>,
     new InputFeederFactoryForMessageWithHeader<geometry_msgs::TransformStamped, PoseMeasurement>,
 };
 }
