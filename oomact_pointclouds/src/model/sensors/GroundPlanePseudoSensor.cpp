@@ -1,18 +1,18 @@
-#include <aslam/calibration/model/sensors/GroundPlanePseudoSensor.hpp>
+#include <aslam/calibration/model/sensors/GroundPlanePseudoSensor.h>
 
 #include <cmath>
 
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/VectorExpressionToGenericMatrixTraits.hpp>
-#include <aslam/calibration/CalibrationConfI.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/error-terms/MeasurementErrorTerm.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/clouds/CloudBatch.h>
 #include <aslam/calibration/clouds/CloudsContainer.h>
 #include <aslam/calibration/laser-scanner/laser3d.h>

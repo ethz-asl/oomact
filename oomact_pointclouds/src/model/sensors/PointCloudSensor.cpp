@@ -1,7 +1,7 @@
 #include <aslam/calibration/model/sensors/PointCloudSensor.h>
 
-#include <aslam/calibration/CalibrationConfI.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/tools/tools.h>

@@ -1,4 +1,4 @@
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
+#include <aslam/calibration/model/sensors/Lidar3d.h>
 
 #include <aslam/calibration/model/ModuleTools.h>
 

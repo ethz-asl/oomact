@@ -1,4 +1,4 @@
-#include <aslam/calibration/model/sensors/StereoCamera.hpp>
+#include <aslam/calibration/model/sensors/StereoCamera.h>
 #include <glog/logging.h>
 
 

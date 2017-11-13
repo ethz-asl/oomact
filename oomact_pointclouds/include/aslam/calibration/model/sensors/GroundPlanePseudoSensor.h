@@ -1,7 +1,7 @@
 #ifndef HD99F880C_876B_4FC1_A6D7_CBC4D83CB183
 #define HD99F880C_876B_4FC1_A6D7_CBC4D83CB183
 
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
+#include <aslam/calibration/model/sensors/Lidar3d.h>
 #include <aslam/calibration/model/PoseTrajectory.h>
 
 namespace aslam {

@@ -4,16 +4,16 @@
 
 #include <aslam/backend/OptimizationProblemBase.hpp>
 #include <aslam/backend/TransformationExpression.hpp>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 
 #include <aslam/calibration/clouds/CalibrationMatcher.h>
 #include <aslam/calibration/clouds/CloudsContainer.h>
 #include <aslam/calibration/error-terms/ErrorTermCloudAssociation.h>
 #include <aslam/calibration/error-terms/ErrorTermPointToPlain.h>
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
+#include <aslam/calibration/model/sensors/Lidar3d.h>
 #include <aslam/calibration/model/sensors/PointCloudSensor.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include <aslam/calibration/tools/Parallelizer.hpp>
+#include <aslam/calibration/tools/Parallelizer.h>
 #include <aslam/calibration/tools/PointCloudTools.h>
 #include <sm/kinematics/Transformation.hpp>
 #include <sm/timing/Timer.hpp>

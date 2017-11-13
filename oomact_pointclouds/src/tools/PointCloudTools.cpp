@@ -1,8 +1,8 @@
 #include <aslam/calibration/tools/PointCloudTools.h>
 
-#include <aslam/calibration/model/sensors/Lidar2d.hpp>
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
-#include <aslam/calibration/model/sensors/StereoCamera.hpp>
+#include <aslam/calibration/model/sensors/Lidar2d.h>
+#include <aslam/calibration/model/sensors/Lidar3d.h>
+#include <aslam/calibration/model/sensors/StereoCamera.h>
 namespace aslam {
 namespace calibration {
 

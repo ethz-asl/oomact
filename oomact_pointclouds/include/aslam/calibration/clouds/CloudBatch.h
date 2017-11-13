@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 #include <Eigen/Core>
 #include <sm/kinematics/Transformation.hpp>
 #include <sm/timing/NsecTimeUtilities.hpp>

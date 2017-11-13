@@ -19,16 +19,16 @@
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
-#include <aslam/calibration/CalibrationConfI.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/clouds/CalibrationMatcher.h>
 #include <aslam/calibration/clouds/PointCloudsPlugin.h>
 #include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/sensors/GroundPlanePseudoSensor.hpp>
+#include <aslam/calibration/model/sensors/GroundPlanePseudoSensor.h>
 #include <aslam/calibration/model/sensors/PointCloudSensor.h>
-#include <aslam/calibration/model/sensors/StereoCamera.hpp>
-#include <aslam/calibration/model/sensors/Velodyne.hpp>
-#include <aslam/calibration/tools/Parallelizer.hpp>
+#include <aslam/calibration/model/sensors/StereoCamera.h>
+#include <aslam/calibration/model/sensors/Velodyne.h>
+#include <aslam/calibration/tools/Parallelizer.h>
 #include <aslam/calibration/tools/PointCloudTools.h>
 #include <aslam/calibration/tools/tools.h>
 

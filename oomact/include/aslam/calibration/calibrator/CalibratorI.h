@@ -10,6 +10,7 @@
 #include "../model/Model.h"
 #include "../SensorId.h"
 #include "../tools/Interval.h"
+#include "../tools/PluginManager.h"
 
 namespace sm {
   class MatrixArchive;
@@ -38,7 +39,7 @@ class CalibratorOptionsI {
   virtual int getNumThreads() const = 0;
 };
 
-class CalibratorI : public ObservationManagerI {
+class CalibratorI : public ObservationManagerI, public PluginManager {
  public:
   virtual ~CalibratorI(){}
 

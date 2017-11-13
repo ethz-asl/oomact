@@ -46,7 +46,7 @@
 #include <aslam/calibration/clouds/CloudsContainer.h>
 
 #include "aslam/calibration/tools/tools.h"
-#include "aslam/calibration/tools/Parallelizer.hpp"
+#include "aslam/calibration/tools/Parallelizer.h"
 
 using namespace aslam::backend;
 using namespace aslam::calibration;

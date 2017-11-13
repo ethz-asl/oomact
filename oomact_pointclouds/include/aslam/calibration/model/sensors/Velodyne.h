@@ -7,7 +7,7 @@
 
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/calibration/input/InputReceiverI.h>
-#include <aslam/calibration/model/sensors/Lidar3d.hpp>
+#include <aslam/calibration/model/sensors/Lidar3d.h>
 
 namespace ethz {
 namespace velodyne {

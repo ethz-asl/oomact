@@ -3,7 +3,7 @@
 
 #include <iosfwd>
 
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 #include <aslam/calibration/tools/Printable.h>
 
 #include <aslam/calibration/clouds/NanPolicy.h>

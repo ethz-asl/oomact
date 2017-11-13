@@ -1,11 +1,11 @@
-#include <aslam/calibration/model/sensors/Velodyne.hpp>
+#include <aslam/calibration/model/sensors/Velodyne.h>
 
-#include <string>
-#include <limits>
 #include <cstddef>
+#include <limits>
+#include <string>
 
 #include <aslam/backend/EuclideanExpression.hpp>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/clouds/CloudsContainer.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
@@ -18,10 +18,10 @@
 #include <sensor/Converter.h>
 #include <sm/PropertyTreeImplementation.hpp>
 
-#include "aslam/calibration/CalibrationConfI.h"
+#include "aslam/calibration/calibrator/CalibrationConfI.h"
 #include "aslam/calibration/clouds/CloudBatch.h"
-#include "aslam/calibration/laser-scanner/laser3d.h"
 #include "aslam/calibration/clouds/PointCloudsPlugin.h"
+#include "aslam/calibration/laser-scanner/laser3d.h"
 
 using aslam::backend::ScalarExpression;
 using boost::algorithm::starts_with;

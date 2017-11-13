@@ -15,8 +15,6 @@ class Registry;
 namespace calibration {
 class CalibrationConfI;
 class CalibrationProblem;
-class CalibratorPlugin;
-
 
 class AbstractCalibratorOptions : public CalibratorOptionsI {
  public:
@@ -120,8 +118,6 @@ protected:
 
   virtual bool handleNewTimeBaseTimestamp(Timestamp t) = 0;
   virtual void clearAfterEstimation();
-
-  void setupNewPlugin(CalibratorPlugin & plugin) override;
 
   template <typename T> void handleNewPhaseClientCandidate(T & t);
 };

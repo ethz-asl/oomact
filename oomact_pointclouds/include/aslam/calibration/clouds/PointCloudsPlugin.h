@@ -7,7 +7,7 @@
 
 #include <aslam/calibration/calibrator/CalibratorPlugin.h>
 #include <aslam/calibration/CalibrationPhaseClient.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 #include <Eigen/Dense>
 #include <sm/value_store/ValueStore.hpp>
 
