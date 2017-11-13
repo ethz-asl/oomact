@@ -15,6 +15,7 @@ class Registry;
 namespace calibration {
 class CalibrationConfI;
 class CalibrationProblem;
+class CalibratorPlugin;
 
 
 class AbstractCalibratorOptions : public CalibratorOptionsI {
