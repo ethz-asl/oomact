@@ -1,4 +1,4 @@
-#include <aslam/calibration/model/SetActivator.h>
+#include <aslam/calibration/calibrator/SetActivator.h>
 
 #include <ostream>
 

@@ -3,7 +3,7 @@
 #include <glog/logging.h>
 #include <sm/assert_macros.hpp>
 
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>

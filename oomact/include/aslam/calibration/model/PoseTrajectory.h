@@ -1,9 +1,9 @@
 #ifndef H22B0B098_C827_4C3A_ACE2_10734530AF87
 #define H22B0B098_C827_4C3A_ACE2_10734530AF87
 
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
 
 namespace aslam {

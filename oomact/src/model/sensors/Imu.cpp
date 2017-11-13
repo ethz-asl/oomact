@@ -17,7 +17,7 @@
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/fragments/TrajectoryCarrier.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 #include "aslam/calibration/error-terms/ErrorTermAccelerometer.h"
 #include "aslam/calibration/error-terms/ErrorTermGyroscope.h"
 #include "aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h"

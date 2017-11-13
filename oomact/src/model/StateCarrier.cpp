@@ -1,4 +1,4 @@
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 
 namespace aslam {
 namespace calibration {

@@ -8,12 +8,12 @@
 #include <sm/MatrixArchive.hpp>
 #include <aslam/backend/OptimizerCallback.hpp>
 #include <aslam/backend/OptimizerCallbackManager.hpp>
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 
-#include <aslam/calibration/CalibrationProblem.hpp>
+#include <aslam/calibration/calibrator/CalibrationProblem.hpp>
 #include <aslam/calibration/DesignVariableReceiver.hpp>
 #include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 

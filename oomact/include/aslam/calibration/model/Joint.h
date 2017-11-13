@@ -1,7 +1,7 @@
 #ifndef H4CA2088F_E492_4165_B0A9_629F2929CA39
 #define H4CA2088F_E492_4165_B0A9_629F2929CA39
 
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 
 namespace aslam {
 namespace calibration {

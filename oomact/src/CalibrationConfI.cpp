@@ -1,4 +1,4 @@
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 
 namespace aslam {
 namespace calibration {

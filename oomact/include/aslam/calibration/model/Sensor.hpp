@@ -3,7 +3,7 @@
 
 #include <aslam/backend/Scalar.hpp>
 
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
