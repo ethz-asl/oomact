@@ -1,6 +1,6 @@
-#include <aslam/calibration/tools/Interval.hpp>
-#include <aslam/calibration/model/BoundedCalibrationVariable.hpp>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/tools/Interval.h>
+#include <aslam/calibration/model/BoundedCalibrationVariable.h>
+#include <aslam/calibration/model/Sensor.h>
 
 
 bool aslam::calibration::Interval::contains(Timestamp t, const TimeDesignVariableCv & delay) const{

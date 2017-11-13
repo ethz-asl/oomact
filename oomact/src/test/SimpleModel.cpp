@@ -1,4 +1,4 @@
-#include <aslam/calibration/test/SimpleModel.hpp>
+#include <aslam/calibration/test/SimpleModel.h>
 
 #include <cmath>
 

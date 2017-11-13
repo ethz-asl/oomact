@@ -5,10 +5,10 @@
 #include <gtest/gtest.h>
 #include <rosbag/bag.h>
 
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
 #include <aslam/calibration/model/FrameGraphModel.h>
 #include <aslam/calibration/model/PoseTrajectory.h>
-#include <aslam/calibration/model/sensors/PoseSensor.hpp>
+#include <aslam/calibration/model/sensors/PoseSensor.h>
 #include <aslam/calibration/tools/SmartPointerTools.h>
 
 #include "bag_tools.h"

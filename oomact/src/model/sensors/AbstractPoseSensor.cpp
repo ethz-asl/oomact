@@ -4,7 +4,7 @@
 #include <aslam/calibration/data/PoseMeasurement.h>
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/model/sensors/PoseSensorI.hpp>
+#include <aslam/calibration/model/sensors/PoseSensorI.h>
 
 namespace aslam {
 namespace calibration {

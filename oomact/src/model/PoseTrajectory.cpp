@@ -12,15 +12,15 @@
 #include <sm/kinematics/Transformation.hpp>
 
 #include "aslam/calibration/algo/OdometryPath.h"
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
-#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include "aslam/calibration/calibrator/CalibratorI.h"
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include "aslam/calibration/data/PoseMeasurement.h"
 #include <aslam/calibration/error-terms/ErrorTermTangency.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
-#include <aslam/calibration/model/sensors/PoseSensorI.hpp>
+#include <aslam/calibration/model/sensors/PoseSensorI.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/tools/MeasurementContainerTools.h>
 

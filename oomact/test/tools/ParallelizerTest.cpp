@@ -1,4 +1,4 @@
-#include <aslam/calibration/tools/Parallelizer.hpp>
+#include <aslam/calibration/tools/Parallelizer.h>
 
 #include <gtest/gtest.h>
 #include <mutex>

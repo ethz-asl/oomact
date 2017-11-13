@@ -1,7 +1,7 @@
 #include "aslam/calibration/ros/RosInputProvider.h"
 
 #include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 #include <rosbag/view.h>
 
 #include "aslam/calibration/ros/InputFeederFactoryRegistry.h"

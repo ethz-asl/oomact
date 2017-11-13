@@ -3,7 +3,7 @@
 
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/Module.h>
-#include "../../Timestamp.hpp"
+#include "../../Timestamp.h"
 
 namespace aslam {
 namespace calibration {

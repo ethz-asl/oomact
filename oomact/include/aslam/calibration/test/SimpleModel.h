@@ -4,7 +4,7 @@
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
 
-#include "Tools.hpp"
+#include "Tools.h"
 
 namespace aslam {
 namespace calibration {

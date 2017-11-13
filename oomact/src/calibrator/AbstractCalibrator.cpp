@@ -10,8 +10,8 @@
 #include <aslam/backend/OptimizerCallbackManager.hpp>
 #include <aslam/calibration/calibrator/CalibrationConfI.h>
 
-#include <aslam/calibration/calibrator/CalibrationProblem.hpp>
-#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include <aslam/calibration/calibrator/CalibrationProblem.h>
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/error-terms/ErrorTermGroup.h>

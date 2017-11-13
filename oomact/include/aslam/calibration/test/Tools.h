@@ -2,7 +2,7 @@
 #define H04B3F29E_096B_4A87_9151_D45C16D87882
 
 
-#include <aslam/calibration/tools/ConfigPathResolver.hpp>
+#include <aslam/calibration/tools/ConfigPathResolver.h>
 #include <sm/value_store/ValueStore.hpp>
 
 namespace aslam {

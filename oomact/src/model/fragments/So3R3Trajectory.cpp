@@ -5,10 +5,10 @@
 #include <bsplines/BSplineFitter.hpp>
 #include <glog/logging.h>
 
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
 #include <aslam/calibration/tools/SplineWriter.h>
-#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 
 using aslam::backend::VectorExpression;

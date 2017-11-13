@@ -5,7 +5,7 @@
 
 #include <glog/logging.h>
 
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 
 using namespace sm::timing;
 using namespace sm::kinematics;

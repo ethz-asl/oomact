@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 
 #include "InputFeederI.h"
 

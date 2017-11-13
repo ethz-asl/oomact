@@ -34,7 +34,7 @@
 
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
-#include "aslam/calibration/error-terms/ConditionalErrorTerm.hpp"
+#include "aslam/calibration/error-terms/ConditionalErrorTerm.h"
 
 using namespace aslam::backend;
 using namespace aslam::calibration;

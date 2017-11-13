@@ -6,10 +6,10 @@
 #include <sm/boost/null_deleter.hpp>
 #include <eigen-checks/gtest.h>
 
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 #include <aslam/calibration/model/Model.h>
-#include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
-#include <aslam/calibration/model/sensors/PoseSensor.hpp>
+#include <aslam/calibration/model/sensors/MotionCaptureSensor.h>
+#include <aslam/calibration/model/sensors/PoseSensor.h>
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/FrameGraphModel.h>

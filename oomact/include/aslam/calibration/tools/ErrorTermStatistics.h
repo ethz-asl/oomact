@@ -8,7 +8,7 @@
 
 #include <aslam/backend/ErrorTerm.hpp>
 
-#include "aslam/calibration/error-terms/ConditionalErrorTerm.hpp"
+#include "aslam/calibration/error-terms/ConditionalErrorTerm.h"
 namespace aslam {
 namespace calibration {
 

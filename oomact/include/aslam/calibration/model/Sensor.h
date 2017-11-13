@@ -8,8 +8,8 @@
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
 #include <aslam/calibration/model/fragments/DelayCv.h>
-#include <aslam/calibration/SensorId.hpp>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/SensorId.h>
+#include <aslam/calibration/tools/Interval.h>
 
 namespace aslam {
 namespace calibration {

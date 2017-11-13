@@ -1,4 +1,4 @@
-#include "aslam/calibration/model/Sensor.hpp"
+#include "aslam/calibration/model/Sensor.h"
 
 #include <ostream>
 
@@ -9,8 +9,8 @@
 
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp> //TODO A remove this and use frames instead!
-#include <aslam/calibration/SensorId.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h> //TODO A remove this and use frames instead!
+#include <aslam/calibration/SensorId.h>
 #include <aslam/calibration/tools/tools.h>
 #include <aslam/calibration/tools/TypeName.h>
 

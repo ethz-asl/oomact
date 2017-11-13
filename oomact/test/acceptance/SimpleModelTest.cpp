@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 
-#include <aslam/calibration/test/SimpleModel.hpp>
-#include <aslam/calibration/test/Tools.hpp>
+#include <aslam/calibration/test/SimpleModel.h>
+#include <aslam/calibration/test/Tools.h>
 
 using namespace aslam::calibration;
 using namespace aslam::calibration::test;

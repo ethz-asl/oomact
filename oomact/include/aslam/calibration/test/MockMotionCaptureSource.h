@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-#include "../input/MotionCaptureSource.hpp"
+#include "../input/MotionCaptureSource.h"
 
 namespace aslam {
 namespace calibration {

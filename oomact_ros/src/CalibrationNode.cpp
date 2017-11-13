@@ -3,9 +3,9 @@
 #include <aslam/calibration/model/FrameGraphModel.h>
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/ros/RosInputProvider.h>
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
-#include <aslam/calibration/model/sensors/PoseSensor.hpp>
-#include <aslam/calibration/model/sensors/PositionSensor.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
+#include <aslam/calibration/model/sensors/PoseSensor.h>
+#include <aslam/calibration/model/sensors/PositionSensor.h>
 #include <aslam/calibration/model/sensors/Imu.h>
 
 #include <sm/MatrixArchive.hpp>

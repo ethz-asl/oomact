@@ -6,7 +6,7 @@
 
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/algo/PredictionWriter.h>
-#include <aslam/calibration/SensorId.hpp>
+#include <aslam/calibration/SensorId.h>
 
 namespace aslam {
 namespace calibration {

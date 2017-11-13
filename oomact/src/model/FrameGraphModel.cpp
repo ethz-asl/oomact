@@ -8,7 +8,7 @@
 
 #include <aslam/calibration/model/PoseTrajectory.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
-#include <aslam/calibration/tools/Tree.hpp>
+#include <aslam/calibration/tools/Tree.h>
 
 namespace aslam {
 namespace calibration {

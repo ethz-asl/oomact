@@ -10,13 +10,13 @@
 #include <aslam/backend/ScalarExpression.hpp>
 
 #include <aslam/calibration/algo/PredictionWriter.h>
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 #include "aslam/calibration/data/WheelSpeedsMeasurement.h"
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include "aslam/calibration/error-terms/ErrorTermWheel.h"
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/tools/Interval.h>
 
 using aslam::backend::EuclideanExpression;
 using aslam::backend::RotationExpression;
