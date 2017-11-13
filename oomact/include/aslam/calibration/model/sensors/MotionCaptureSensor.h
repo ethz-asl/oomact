@@ -4,7 +4,7 @@
 #include <aslam/calibration/data/StorageI.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/sensors/AbstractPoseSensor.h>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/tools/Interval.h>
 
 namespace aslam {
 namespace calibration {

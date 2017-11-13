@@ -1,9 +1,9 @@
 #ifndef H2E153EC9_9902_41A1_A522_E4E0A04D6F76
 #define H2E153EC9_9902_41A1_A522_E4E0A04D6F76
 
-#include "CalibratorI.hpp"
+#include "CalibratorI.h"
 #include "../algo/PredictionWriter.h"
-#include "../SensorId.hpp"
+#include "../SensorId.h"
 
 namespace aslam {
 namespace backend {

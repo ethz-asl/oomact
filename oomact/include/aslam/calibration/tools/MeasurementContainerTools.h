@@ -2,7 +2,7 @@
 #define H786129C5_656D_4519_AC5E_FCC314B1BC7F
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include <aslam/calibration/data/PoseMeasurement.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 
 
 namespace aslam {

@@ -8,8 +8,8 @@
 
 #include "../data/ObservationManagerI.h"
 #include "../model/Model.h"
-#include "../SensorId.hpp"
-#include "../tools/Interval.hpp"
+#include "../SensorId.h"
+#include "../tools/Interval.h"
 
 namespace sm {
   class MatrixArchive;

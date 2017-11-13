@@ -1,6 +1,6 @@
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 
 namespace aslam {
 namespace calibration {

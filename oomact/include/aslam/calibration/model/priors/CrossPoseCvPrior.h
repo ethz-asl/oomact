@@ -1,7 +1,7 @@
 #ifndef H5CC08D7E_8450_473B_B779_89023C21D91E
 #define H5CC08D7E_8450_473B_B779_89023C21D91E
 
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
 #include <aslam/calibration/model/Module.h>
 

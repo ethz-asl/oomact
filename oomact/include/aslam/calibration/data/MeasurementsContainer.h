@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "../Timestamp.hpp"
+#include "../Timestamp.h"
 
 namespace aslam {
 namespace calibration {

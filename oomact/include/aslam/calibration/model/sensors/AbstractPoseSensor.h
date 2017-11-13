@@ -2,8 +2,8 @@
 #define H224E4723_D72A_4715_947A_F81E0A1714EB
 
 #include "../../data/StorageI.h"
-#include "../Sensor.hpp"
-#include "PoseSensorI.hpp"
+#include "../Sensor.h"
+#include "PoseSensorI.h"
 
 namespace aslam {
 namespace calibration {

@@ -3,13 +3,13 @@
 
 #include <aslam/backend/Scalar.hpp>
 
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/CalibrationVariable.h>
 #include <aslam/calibration/model/fragments/PoseCv.h>
 #include <aslam/calibration/model/fragments/DelayCv.h>
-#include <aslam/calibration/SensorId.hpp>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/SensorId.h>
+#include <aslam/calibration/tools/Interval.h>
 
 namespace aslam {
 namespace calibration {

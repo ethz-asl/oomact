@@ -1,4 +1,4 @@
-#include <aslam/calibration/test/Tools.hpp>
+#include <aslam/calibration/test/Tools.h>
 
 #include <glog/logging.h>
 #include <sm/BoostPropertyTreeLoader.hpp>

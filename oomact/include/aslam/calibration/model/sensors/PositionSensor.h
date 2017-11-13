@@ -2,8 +2,8 @@
 #define POSITION_SENSOR_HPP_
 
 #include <aslam/calibration/input/InputReceiverI.h>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/model/Sensor.h>
+#include <aslam/calibration/tools/Interval.h>
 #include <sm/deprecation.h>
 
 namespace aslam {

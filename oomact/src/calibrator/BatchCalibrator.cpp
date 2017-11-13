@@ -5,11 +5,11 @@
 #include <sm/BoostPropertyTree.hpp>
 
 #include <aslam/calibration/calibrator/AbstractCalibrator.h>
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
-#include <aslam/calibration/CalibrationProblem.hpp>
+#include "aslam/calibration/calibrator/CalibratorI.h"
+#include <aslam/calibration/calibrator/CalibrationProblem.h>
 #include <aslam/calibration/data/MapStorage.h>
-#include <aslam/calibration/model/StateCarrier.h>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/calibrator/StateCarrier.h>
+#include <aslam/calibration/model/Sensor.h>
 
 namespace aslam {
 namespace calibration {

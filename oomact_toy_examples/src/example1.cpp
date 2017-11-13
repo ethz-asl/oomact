@@ -3,11 +3,11 @@
 #include <sm/boost/null_deleter.hpp>
 
 #include <aslam/calibration/model/FrameGraphModel.h>
-#include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
+#include <aslam/calibration/model/sensors/MotionCaptureSensor.h>
 #include <aslam/calibration/model/PoseTrajectory.h>
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 
-#include "aslam/calibration/input/MotionCaptureSource.hpp"
+#include "aslam/calibration/input/MotionCaptureSource.h"
 
 using namespace aslam::calibration;
 class SimpleModelFrame : public Frame, public NamedMinimal {

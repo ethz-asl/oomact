@@ -9,15 +9,15 @@
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
 #include <aslam/splines/OPTBSpline.hpp>
 
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 #include "aslam/calibration/data/AccelerometerMeasurement.h"
 #include "aslam/calibration/data/GyroscopeMeasurement.h"
-#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include <aslam/calibration/algo/splinesToFile.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/fragments/TrajectoryCarrier.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/model/StateCarrier.h>
+#include <aslam/calibration/calibrator/StateCarrier.h>
 #include "aslam/calibration/error-terms/ErrorTermAccelerometer.h"
 #include "aslam/calibration/error-terms/ErrorTermGyroscope.h"
 #include "aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h"

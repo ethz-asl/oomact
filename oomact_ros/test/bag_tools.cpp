@@ -1,6 +1,6 @@
 #include <aslam/calibration/data/PoseMeasurement.h>
 #include <aslam/calibration/test/MockMotionCaptureSource.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 #include <rosbag/bag.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <sm/kinematics/quaternion_algebra.hpp>

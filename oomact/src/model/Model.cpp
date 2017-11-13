@@ -13,8 +13,8 @@
 #include <aslam/calibration/model/fragments/Gravity.h>
 #include <aslam/calibration/model/Joint.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/SensorId.hpp>
+#include <aslam/calibration/model/Sensor.h>
+#include <aslam/calibration/SensorId.h>
 #include <aslam/calibration/tools/tools.h>
 #include <aslam/calibration/tools/TypeName.h>
 

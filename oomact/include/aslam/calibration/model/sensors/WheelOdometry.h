@@ -3,9 +3,9 @@
 
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 #include <aslam/calibration/data/WheelSpeedsMeasurement.h>
-#include "../../Timestamp.hpp"
+#include "../../Timestamp.h"
 
 namespace aslam {
 namespace calibration {

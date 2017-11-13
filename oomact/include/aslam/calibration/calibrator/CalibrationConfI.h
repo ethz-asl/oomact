@@ -1,7 +1,7 @@
 #ifndef H2FC5F3AD_D310_4A93_B2E5_55925AA5F4DF
 #define H2FC5F3AD_D310_4A93_B2E5_55925AA5F4DF
 #include <aslam/calibration/model/Module.h>
-#include "tools/Printable.h"
+#include "../tools/Printable.h"
 
 namespace aslam {
 namespace calibration {

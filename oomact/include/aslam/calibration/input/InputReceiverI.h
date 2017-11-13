@@ -1,7 +1,7 @@
 #ifndef HCD22AC9B_8438_43D6_BD69_2D38100CFD14
 #define HCD22AC9B_8438_43D6_BD69_2D38100CFD14
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 
 namespace aslam {
 namespace calibration {

@@ -1,9 +1,9 @@
 #include <aslam/calibration/tools/MeasurementContainerTools.h>
 
-#include <aslam/calibration/calibrator/CalibratorI.hpp>
-#include <aslam/calibration/model/sensors/PoseSensorI.hpp>
-#include <aslam/calibration/model/Sensor.hpp>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/calibrator/CalibratorI.h>
+#include <aslam/calibration/model/sensors/PoseSensorI.h>
+#include <aslam/calibration/model/Sensor.h>
+#include <aslam/calibration/Timestamp.h>
 
 
 aslam::calibration::PoseMeasurement aslam::calibration::getFirstPoseMeasurement(CalibratorI & calib, Timestamp & startTime, const Sensor & sensor, bool respectDelayLowerBound, const Frame * transformToFramePtr) {

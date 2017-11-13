@@ -4,7 +4,7 @@
 #include <aslam/backend/GenericScalarExpression.hpp>
 
 #include "../model/fragments/DelayCv.h"
-#include "../Timestamp.hpp"
+#include "../Timestamp.h"
 
 namespace aslam {
 

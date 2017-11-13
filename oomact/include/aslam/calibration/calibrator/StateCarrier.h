@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 
 namespace aslam {
 namespace calibration {

@@ -1,17 +1,17 @@
-#include <aslam/calibration/model/sensors/MotionCaptureSensor.hpp>
+#include <aslam/calibration/model/sensors/MotionCaptureSensor.h>
 
 #include <boost/make_shared.hpp>
 #include <glog/logging.h>
 
 #include <aslam/backend/TransformationExpression.hpp>
 
-#include "aslam/calibration/input/MotionCaptureSource.hpp"
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
+#include "aslam/calibration/input/MotionCaptureSource.h"
+#include "aslam/calibration/calibrator/CalibratorI.h"
 #include "aslam/calibration/data/MeasurementsContainer.h"
 #include "aslam/calibration/error-terms/ErrorTermPose.h"
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/model/Sensor.h>
 #include <aslam/calibration/tools/ErrorTermStatistics.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 

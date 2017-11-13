@@ -3,7 +3,7 @@
 
 #include <aslam/calibration/input/InputReceiverI.h>
 #include <aslam/calibration/model/sensors/AbstractPoseSensor.h>
-#include <aslam/calibration/tools/Interval.hpp>
+#include <aslam/calibration/tools/Interval.h>
 
 namespace aslam {
 namespace calibration {

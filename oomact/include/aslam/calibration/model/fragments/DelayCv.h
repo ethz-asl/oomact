@@ -8,9 +8,9 @@
 #include <aslam/backend/GenericScalar.hpp>
 #include <sm/value_store/ValueStore.hpp>
 
-#include <aslam/calibration/model/BoundedCalibrationVariable.hpp>
+#include <aslam/calibration/model/BoundedCalibrationVariable.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 
 namespace aslam {
 namespace calibration {

@@ -6,21 +6,21 @@
 #include <aslam/backend/EuclideanExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/Vector2RotationQuaternionExpressionAdapter.hpp>
-#include <aslam/calibration/CalibrationConfI.h>
+#include <aslam/calibration/calibrator/CalibrationConfI.h>
 #include <bsplines/NsecTimePolicy.hpp>
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
 #include "aslam/calibration/algo/OdometryPath.h"
-#include "aslam/calibration/calibrator/CalibratorI.hpp"
-#include <aslam/calibration/DesignVariableReceiver.hpp>
+#include "aslam/calibration/calibrator/CalibratorI.h"
+#include <aslam/calibration/DesignVariableReceiver.h>
 #include "aslam/calibration/data/PoseMeasurement.h"
 #include <aslam/calibration/error-terms/ErrorTermTangency.h>
 #include <aslam/calibration/model/Model.h>
 #include <aslam/calibration/model/ModuleTools.h>
 #include <aslam/calibration/model/fragments/So3R3Trajectory.h>
 #include <aslam/calibration/model/sensors/WheelOdometry.h>
-#include <aslam/calibration/model/sensors/PoseSensorI.hpp>
+#include <aslam/calibration/model/sensors/PoseSensorI.h>
 #include <aslam/calibration/tools/ErrorTermStatisticsWithProblemAndPredictor.h>
 #include <aslam/calibration/tools/MeasurementContainerTools.h>
 

@@ -4,8 +4,8 @@
 #include <aslam/calibration/data/MeasurementsContainer.h>
 #include <aslam/calibration/input/InputReceiverI.h>
 #include <aslam/calibration/model/Module.h>
-#include <aslam/calibration/model/StateCarrier.h>
-#include <aslam/calibration/model/Sensor.hpp>
+#include <aslam/calibration/calibrator/StateCarrier.h>
+#include <aslam/calibration/model/Sensor.h>
 
 namespace aslam {
 namespace backend {

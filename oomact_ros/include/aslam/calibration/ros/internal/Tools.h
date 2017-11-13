@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <aslam/calibration/input/InputReceiverI.h>
-#include <aslam/calibration/Timestamp.hpp>
+#include <aslam/calibration/Timestamp.h>
 #include <boost/array.hpp>
 
 namespace aslam {
