@@ -75,7 +75,7 @@ class AbstractCalibrator : public virtual CalibratorI {
   const Model & getModel() const override { return _model; }
   Model & getModel() override { return _model; }
 
-  virtual ValueStoreRef getValueStore() const;
+  virtual ValueStoreRef getValueStore() const override;
 
   double secsSinceStart(Timestamp timestamp) const override;
   std::string secsSinceStart(const Interval & interval) const override;

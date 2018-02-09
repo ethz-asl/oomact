@@ -210,7 +210,7 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
     }
   }
 
-  bool isMeasurementRelevant(const Sensor &, Timestamp) const {
+  bool isMeasurementRelevant(const Sensor &, Timestamp) const override {
     return true; // TODO B support predefined batch interval in time
   }
 
