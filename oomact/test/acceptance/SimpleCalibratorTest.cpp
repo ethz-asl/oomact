@@ -30,7 +30,7 @@ TEST(CalibrationTestSuite, testEstimateTwoPoseSensors) {
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, mcSensorB, traj);
 
-  EXPECT_EQ(2, m.getCalibrationVariables().size());
+  EXPECT_EQ(2u, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorB.getTranslationToParent()[1]);
   EXPECT_NEAR(0.1, std::abs(sm::kinematics::quat2AxisAngle(mcSensorB.getRotationQuaternionToParent())[2]), 1e-6); // abs for conventional neutrality
 
@@ -71,7 +71,7 @@ TEST(CalibrationTestSuite, testEstimateOnePoseSensorsAndOnePosition) {
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, mcSensorB, traj);
 
-  EXPECT_EQ(1, m.getCalibrationVariables().size());
+  EXPECT_EQ(1u, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorB.getTranslationToParent()[1]);
 
   auto vsCalib = ValueStoreRef::fromString(
