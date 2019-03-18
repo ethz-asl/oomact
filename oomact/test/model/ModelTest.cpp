@@ -23,7 +23,7 @@ class MockSensor3 : public MockSensor {
   using MockSensor::MockSensor;
 };
 
-TEST(Module, modelUid) {
+TEST(Model, modelUid) {
   ValueStoreRef config;
   Model m(config, std::make_shared<SimpleConfigPathResolver>());
   MockModule mm1(m, "A", config);
@@ -35,14 +35,13 @@ TEST(Module, modelUid) {
   ASSERT_EQ(mm2.getUid(), "A1");
 }
 
-TEST(Module, getSensors) {
-
+TEST(Model, getSensors) {
   ValueStoreRef config = ValueStoreRef::fromString(
       "frames=a:b,"
       "S1{frame=a, rotation/used=false,translation/used=false,delay/used=false}"
       "S2{frame=b, rotation/used=false,translation/used=false,delay/used=false}"
       );
-;
+
   Model m(config, std::make_shared<SimpleConfigPathResolver>());
   MockModule mm1(m, "A", config);
   MockSensor s1(m, "S1", config);
