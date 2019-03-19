@@ -108,7 +108,7 @@ constexpr Timestamp MockInputProvider::TimeInc;
 TEST(InputProviderSuite, testEasy) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}, frames=body:world,"
-      "a{frame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
+      "a{referenceFrame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
   auto vsCalib = ValueStoreRef::fromString(

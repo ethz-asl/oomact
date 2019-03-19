@@ -19,8 +19,8 @@ TEST(CalibrationTestSuite, testEstimateTwoPoseSensors) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
       "frames=body:world,"
-      "a{frame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
-      "b{frame=body,targetFrame=world,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
+      "a{referenceFrame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
+      "b{referenceFrame=body,targetFrame=world,rotation{used=true,yaw=0.1,pitch=0.,roll=0.},translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 
@@ -60,8 +60,8 @@ TEST(CalibrationTestSuite, testEstimateOnePoseSensorsAndOnePosition) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}"
       "frames=body:world,"
-      "a{frame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
-      "b{frame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
+      "a{referenceFrame=body,targetFrame=world,rotation/used=false,translation/used=false,delay/used=false}"
+      "b{referenceFrame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
 

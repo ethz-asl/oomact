@@ -38,8 +38,8 @@ TEST(Model, modelUid) {
 TEST(Model, getSensors) {
   ValueStoreRef config = ValueStoreRef::fromString(
       "frames=a:b,"
-      "S1{frame=a, rotation/used=false,translation/used=false,delay/used=false}"
-      "S2{frame=b, rotation/used=false,translation/used=false,delay/used=false}"
+      "S1{referenceFrame=a, rotation/used=false,translation/used=false,delay/used=false}"
+      "S2{referenceFrame=b, rotation/used=false,translation/used=false,delay/used=false}"
       );
 
   Model m(config, std::make_shared<SimpleConfigPathResolver>());

@@ -33,8 +33,8 @@ TEST(FrameGraphModel, getTransformation) {
   auto config = ValueStoreRef::fromString(
       "Gravity{used=false}"
       "frames=body:world,"
-      "body{frame=world, rotation/used=false,translation/used=false,delay/used=false}"
-      "s1{frame=body, rotation/used=false,translation/used=false,delay/used=false}"
+      "body{referenceFrame=world, rotation/used=false,translation/used=false,delay/used=false}"
+      "s1{referenceFrame=body, rotation/used=false,translation/used=false,delay/used=false}"
       );
 
   Eigen::MatrixXd R_w_b(3, 3);

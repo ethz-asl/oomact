@@ -261,7 +261,7 @@ logger:
     </UpperBodyTrajectory>
       <sensors>
         <imu>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <estimate>true</estimate>
           <observeOnly>false</observeOnly>
           <used>true</used>
@@ -324,7 +324,7 @@ logger:
           </delay>
           <inertiaFrame>Global</inertiaFrame></imu>
         <Velodyne>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <estimate>true</estimate>
           <observeOnly>false</observeOnly>
           <used>true</used>
@@ -454,7 +454,7 @@ logger:
           <pcFilterConfig>icp/GroundPlaneFilter.yaml</pcFilterConfig>
         </GroundPlane>
         <ViconSystem>
-          <frame>Global</frame>
+          <referenceFrame>Global</referenceFrame>
           <used>false</used>
           <estimate>true</estimate>
           <translation>
@@ -476,7 +476,7 @@ logger:
           </delay>
         </ViconSystem>
         <ViconBody>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <used>false</used>
           <observeOnly>true</observeOnly>
           <estimate>true</estimate>
@@ -497,7 +497,7 @@ logger:
           <delay><used>false</used></delay>
         </ViconBody>
         <ViconBase>
-          <frame>LowerBody</frame>
+          <referenceFrame>LowerBody</referenceFrame>
           <used>true</used>
           <observeOnly>true</observeOnly>
           <estimate>true</estimate>
@@ -577,7 +577,7 @@ logger:
           <estimate>false</estimate>
         </VelocityObserver>
         <LMS_FRONT>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <model>Sick</model>
           <minimalAngle>-1.54226</minimalAngle>
           <maximalAngle>1.54226</maximalAngle>
@@ -594,7 +594,7 @@ logger:
           <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
         </LMS_FRONT>
         <LMS_REAR>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <model>Sick</model>
           <translation>
             <sigma>0.05,0.05,0.01</sigma>
@@ -609,7 +609,7 @@ logger:
           <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
         </LMS_REAR>
         <LMS_DOWN>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <model>Sick</model>
           <translation>
             <sigma>0.1</sigma>
@@ -624,7 +624,7 @@ logger:
           <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
         </LMS_DOWN>
         <UTM_FRONT>
-          <frame>Nose</frame>
+          <referenceFrame>Nose</referenceFrame>
           <model>Hokuyo</model>
           <translation>
             <sigma>0.01</sigma>
@@ -640,7 +640,7 @@ logger:
           <pcFilterConfig>icp/SickFilter.yaml</pcFilterConfig>
         </UTM_FRONT>
         <dynamixel>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <used>true</used>
           <estimate>true</estimate>
           <angleSigma>0.01</angleSigma>
@@ -661,7 +661,7 @@ logger:
           </splines>
         </dynamixel>
         <BumbleBee>
-          <frame>UpperBody</frame>
+          <referenceFrame>UpperBody</referenceFrame>
           <used>true</used>
           <observeOnly>false</observeOnly>
           <translation>
@@ -688,7 +688,7 @@ logger:
           <zVarianceFactor>2</zVarianceFactor>
         </BumbleBee>
         <WheelOdometry>
-          <frame>LowerBody</frame>
+          <referenceFrame>LowerBody</referenceFrame>
           <groundFrame>Global</groundFrame>
           <observeOnly>false</observeOnly>
           <estimate>true</estimate>
