@@ -189,8 +189,14 @@ ModuleLinkBase::ModuleLinkBase(const std::string& ownerName, const std::string &
   }
 }
 
+ModuleLinkBase::ModuleLinkBase(const std::string& ownerName, sm::value_store::ValueStoreRef config,
+                               const std::string& linkName, bool required) :
+  ModuleLinkBase(ownerName, linkName, required ? config.getString(linkName) : config.getString(linkName, std::string()), required)
+{
+}
+
 ModuleLinkBase::ModuleLinkBase(Module & owner, const std::string& linkName, bool required) :
-  ModuleLinkBase(owner.getName(), linkName, required ? owner.getMyConfig().getString(linkName) : owner.getMyConfig().getString(linkName, std::string()), required)
+  ModuleLinkBase(owner.getName(), owner.getMyConfig(), linkName, required)
 {
   owner.moduleLinks_.push_back(*this);
 }

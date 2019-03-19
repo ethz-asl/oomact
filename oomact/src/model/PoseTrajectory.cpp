@@ -376,6 +376,10 @@ RelativeKinematicExpression computeTrajectoryFrame(A expressionFactories, bool n
         //TODO O The adapter is a big waste of time. There are more direct ways (UnitQuaternion expressions ..)
         Vector2RotationQuaternionExpressionAdapter::adapt(expressionFactories.rot.getValueExpression()),
         needGlobalPosition ? expressionFactories.trans.getValueExpression(0) : EuclideanExpression(),
+            // the following two negations of the angular derivatives are necessary because the
+            // B-spline implementation assumes global to local usage while we use it local to global
+            // here.
+            // TODO: various usages should be supported by the splines physical values!
         maximalDerivativeOrder >= 1 ? -EuclideanExpression(expressionFactories.rot.getAngularVelocityExpression()) : EuclideanExpression(),
         maximalDerivativeOrder >= 1 ? EuclideanExpression(expressionFactories.trans.getValueExpression(1)) : EuclideanExpression(),
         maximalDerivativeOrder >= 2 ? -EuclideanExpression(expressionFactories.rot.getAngularAccelerationExpression()) : EuclideanExpression(),

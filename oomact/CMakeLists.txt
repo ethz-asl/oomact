@@ -70,6 +70,7 @@ cs_add_library(${PROJECT_NAME}
   src/plan/Plan.cpp
   src/plan/PlanFragment.cpp
   src/plan/SmartDriver.cpp
+  src/test/MockCalibrator.cpp
   src/test/MockMotionCaptureSource.cpp
   src/test/SimpleModel.cpp
   src/test/TestData.cpp
@@ -103,6 +104,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/input/InputProviderTest.cpp
   test/model/FrameGraphModelTest.cpp
   test/model/ModelTest.cpp
+  test/model/PoseTrajectoryTest.cpp
   test/plan/PlanTest.cpp
   test/test/TestDataTest.cpp
   test/test_main.cpp

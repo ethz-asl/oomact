@@ -44,8 +44,9 @@ AbstractCalibratorOptions::AbstractCalibratorOptions(const sm::value_store::Valu
 AbstractCalibratorOptions::~AbstractCalibratorOptions(){
 }
 
-AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model) :
-  _timeBaseSensor("Calibrator", "timeBaseSensor", config.getString("timeBaseSensor"), true), //TODO C support LinkBase with config and owner name
+AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model,
+                                       bool timeBaseSensorRequired) :
+  _timeBaseSensor("Calibrator", config, "timeBaseSensor", timeBaseSensorRequired),
   _modelSP(model),
   _model(*model),
   _config(config)
@@ -53,8 +54,10 @@ AbstractCalibrator::AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Mod
   _timeBaseSensor.resolve(_model);
 
   // Sanity checks
-  CHECK(_timeBaseSensor.get().isUsed()) << "Time base sensor (" << _timeBaseSensor.get() << ") is not used!";
-  CHECK(!_timeBaseSensor.get().hasDelay()) << "Time base sensor (" << _timeBaseSensor.get() << ") with delay isn't supported!";
+  if(_timeBaseSensor.isResolved()){
+    CHECK(_timeBaseSensor.get().isUsed()) << "Time base sensor (" << _timeBaseSensor.get() << ") is not used!";
+    CHECK(!_timeBaseSensor.get().hasDelay()) << "Time base sensor (" << _timeBaseSensor.get() << ") with delay isn't supported!";
+  }
 }
 
 
@@ -180,7 +183,7 @@ void AbstractCalibrator::addMeasurementTimestamp(const Timestamp lowerBound, Tim
 
 void AbstractCalibrator::addMeasurementTimestamp(Timestamp t, const Sensor & sensor) {
   addMeasurementTimestamp(t - sensor.getDelayUpperBound(), t - sensor.getDelayLowerBound());
-  if(_timeBaseSensor.get() == sensor){
+  if(_timeBaseSensor.isResolved() && _timeBaseSensor.get() == sensor){
     handleNewTimeBaseTimestamp(t);
   }
 }

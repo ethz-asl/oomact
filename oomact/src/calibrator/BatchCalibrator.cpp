@@ -146,7 +146,7 @@ class BatchCalibrationProblem : public CalibrationProblem, public BatchStateRece
 class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrator {
  public:
   BatchCalibrator (ValueStoreRef config, std::shared_ptr<Model> model) :
-    AbstractCalibrator(config, model),
+    AbstractCalibrator(config, model, true),
     config_(config),
     options_(config),
     storage_(*this)
