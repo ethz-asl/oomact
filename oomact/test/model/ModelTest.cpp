@@ -51,8 +51,8 @@ TEST(Model, getSensors) {
   m.addModule(s1);
   m.addModule(s2);
 
-  EXPECT_EQ(2, m.getSensors().size());
-  EXPECT_EQ(2, m.getSensors<MockSensor>().size());
-  EXPECT_EQ(1, m.getSensors<MockSensor2>().size());
-  EXPECT_EQ(0, m.getSensors<MockSensor3>().size());
+  EXPECT_EQ(2u, m.getSensors().size());
+  EXPECT_EQ(2u, m.getSensors<MockSensor>().size());
+  EXPECT_EQ(1u, m.getSensors<MockSensor2>().size());
+  EXPECT_EQ(0u, m.getSensors<MockSensor3>().size());
 }

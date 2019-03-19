@@ -122,7 +122,7 @@ TEST(InputProviderSuite, testEasy) {
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, traj);
 
-  EXPECT_EQ(1, m.getCalibrationVariables().size());
+  EXPECT_EQ(1u, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
   auto spModel = to_local_shared_ptr(m);
