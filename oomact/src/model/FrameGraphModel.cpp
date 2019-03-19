@@ -60,10 +60,10 @@ class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
   {
   }
 
-  CoordinateFrame getCoordinateFrame(const Frame & to, const Frame & from, const size_t maximalDerivativeOrder) const {
+  CoordinateFrame getKinematicChainFromTo(const Frame & fromLocal, const Frame & toGlobal, const size_t maximalDerivativeOrder) const {
     boost::shared_ptr<CoordinateFrame> f, fInv;
-    fgModel_.frameGraph_->walkPath(&from , &to, [&](const FrameLinkStorage & frameLink, bool inverse){
-      CHECK(inverse) << "to=" << to << ", from=" << from;
+    fgModel_.frameGraph_->walkPath(&toGlobal , &fromLocal, [&](const FrameLinkStorage & frameLink, bool towardsLeafs){
+      CHECK(towardsLeafs) << "Only walking to leaf frames is currently supported! Path was: to=" << fromLocal << ", from=" << toGlobal;
       switch(frameLink.type){
         case FrameLinkStorage::Type::Static:
           f = relativeKinematics2CF(f, frameLink.ptr.staticFrameLink->calcRelativeKinematics());
@@ -80,16 +80,16 @@ class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
     return std::move(*f);
   }
 
-  aslam::backend::CoordinateFrame getCoordinateFrame(const Frame & to, const Frame & from) const {
-    if(from == to) return CoordinateFrame();
-    return getCoordinateFrame(to, from, maximalDerivativeOrder_);
+  aslam::backend::CoordinateFrame getKinematicChainFromTo(const Frame & fromLocal, const Frame & toGlobal) const {
+    if(toGlobal == fromLocal) return CoordinateFrame();
+    return getKinematicChainFromTo(fromLocal, toGlobal, maximalDerivativeOrder_);
   }
 
   aslam::backend::TransformationExpression getTransformationToFrom(const Frame & to, const Frame & from) const override {
     const Frame & closestCommonAncestor = *fgModel_.frameGraph_->getClosestCommonAncestor(&to, &from);
-    auto toCFrame = getCoordinateFrame(to, closestCommonAncestor);
-    auto fromCFrame = getCoordinateFrame(from, closestCommonAncestor);
-    return aslam::backend::TransformationExpression(toCFrame.getR_G_L(), toCFrame.getPG()).inverse() * aslam::backend::TransformationExpression(fromCFrame.getR_G_L(), fromCFrame.getPG());
+    auto to2ca = getKinematicChainFromTo(to, closestCommonAncestor);
+    auto from2ca = getKinematicChainFromTo(from, closestCommonAncestor);
+    return aslam::backend::TransformationExpression(to2ca.getR_G_L(), to2ca.getPG()).inverse() * aslam::backend::TransformationExpression(from2ca.getR_G_L(), from2ca.getPG());
   }
 
   aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & in) const override {
