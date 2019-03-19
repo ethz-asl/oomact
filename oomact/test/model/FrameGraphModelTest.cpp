@@ -42,13 +42,18 @@ TEST(FrameGraphModel, getTransformation) {
   Eigen::Vector3d t_w_b;
   t_w_b << 1, 2, 3;
 
+  Eigen::Vector3d omega_w_wb;
+  omega_w_wb << 1, 2, 3;
+
   FrameGraphModel m(config);
   Sensor s1(m, "s1", config);
   MockFrameLink link(m, "body", config,
                      {
                          aslam::backend::RotationExpression(R_w_b),
                          aslam::backend::EuclideanExpression(t_w_b),
+                         aslam::backend::EuclideanExpression(omega_w_wb)
                      });
+  //TODO increase test coverage for all derivatives and more complex graphs
 
   m.addModulesAndInit(link, s1);
 
@@ -62,11 +67,17 @@ TEST(FrameGraphModel, getTransformation) {
                         SM_SOURCE_FILE_POS);
   sm::eigen::assertNear(T_w_b.toEuclideanExpression().evaluate(), t_w_b, 1e-9,
                         SM_SOURCE_FILE_POS);
+  auto omega_w_wb_exp = mAt.getAngularVelocity(bodyFrame, worldFrame);
+  sm::eigen::assertNear(omega_w_wb_exp.evaluate(), omega_w_wb, 1e-9,
+                        SM_SOURCE_FILE_POS);
 
   auto T_b_w = mAt.getTransformationToFrom(bodyFrame, worldFrame);
   sm::eigen::assertNear(T_b_w.toRotationExpression().toRotationMatrix(), R_w_b.transpose(), 1e-9,
                         SM_SOURCE_FILE_POS);
   sm::eigen::assertNear(T_b_w.toEuclideanExpression().evaluate(), -R_w_b.transpose()*t_w_b, 1e-9,
+                        SM_SOURCE_FILE_POS);
+  auto omega_b_bb_exp = mAt.getAngularVelocity(bodyFrame, bodyFrame);
+  sm::eigen::assertNear(omega_b_bb_exp.evaluate(), Eigen::Vector3d::Zero(), 1e-9,
                         SM_SOURCE_FILE_POS);
 
 
@@ -76,11 +87,17 @@ TEST(FrameGraphModel, getTransformation) {
                         SM_SOURCE_FILE_POS);
   sm::eigen::assertNear(T_w_s.toEuclideanExpression().evaluate(), t_w_b, 1e-9,
                         SM_SOURCE_FILE_POS);
+  auto omega_w_ws_exp = mAt.getAngularVelocity(s1Frame, worldFrame);
+  sm::eigen::assertNear(omega_w_ws_exp.evaluate(), omega_w_wb, 1e-9,
+                        SM_SOURCE_FILE_POS);
 
   auto T_s_w = mAt.getTransformationToFrom(s1Frame, worldFrame);
   sm::eigen::assertNear(T_s_w.toRotationExpression().toRotationMatrix(), R_w_b.transpose(), 1e-9,
                         SM_SOURCE_FILE_POS);
   sm::eigen::assertNear(T_s_w.toEuclideanExpression().evaluate(), -R_w_b.transpose()*t_w_b, 1e-9,
+                        SM_SOURCE_FILE_POS);
+  auto omega_b_bs_exp = mAt.getAngularVelocity(s1Frame, bodyFrame);
+  sm::eigen::assertNear(omega_b_bb_exp.evaluate(), Eigen::Vector3d::Zero(), 1e-9,
                         SM_SOURCE_FILE_POS);
 
 }
