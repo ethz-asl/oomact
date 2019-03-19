@@ -29,13 +29,15 @@ class MockFrameLink : public Module, public PoseCv {
   const RelativeKinematicExpression relKin;
 };
 
-TEST(FrameGraphModel, getTransformation) {
+TEST(FrameGraphModel, getTransformationAndGetDerivatives) {
   auto config = ValueStoreRef::fromString(
       "Gravity{used=false}"
       "frames=body:world,"
       "body{referenceFrame=world, rotation/used=false,translation/used=false,delay/used=false}"
       "s1{referenceFrame=body, rotation/used=false,translation/used=false,delay/used=false}"
-      );
+    );
+  FrameGraphModel m(config);
+  Sensor s1(m, "s1", config);
 
   Eigen::MatrixXd R_w_b(3, 3);
   R_w_b << 0, -1, 0,  1, 0, 0,  0, 0, 1;
@@ -45,8 +47,6 @@ TEST(FrameGraphModel, getTransformation) {
   Eigen::Vector3d omega_w_wb;
   omega_w_wb << 1, 2, 3;
 
-  FrameGraphModel m(config);
-  Sensor s1(m, "s1", config);
   MockFrameLink link(m, "body", config,
                      {
                          aslam::backend::RotationExpression(R_w_b),
