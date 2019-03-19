@@ -353,5 +353,74 @@ So3R3Trajectory& PoseTrajectory::getCurrentTrajectory() {
   return *state_;
 }
 
+
+
+constexpr int getVariability(BoundedTimeExpression*){
+  return 1;
+}
+constexpr int getVariability(Timestamp*){
+  return 0;
+}
+
+template <typename T>
+constexpr int addVariablitiy(int i){
+  return i + getVariability(static_cast<T*>(nullptr));
+}
+
+using namespace aslam::backend;
+
+template <typename A>
+RelativeKinematicExpression computeTrajectoryFrame(A expressionFactories, bool needGlobalPosition, int maximalDerivativeOrder){
+  return RelativeKinematicExpression(
+        //TODO O The adapter is a big waste of time. There are more direct ways (UnitQuaternion expressions ..)
+        Vector2RotationQuaternionExpressionAdapter::adapt(expressionFactories.rot.getValueExpression()),
+        needGlobalPosition ? expressionFactories.trans.getValueExpression(0) : EuclideanExpression(),
+        maximalDerivativeOrder >= 1 ? -EuclideanExpression(expressionFactories.rot.getAngularVelocityExpression()) : EuclideanExpression(),
+        maximalDerivativeOrder >= 1 ? EuclideanExpression(expressionFactories.trans.getValueExpression(1)) : EuclideanExpression(),
+        maximalDerivativeOrder >= 2 ? -EuclideanExpression(expressionFactories.rot.getAngularAccelerationExpression()) : EuclideanExpression(),
+        maximalDerivativeOrder >= 2 ? EuclideanExpression(expressionFactories.trans.getValueExpression(2)) : EuclideanExpression()
+      );
+}
+
+template <typename Time>
+RelativeKinematicExpression computeTrajectoryFrame(
+    const So3R3Trajectory & trajectory, Time timestamp,
+    bool needGlobalPosition, int maximalDerivativeOrder){
+
+  auto computeFrame = [&](auto expressionFactories){
+    return computeTrajectoryFrame(
+        expressionFactories,
+        needGlobalPosition, maximalDerivativeOrder
+      );
+  };
+  switch(addVariablitiy<Time>(maximalDerivativeOrder)){
+    case 0:
+    case 1:
+    case 2: //TODO O support maximalDerivativeOrder_ below 2 in getCoordinateFrame above properly (requires turning off accelerations in computeTrajectoryFrame for that case!
+      return computeFrame(trajectory.getExpressionFactoryPair<2>(timestamp));
+    case 3:
+      return computeFrame(trajectory.getExpressionFactoryPair<3>(timestamp));
+    case 4:
+      return computeFrame(trajectory.getExpressionFactoryPair<4>(timestamp));
+    default:
+      LOG(FATAL) << "Unsupported maximal derivative order " << maximalDerivativeOrder << " for time type " << typeid(Time).name();
+      throw 0; // dummy
+  }
+}
+
+RelativeKinematicExpression PoseTrajectory::calcRelativeKinematics(
+    Timestamp at, const ModelSimplification& simplification,
+    const size_t maximalDerivativeOrder) const
+{
+  return computeTrajectoryFrame(getCurrentTrajectory(), at, simplification.needGlobalOrientation, maximalDerivativeOrder);
+}
+
+RelativeKinematicExpression PoseTrajectory::calcRelativeKinematics(
+    const BoundedTimeExpression& at, const ModelSimplification& simplification,
+    const size_t maximalDerivativeOrder) const
+{
+  return computeTrajectoryFrame(getCurrentTrajectory(), at, simplification.needGlobalOrientation, maximalDerivativeOrder);
+}
 } /* namespace calibration */
 } /* namespace aslam */
+

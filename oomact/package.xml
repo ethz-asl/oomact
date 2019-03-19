@@ -18,4 +18,5 @@
   <depend>sm_deprecation</depend>
   <depend>sm_matrix_archive</depend>
   <depend>sm_value_store</depend>
+  <depend>sm_eigen</depend>
 </package>

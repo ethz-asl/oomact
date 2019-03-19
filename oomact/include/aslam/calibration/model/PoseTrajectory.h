@@ -5,6 +5,7 @@
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
+#include <aslam/calibration/model/FrameLinkI.h>
 
 namespace aslam {
 namespace calibration {
@@ -14,7 +15,7 @@ class So3R3Trajectory;
 class PoseSensorI;
 class WheelOdometry;
 
-class PoseTrajectory : public Module, public StateCarrier, public Activatable, public So3R3TrajectoryCarrier {
+class PoseTrajectory : public Module, public StateCarrier, public Activatable, public So3R3TrajectoryCarrier, public FrameLinkI {
  public:
   PoseTrajectory(Model & model, const std::string & name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
 
@@ -37,6 +38,17 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
   }
 
   const Frame & getReferenceFrame() const { return referenceFrame_; }
+  const Frame & getFrame() const override final { return So3R3TrajectoryCarrier::getFrame(); }
+  const Frame & getParentFrame() const override final { return getReferenceFrame(); }
+
+  RelativeKinematicExpression calcRelativeKinematics(
+      Timestamp at, const ModelSimplification& simplification,
+      const size_t maximalDerivativeOrder) const override;
+
+  RelativeKinematicExpression calcRelativeKinematics(
+      const BoundedTimeExpression & at, const ModelSimplification& simplification,
+      const size_t maximalDerivativeOrder) const override;
+
  protected:
   void writeConfig(std::ostream & out) const override;
  private:

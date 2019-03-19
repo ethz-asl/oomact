@@ -21,6 +21,12 @@ PoseCv::PoseCv(Module* module, boost::optional<std::string> defaultFrameName):
 Eigen::Vector3d PoseCv::NoTranslation = Eigen::Vector3d::Zero();
 Eigen::Vector4d PoseCv::NoRotation = Eigen::Vector4d::Unit(3);
 
+aslam::calibration::RelativeKinematicExpression PoseCv::calcRelativeKinematics() const
+{
+  return RelativeKinematicExpression(getRotationToParentExpression(),
+                                     getTranslationToParentExpression());
+}
+
 } /* namespace calibration */
 } /* namespace aslam */
 

@@ -46,6 +46,7 @@ cs_add_library(${PROJECT_NAME}
   src/model/fragments/So3R3Trajectory.cpp
   src/model/fragments/TrajectoryCarrier.cpp
   src/model/FrameGraphModel.cpp
+  src/model/FrameLinkI.cpp
   src/model/Joint.cpp
   src/model/Model.cpp
   src/model/Module.cpp
@@ -99,6 +100,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/error-terms/ErrorTermPoseTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
   test/input/InputProviderTest.cpp
+  test/model/FrameGraphModelTest.cpp
   test/model/ModelTest.cpp
   test/plan/PlanTest.cpp
   test/test/TestDataTest.cpp

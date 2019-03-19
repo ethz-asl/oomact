@@ -11,6 +11,7 @@
 
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/model/CalibrationVariable.h>
+#include <aslam/calibration/model/FrameLinkI.h>
 #include <boost/optional.hpp>
 
 namespace aslam {
@@ -29,7 +30,7 @@ typedef CalibrationDesignVariable<aslam::backend::RotationQuaternion> RotationQu
 typedef boost::shared_ptr<RotationQuaternionCv> RotationQuaternionCvSp;
 
 
-class PoseCv {
+class PoseCv : public AbstractStaticFrameLink {
  public:
   PoseCv(Module * module, boost::optional<std::string> defaultFrameName = boost::optional<std::string>());
 
@@ -72,13 +73,15 @@ class PoseCv {
     return *translationVariable;
   }
 
-  const Frame& getParentFrame() const {
+  const Frame& getParentFrame() const override final {
     return parentFrame_;
   }
 
-  const Frame& getFrame() const {
+  const Frame& getFrame() const override final {
     return frame_;
   }
+
+  RelativeKinematicExpression calcRelativeKinematics() const override;
  protected:
   void setActive(bool active) {
     if(rotationVariable) rotationVariable->setActive(active && rotationVariable->isToBeEstimated());
