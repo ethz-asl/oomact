@@ -92,20 +92,20 @@ class FrameGraphModelAtTimeImpl: public ModelAtTimeImpl {
     return aslam::backend::TransformationExpression(toCFrame.getR_G_L(), toCFrame.getPG()).inverse() * aslam::backend::TransformationExpression(fromCFrame.getR_G_L(), fromCFrame.getPG());
   }
 
-  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & frame) const override {
-    return getCoordinateFrame(of, frame).getAG();
+  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & in) const override {
+    return getKinematicChainFromTo(of, in).getAG();
   }
 
-  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & frame) const override {
-    return getCoordinateFrame(of, frame).getVG();
+  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & in) const override {
+    return getKinematicChainFromTo(of, in).getVG();
   }
 
-  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & frame) const override {
-    return getCoordinateFrame(of, frame).getOmegaG();
+  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & in) const override {
+    return getKinematicChainFromTo(of, in).getOmegaG();
   }
 
-  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & frame) const override {
-    return getCoordinateFrame(of, frame).getAlphaG();
+  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & in) const override {
+    return getKinematicChainFromTo(of, in).getAlphaG();
   }
  private:
   int maximalDerivativeOrder_;

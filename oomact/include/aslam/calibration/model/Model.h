@@ -40,11 +40,11 @@ class Frame : public virtual Named {
 
 class ModelAtTimeImpl {
  public:
-  virtual aslam::backend::TransformationExpression getTransformationToFrom(const Frame & to, const Frame & from) const = 0;
-  virtual aslam::backend::EuclideanExpression getAcceleration(const Frame & to, const Frame & frame) const = 0;
-  virtual aslam::backend::EuclideanExpression getVelocity(const Frame & to, const Frame & frame) const = 0;
-  virtual aslam::backend::EuclideanExpression getAngularVelocity(const Frame & to, const Frame & frame) const = 0;
-  virtual aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & to, const Frame & frame) const = 0;
+  virtual aslam::backend::TransformationExpression getTransformationToFrom(const Frame & to, const Frame & in) const = 0;
+  virtual aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & in) const = 0;
+  virtual aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & in) const = 0;
+  virtual aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & in) const = 0;
+  virtual aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & in) const = 0;
 
   virtual ~ModelAtTimeImpl() = default;
 
@@ -57,17 +57,17 @@ class ModelAtTime {
   aslam::backend::TransformationExpression getTransformationToFrom(const Frame & to, const Frame & from) const {
     return impl_->getTransformationToFrom(to, from);
   }
-  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & frame) const {
-    return impl_->getAcceleration(of, frame);
+  aslam::backend::EuclideanExpression getAcceleration(const Frame & of, const Frame & in) const {
+    return impl_->getAcceleration(of, in);
   }
-  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & frame) const {
-    return impl_->getVelocity(of, frame);
+  aslam::backend::EuclideanExpression getVelocity(const Frame & of, const Frame & in) const {
+    return impl_->getVelocity(of, in);
   }
-  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & frame) const {
-    return impl_->getAngularAcceleration(of, frame);
+  aslam::backend::EuclideanExpression getAngularAcceleration(const Frame & of, const Frame & in) const {
+    return impl_->getAngularAcceleration(of, in);
   }
-  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & frame) const {
-    return impl_->getAngularVelocity(of, frame);
+  aslam::backend::EuclideanExpression getAngularVelocity(const Frame & of, const Frame & in) const {
+    return impl_->getAngularVelocity(of, in);
   }
 
   template <typename T> T & as() { assert(impl_); return impl_->as<T>(); };
