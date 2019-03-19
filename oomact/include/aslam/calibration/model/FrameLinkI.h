@@ -37,7 +37,7 @@ class FrameLinkI
 
   virtual ~FrameLinkI();
 
-  virtual const Frame& getParentFrame() const = 0;
+  virtual const Frame& getReferenceFrame() const = 0;
 
   virtual const Frame& getFrame() const = 0;
 };

@@ -10,7 +10,7 @@ class Frame;
 
 class So3R3TrajectoryCarrier : public virtual Named {
  public:
-  So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef config, const Frame & frame);
+  So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef config);
 
   double getKnotsPerSecond() const {
     return knotsPerSecond;
@@ -36,11 +36,9 @@ class So3R3TrajectoryCarrier : public virtual Named {
     return transFittingLambda;
   }
 
-  const Frame & getFrame() const { return frame; }
  protected:
   void writeConfig(std::ostream & out) const;
 
-  const Frame & frame;
   double knotsPerSecond;
   int rotSplineOrder, transSplineOrder;
   double rotFittingLambda, transFittingLambda;

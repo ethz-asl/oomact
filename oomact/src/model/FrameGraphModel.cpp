@@ -134,9 +134,9 @@ ModelAtTime FrameGraphModel::getAtTime(const BoundedTimeExpression& boundedTimeE
 void FrameGraphModel::registerModule(Module& m) {
   Model::registerModule(m);
   if (auto staticFLPtr = m.ptrAs<AbstractStaticFrameLink>()) {
-    frameGraph_->add(&staticFLPtr->getFrame(), &staticFLPtr->getParentFrame(), FrameLinkStorage { staticFLPtr });
+    frameGraph_->add(&staticFLPtr->getFrame(), &staticFLPtr->getReferenceFrame(), FrameLinkStorage { staticFLPtr });
   } else if (auto flPtr = m.ptrAs<FrameLinkI>()) {
-    frameGraph_->add(&flPtr->getFrame(), &flPtr->getParentFrame(), FrameLinkStorage { flPtr });
+    frameGraph_->add(&flPtr->getFrame(), &flPtr->getReferenceFrame(), FrameLinkStorage { flPtr });
   }
 }
 

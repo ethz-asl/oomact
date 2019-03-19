@@ -37,9 +37,8 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
     return assumeStatic;
   }
 
-  const Frame & getReferenceFrame() const { return referenceFrame_; }
-  const Frame & getFrame() const override final { return So3R3TrajectoryCarrier::getFrame(); }
-  const Frame & getParentFrame() const override final { return getReferenceFrame(); }
+  const Frame & getReferenceFrame() const override final { return referenceFrame_; }
+  const Frame & getFrame() const override final { return frame_; }
 
   RelativeKinematicExpression calcRelativeKinematics(
       Timestamp at, const ModelSimplification& simplification,
@@ -60,7 +59,7 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
   ModuleLink<PoseSensorI> poseSensor;
   ModuleLink<WheelOdometry> odometrySensor;
   bool assumeStatic;
-  const Frame & referenceFrame_;
+  const Frame &frame_, &referenceFrame_;
 };
 
 } /* namespace calibration */

@@ -140,7 +140,7 @@ void MotionCaptureSensor::addMeasurementErrorTerms(CalibratorI& calib, const Cal
 
     const auto & pose = m.second;
 
-    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, motionCaptureSystem.getParentFrame(), true);
+    aslam::backend::TransformationExpression T_m_s = getTransformationExpressionToAtMeasurementTimestamp(calib, timestamp, motionCaptureSystem.getReferenceFrame(), true);
     boost::shared_ptr<ErrorTermPose> e_pose(new ErrorTermPose(aslam::backend::TransformationExpression(mCSFromGlobalTransformation * T_m_s), pose, cov_t, cov_r, etgr));
 
     if (timestampIsPossiblyOutOfBounds) {

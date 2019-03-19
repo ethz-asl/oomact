@@ -55,7 +55,7 @@ constexpr double TAN_CONSTRAINT_VARIANCE_DEFAULT = 1e-8;
 
 PoseTrajectory::PoseTrajectory(Model& model, const std::string& name, sm::value_store::ValueStoreRef config) :
   Module(model, name, config),
-  So3R3TrajectoryCarrier(getMyConfig().getChild("splines"), model.getFrame(getMyConfig().getString("frame"))),
+  So3R3TrajectoryCarrier(getMyConfig().getChild("splines")),
   estimate(getMyConfig().getBool("estimate", true)),
   useTanConstraint(getMyConfig().getBool("tangentialConstraint/used", false)),
   tanConstraintVariance(getMyConfig().getDouble("tangentialConstraint/variance", TAN_CONSTRAINT_VARIANCE_DEFAULT)),
@@ -63,6 +63,7 @@ PoseTrajectory::PoseTrajectory(Model& model, const std::string& name, sm::value_
   poseSensor(*this, "McSensor", initWithPoseMeasurements),
   odometrySensor(*this, "OdomSensor"),
   assumeStatic(getMyConfig().getBool("assumeStatic", false)),
+  frame_(model.getFrame(getMyConfig().getString("frame"))),
   referenceFrame_(model.getFrame(getMyConfig().getString("referenceFrame")))
 {
   if(isUsed()){
@@ -80,6 +81,7 @@ void PoseTrajectory::writeConfig(std::ostream& out) const {
   MODULE_WRITE_PARAM(initWithPoseMeasurements);
   MODULE_WRITE_PARAM(poseSensor);
   MODULE_WRITE_PARAM(odometrySensor);
+  MODULE_WRITE_PARAM(frame_);
   MODULE_WRITE_PARAM(referenceFrame_);
   So3R3TrajectoryCarrier::writeConfig(out);
   if(useTanConstraint){
@@ -87,8 +89,8 @@ void PoseTrajectory::writeConfig(std::ostream& out) const {
   }
 }
 
-bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSensorI& poseSensor, const Frame & referenceFrame) {
-  auto & storage = calib.getCurrentStorage();
+bool initSplines(CalibratorI& calib, So3R3Trajectory& trajectory, const PoseSensorI& poseSensor, const Frame& frame, const Frame& referenceFrame) {
+  auto& storage = calib.getCurrentStorage();
   if (!poseSensor.hasMeasurements(storage)) {
     LOG(WARNING) << "Pose sensor " << poseSensor.getSensor() << " has no measurements! Cannot initialize based on it!";
     return false;
@@ -111,8 +113,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   std::vector<Eigen::Vector4d> rotPoses;
   rotPoses.reserve(numMeasurements);
 
-  const auto & trajectoryFrame = trajectory.getCarrier().getFrame();
-  const auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, trajectoryFrame).inverse();
+  const auto T_sens_traj = poseSensor.getSensor().getTransformationTo(calib, frame).inverse();
 
   const Timestamp currentDelay = poseSensor.getSensor().getDelay();
 
@@ -142,7 +143,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   return true;
 }
 
-bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelOdometry & wheelOdometry, const ModuleLink<PoseSensorI>& poseSensor) {
+bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelOdometry & wheelOdometry, const ModuleLink<PoseSensorI>& poseSensor, const Frame & frame) {
   if(!wheelOdometry.isUsed()){
     throw std::runtime_error("Attempt to initialize from unused WheelOdometry!");
   }
@@ -176,7 +177,7 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
 
   if(poseSensor.isResolved()) {
     Timestamp tmpStart(prevTimestamp);
-    auto pose = getFirstPoseMeasurement(calib, tmpStart, poseSensor.get().getSensor(), false, &trajectory.getCarrier().getFrame()); //TODO B sync
+    auto pose = getFirstPoseMeasurement(calib, tmpStart, poseSensor.get().getSensor(), false, &frame); //TODO B sync
 
     if(double(tmpStart - prevTimestamp) > 0.02){
       LOG(WARNING) << "Motion capture data is quite sparse or starts too late (searched for "<< calib.secsSinceStart(prevTimestamp) << " found " << calib.secsSinceStart(tmpStart) << "!";
@@ -268,13 +269,13 @@ bool PoseTrajectory::initState(CalibratorI& calib) {
   } else {
     if(initWithPoseMeasurements){
       if(poseSensor.isResolved()){
-        return initSplines(calib, getCurrentTrajectory(), poseSensor, getReferenceFrame());
+        return initSplines(calib, getCurrentTrajectory(), poseSensor, getFrame(), getReferenceFrame());
       } else {
         throw std::runtime_error(getName() + ".initWithPoseMeasurements is true but " + poseSensor.toString() + " is not resolved!");
       }
     }
     CHECK(odometrySensor.isResolved()) << getName() << ".initWithPoseMeasurements is false but " << odometrySensor.toString() << " is not resolved!";
-    return initSplines(calib, getCurrentTrajectory(), odometrySensor, poseSensor);
+    return initSplines(calib, getCurrentTrajectory(), odometrySensor, poseSensor, getFrame());
   }
 }
 

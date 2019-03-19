@@ -49,7 +49,7 @@ class MotionCaptureSensor : public AbstractPoseSensor {
   }
 
   const Frame& getTargetFrame() const override {
-    return motionCaptureSystem.getParentFrame();
+    return motionCaptureSystem.getReferenceFrame();
   }
  private:
   MotionCaptureSystem & motionCaptureSystem;

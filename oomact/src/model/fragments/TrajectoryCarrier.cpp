@@ -9,8 +9,7 @@
 namespace aslam {
 namespace calibration {
 
-So3R3TrajectoryCarrier::So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef config, const Frame & frame) :
-  frame(frame),
+So3R3TrajectoryCarrier::So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef config) :
   knotsPerSecond(config.getDouble("knotsPerSecond")),
   rotSplineOrder(config.getInt("rotSplineOrder")),
   transSplineOrder(config.getInt("transSplineOrder")),
@@ -20,7 +19,6 @@ So3R3TrajectoryCarrier::So3R3TrajectoryCarrier(sm::value_store::ValueStoreRef co
 }
 
 void So3R3TrajectoryCarrier::writeConfig(std::ostream& out) const {
-  MODULE_WRITE_PARAM(frame);
   MODULE_WRITE_PARAM(knotsPerSecond);
   MODULE_WRITE_PARAM(rotSplineOrder);
   MODULE_WRITE_PARAM(rotFittingLambda);
