@@ -137,8 +137,8 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const PoseSe
   assert(trajectory.getTranslationSpline().getMinTime() == startTimestamp);
   assert(trajectory.getTranslationSpline().getMaxTime() == endTimestamp);
 
-  assert(effectiveBatchInterval.start == Timestamp(startTimestamp));
-  assert(effectiveBatchInterval.end == Timestamp(endTimestamp));
+  assert(effectiveBatchInterval.start == Timestamp::fromNumerator(startTimestamp));
+  assert(effectiveBatchInterval.end == Timestamp::fromNumerator(endTimestamp));
   return true;
 }
 
@@ -251,10 +251,10 @@ bool initSplines(CalibratorI & calib, So3R3Trajectory & trajectory, const WheelO
   //const int measPerSec = std::round(numWheelSpeedsMeasurements / elapsedTime);
   //int numSegments;
 
-  CHECK_EQ(Timestamp(trajectory.getRotationSpline().getMinTime()), startTimestamp);
-  CHECK_EQ(Timestamp(trajectory.getRotationSpline().getMaxTime()), endTimestamp);
-  CHECK_EQ(Timestamp(trajectory.getTranslationSpline().getMinTime()), startTimestamp);
-  CHECK_EQ(Timestamp(trajectory.getTranslationSpline().getMaxTime()), endTimestamp);
+  CHECK_EQ(Timestamp::fromNumerator(trajectory.getRotationSpline().getMinTime()), startTimestamp);
+  CHECK_EQ(Timestamp::fromNumerator(trajectory.getRotationSpline().getMaxTime()), endTimestamp);
+  CHECK_EQ(Timestamp::fromNumerator(trajectory.getTranslationSpline().getMinTime()), startTimestamp);
+  CHECK_EQ(Timestamp::fromNumerator(trajectory.getTranslationSpline().getMaxTime()), endTimestamp);
   return true;
 }
 
