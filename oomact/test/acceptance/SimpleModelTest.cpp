@@ -12,7 +12,7 @@ TEST(AslamCalibrationAcceptance, testSimpleModelInit) {
   auto config = readConfig("testSimple.xml");
   SimpleModel m(config.getChild("test/model"));
 
-  EXPECT_EQ(5, m.getCalibrationVariables().size());
+  EXPECT_EQ(5u, m.getCalibrationVariables().size());
 
   LOG(INFO) << m;
 }

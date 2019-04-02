@@ -6,7 +6,7 @@ model {
 	frames "body,world"
 
 	pose {
-		frame body
+		referenceFrame body
 		targetFrame world
 		invertInput false
 
@@ -24,7 +24,7 @@ model {
 	imu {
 		used true
 
-		frame body
+		referenceFrame body
 		inertiaFrame world
 		topic "/firefly/vi_sensor/imu"
 

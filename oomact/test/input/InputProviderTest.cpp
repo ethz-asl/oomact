@@ -108,7 +108,7 @@ constexpr Timestamp MockInputProvider::TimeInc;
 TEST(InputProviderSuite, testEasy) {
   auto vs = ValueStoreRef::fromString(
       "Gravity{used=false}, frames=body:world,"
-      "a{frame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
+      "a{referenceFrame=body,targetFrame=world,rotation/used=false,translation{used=true,x=0,y=5,z=0},delay/used=false}"
       "traj{frame=body,referenceFrame=world,McSensor=a,initWithPoseMeasurements=true,splines{knotsPerSecond=5,rotSplineOrder=4,rotFittingLambda=0.001,transSplineOrder=4,transFittingLambda=0.001}}"
     );
   auto vsCalib = ValueStoreRef::fromString(
@@ -122,7 +122,7 @@ TEST(InputProviderSuite, testEasy) {
   PoseTrajectory traj(m, "traj", vs);
   m.addModulesAndInit(mcSensorA, traj);
 
-  EXPECT_EQ(1, m.getCalibrationVariables().size());
+  EXPECT_EQ(1u, m.getCalibrationVariables().size());
   EXPECT_DOUBLE_EQ(5.0, mcSensorA.getTranslationToParent()[1]);
 
   auto spModel = to_local_shared_ptr(m);

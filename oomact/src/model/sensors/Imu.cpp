@@ -318,7 +318,7 @@ void Imu::addMeasurementErrorTerms(CalibratorI & calib, const CalibrationConfI &
         [&, this](const Timestamp timestamp, const GyroscopeMeasurement & m){
           auto modelAt = calib.getModelAt(*this,  timestamp, 1, {false});
           return boost::make_shared<ErrorTermGyroscope>(
-              getTransformationExpressionTo(modelAt, inertiaFrame).toRotationExpression().inverse() * modelAt.getAngularVelocity(getParentFrame(), inertiaFrame),
+              getTransformationExpressionTo(modelAt, inertiaFrame).toRotationExpression().inverse() * modelAt.getAngularVelocity(getReferenceFrame(), inertiaFrame),
               gyroBias.getBiasExpression(timestamp),
               m.w,
               isCovarianceAvailable(m) && !enforceGyroCovariance_ ? m.cov : covarianceMatrix,

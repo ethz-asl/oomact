@@ -59,7 +59,8 @@ class AbstractCalibratorOptions : public CalibratorOptionsI {
 
 class AbstractCalibrator : public virtual CalibratorI {
  public:
-  AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model);
+  AbstractCalibrator(ValueStoreRef config, std::shared_ptr<Model> model,
+                     bool timeBaseSensorRequired);
 
   virtual ~AbstractCalibrator() {}
 

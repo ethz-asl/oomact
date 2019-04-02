@@ -5,6 +5,7 @@
 #include <aslam/calibration/model/Module.h>
 #include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/model/fragments/So3R3TrajectoryCarrier.h>
+#include <aslam/calibration/model/FrameLinkI.h>
 
 namespace aslam {
 namespace calibration {
@@ -14,7 +15,7 @@ class So3R3Trajectory;
 class PoseSensorI;
 class WheelOdometry;
 
-class PoseTrajectory : public Module, public StateCarrier, public Activatable, public So3R3TrajectoryCarrier {
+class PoseTrajectory : public Module, public StateCarrier, public Activatable, public So3R3TrajectoryCarrier, public FrameLinkI {
  public:
   PoseTrajectory(Model & model, const std::string & name, sm::value_store::ValueStoreRef config = sm::value_store::ValueStoreRef());
 
@@ -36,7 +37,17 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
     return assumeStatic;
   }
 
-  const Frame & getReferenceFrame() const { return referenceFrame_; }
+  const Frame & getReferenceFrame() const override final { return referenceFrame_; }
+  const Frame & getFrame() const override final { return frame_; }
+
+  RelativeKinematicExpression calcRelativeKinematics(
+      Timestamp at, const ModelSimplification& simplification,
+      const size_t maximalDerivativeOrder) const override;
+
+  RelativeKinematicExpression calcRelativeKinematics(
+      const BoundedTimeExpression & at, const ModelSimplification& simplification,
+      const size_t maximalDerivativeOrder) const override;
+
  protected:
   void writeConfig(std::ostream & out) const override;
  private:
@@ -48,7 +59,7 @@ class PoseTrajectory : public Module, public StateCarrier, public Activatable, p
   ModuleLink<PoseSensorI> poseSensor;
   ModuleLink<WheelOdometry> odometrySensor;
   bool assumeStatic;
-  const Frame & referenceFrame_;
+  const Frame &frame_, &referenceFrame_;
 };
 
 } /* namespace calibration */

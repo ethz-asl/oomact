@@ -40,7 +40,7 @@ Sensor::Sensor(Model & model, std::string name, ValueStoreRef config) :
 
 void Sensor::writeConfig(std::ostream& out) const {
   out << ", id=" << id << ", type=" << TypeName(*this);
-  MODULE_WRITE_PARAM(getParentFrame());
+  MODULE_WRITE_PARAM(getReferenceFrame());
   if(maximalExpectedGap > 0){
     MODULE_WRITE_PARAM(maximalExpectedGap);
   }
@@ -92,7 +92,7 @@ aslam::backend::TransformationExpression Sensor::getTransformationExpressionToAt
 }
 
 aslam::backend::TransformationExpression Sensor::getTransformationExpressionTo(const ModelAtTime & robotModel, const Frame & to) const {
-  return robotModel.getTransformationToFrom(to, this->getParentFrame()) * getTransformationToParentExpression();
+  return robotModel.getTransformationToFrom(to, this->getReferenceFrame()) * getTransformationToParentExpression();
 }
 
 sm::kinematics::Transformation Sensor::getTransformationTo(const ModelAtTime& robotModel, const Frame& to) const {

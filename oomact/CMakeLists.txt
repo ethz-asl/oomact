@@ -13,9 +13,9 @@ endif()
 
 # enable C++11 support
 if(CMAKE_VERSION VERSION_LESS "3.1")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 else()
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
 
@@ -46,6 +46,7 @@ cs_add_library(${PROJECT_NAME}
   src/model/fragments/So3R3Trajectory.cpp
   src/model/fragments/TrajectoryCarrier.cpp
   src/model/FrameGraphModel.cpp
+  src/model/FrameLinkI.cpp
   src/model/Joint.cpp
   src/model/Model.cpp
   src/model/Module.cpp
@@ -69,12 +70,14 @@ cs_add_library(${PROJECT_NAME}
   src/plan/Plan.cpp
   src/plan/PlanFragment.cpp
   src/plan/SmartDriver.cpp
+  src/test/MockCalibrator.cpp
   src/test/MockMotionCaptureSource.cpp
   src/test/SimpleModel.cpp
   src/test/TestData.cpp
   src/test/Tools.cpp
   src/tools/CheckNotNull.cpp
   src/tools/Covariance.cpp
+  src/tools/DeprecationAlerter.cpp
   src/tools/ErrorTermStatistics.cpp
   src/tools/ErrorTermStatisticsWithProblemAndPredictor.cpp
   src/tools/Interval.cpp
@@ -99,7 +102,9 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/error-terms/ErrorTermPoseTest.cpp
   test/error-terms/ErrorTermWheelTest.cpp
   test/input/InputProviderTest.cpp
+  test/model/FrameGraphModelTest.cpp
   test/model/ModelTest.cpp
+  test/model/PoseTrajectoryTest.cpp
   test/plan/PlanTest.cpp
   test/test/TestDataTest.cpp
   test/test_main.cpp

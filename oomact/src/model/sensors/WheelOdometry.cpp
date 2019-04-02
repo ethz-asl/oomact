@@ -168,10 +168,10 @@ void WheelOdometry::addMeasurementErrorTerms(CalibratorI & calib, const Calibrat
     }*/
     {
       auto R_m_r = getTransformationExpressionTo(robot, groundFrame_).toRotationExpression();
-      auto v_m_mr = robot.getVelocity(groundFrame_, getParentFrame());
+      auto v_m_mr = robot.getVelocity(groundFrame_, getReferenceFrame());
       auto v_r_mr = R_m_r.inverse() * v_m_mr;
 
-      auto w_m_mr = robot.getAngularVelocity(groundFrame_, getParentFrame());
+      auto w_m_mr = robot.getAngularVelocity(groundFrame_, getReferenceFrame());
       auto w_r_mr = R_m_r.inverse() * w_m_mr;
 
       // Computing the velocity in the wheel frame:

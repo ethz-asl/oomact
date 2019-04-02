@@ -229,7 +229,10 @@ struct ModuleRegistry {
 
 struct ModuleLinkBase : public NamedMinimal {
   ModuleLinkBase(Module & owner, const std::string & linkName, bool required = false);
-  ModuleLinkBase(const std::string & ownerName, const std::string & linkName, const std::string targetUid, bool required = false);
+  ModuleLinkBase(const std::string & ownerName, const std::string & linkName,
+                 const std::string targetUid, bool required = false);
+  ModuleLinkBase(const std::string& ownerName, sm::value_store::ValueStoreRef config,
+                 const std::string& linkName, bool required = false);
   ModuleLinkBase(const ModuleLinkBase &) = delete;
 
   virtual void resolve(const ModuleRegistry & reg) = 0;
@@ -256,7 +259,7 @@ class ModuleLink : public ModuleLinkBase {
 
   Interface & get() {
     if(!isResolved()){
-      throw std::runtime_error("Resolving an unresolved link : " + toString());
+      throw std::runtime_error("Attempt to follow an unresolved link : " + toString());
     }
     return *ptr;
   }
