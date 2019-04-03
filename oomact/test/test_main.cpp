@@ -1,3 +1,5 @@
+#include <regex>
+
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
@@ -20,8 +22,29 @@ void initGloogleLogging(unsigned verbosity) {
 
 int main(int argc, char** argv) {
   int verbosity = 0;
-  if(argc > 1 && std::string("-v") == argv[1]){
-    verbosity = 2;
+  const std::regex number_pattern("[0-9]+", std::regex_constants::egrep);
+  const std::regex verbose_pattern("-v([0-9]+|v*)", std::regex_constants::egrep);
+  for(int i = 1; i < argc; i++){
+    std::cmatch m;
+    if (std::regex_match(argv[i], m, verbose_pattern)) {
+      int removeArgs = 1;
+      const auto& vArg = m[1];
+      if (vArg.length() == 0) {
+        if (i < argc - 1 && std::regex_match(argv[i + 1], number_pattern)) {
+          verbosity += std::stoi(argv[i + 1]);
+          removeArgs++;
+        } else {
+          verbosity += 1;
+        }
+      } else if (m.str(1)[0] != 'v') {
+        verbosity += std::stoi(vArg);
+      } else {
+        verbosity += vArg.length() + 1;
+      }
+      std::copy(argv + i + removeArgs, argv + argc + 1, argv + i);
+      argc -= removeArgs;
+      i --;
+    }
   }
   initGloogleLogging(verbosity);
   testing::InitGoogleTest(&argc, argv);
