@@ -11,6 +11,7 @@
 #include <aslam/calibration/data/MapStorage.h>
 #include <aslam/calibration/calibrator/StateCarrier.h>
 #include <aslam/calibration/model/Sensor.h>
+#include <sm/boost/null_deleter.hpp>
 
 namespace aslam {
 namespace calibration {
@@ -241,6 +242,11 @@ class BatchCalibrator : public virtual BatchCalibratorI, public AbstractCalibrat
 std::unique_ptr<BatchCalibratorI> createBatchCalibrator(ValueStoreRef vs, std::shared_ptr<Model> model) {
   return std::unique_ptr<BatchCalibratorI>(new BatchCalibrator(vs, model));
 }
+
+std::unique_ptr<BatchCalibratorI> createBatchCalibrator(ValueStoreRef vs, Model& model) {
+  return createBatchCalibrator(vs, std::shared_ptr<Model>(&model, sm::null_deleter()));
+}
+
 
 }
 }

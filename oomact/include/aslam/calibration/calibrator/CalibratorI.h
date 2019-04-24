@@ -100,6 +100,15 @@ class IncrementalCalibratorI : public virtual CalibratorI {
 
 std::unique_ptr<IncrementalCalibratorI> createIncrementalCalibrator(ValueStoreRef vs, std::shared_ptr<Model> model);
 std::unique_ptr<BatchCalibratorI> createBatchCalibrator(ValueStoreRef vs, std::shared_ptr<Model> model);
+
+/**
+ * Create a batch calibrator.
+ * WARNING: The calibrator will keep a reference to the model.
+ * The user must ensure that the model always lives longer than any calibrator created
+ * by this function.
+ */
+std::unique_ptr<BatchCalibratorI> createBatchCalibrator(ValueStoreRef vs, Model& model);
+
 }
 }
 
